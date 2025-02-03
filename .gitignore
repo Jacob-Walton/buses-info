@@ -1,0 +1,9 @@
+wwwroot/lib
+wwwroot/css
+**/node_modules
+**/bin
+**/obj
+**/Properties
+*.lock
+appsettings*.json
+*.sln
