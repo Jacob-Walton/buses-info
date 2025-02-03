@@ -7,10 +7,14 @@ using Microsoft.Extensions.Logging;
 
 namespace BusInfo.Services
 {
-    public class EmailService(SmtpSettings smtpSettings, ILogger<EmailService> logger) : IEmailService
+    public class EmailService(
+        SmtpSettings smtpSettings,
+        ILogger<EmailService> logger,
+        IEmailTemplateService templateService) : IEmailService
     {
         private readonly SmtpSettings _smtpSettings = smtpSettings;
         private readonly ILogger<EmailService> _logger = logger;
+        private readonly IEmailTemplateService _templateService = templateService;
         private static readonly Action<ILogger, string, Exception> _passwordResetEmailSent =
             LoggerMessage.Define<string>(LogLevel.Information,
                 new EventId(1, nameof(SendPasswordResetEmailAsync)),
@@ -43,11 +47,11 @@ namespace BusInfo.Services
 
         public async Task SendPasswordResetEmailAsync(string toEmail, string resetLink)
         {
-            MailMessage mail = new()
+            using MailMessage mail = new()
             {
                 From = new MailAddress(_smtpSettings.Username, "BusInfo Support"),
                 Subject = "Reset Your Password - BusInfo",
-                Body = GetPasswordResetEmailBody(resetLink),
+                Body = _templateService.GetPasswordResetTemplate(resetLink),
                 IsBodyHtml = true
             };
             mail.To.Add(toEmail);
@@ -58,6 +62,8 @@ namespace BusInfo.Services
                 Port = _smtpSettings.Port,
                 EnableSsl = _smtpSettings.EnableSsl,
                 DeliveryMethod = SmtpDeliveryMethod.Network,
+                UseDefaultCredentials = false,
+                Credentials = new NetworkCredential(_smtpSettings.Username, _smtpSettings.Password)
             };
 
             try
@@ -74,11 +80,11 @@ namespace BusInfo.Services
 
         public async Task SendAccountDeletionNotificationAsync(string toEmail, int gracePeriodDays)
         {
-            MailMessage mail = new()
+            using MailMessage mail = new()
             {
                 From = new MailAddress(_smtpSettings.Username, "BusInfo Support"),
                 Subject = "Account Deletion Request - BusInfo",
-                Body = GetAccountDeletionEmailBody(gracePeriodDays),
+                Body = _templateService.GetAccountDeletionTemplate(gracePeriodDays),
                 IsBodyHtml = true
             };
             mail.To.Add(toEmail);
@@ -107,11 +113,11 @@ namespace BusInfo.Services
 
         public async Task SendAccountReactivationNotificationAsync(string toEmail)
         {
-            MailMessage mail = new()
+            using MailMessage mail = new()
             {
                 From = new MailAddress(_smtpSettings.Username, "BusInfo Support"),
                 Subject = "Account Reactivation Confirmation - BusInfo",
-                Body = GetAccountReactivationEmailBody(),
+                Body = _templateService.GetAccountReactivationTemplate(),
                 IsBodyHtml = true
             };
 

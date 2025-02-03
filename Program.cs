@@ -6,7 +6,9 @@ using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AspNetCoreRateLimit;
+using BusInfo.Data;
 using BusInfo.Models;
+using BusInfo.Services;
 using ConfigCat.Client;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -156,9 +158,9 @@ namespace BusInfo
                             ClaimsRefreshService claimsRefreshService = context.HttpContext.RequestServices
                                 .GetRequiredService<ClaimsRefreshService>();
 
-                            if (await claimsRefreshService.ShouldRefreshClaimsAsync(context.Principal))
+                            if (claimsRefreshService.ShouldRefreshClaims(context.Principal))
                             {
-                                var newPrincipal = await claimsRefreshService.RefreshClaimsAsync(context.Principal);
+                                ClaimsPrincipal newPrincipal = await claimsRefreshService.RefreshClaimsAsync(context.Principal);
                                 context.ReplacePrincipal(newPrincipal);
                                 context.ShouldRenew = true;
                             }
@@ -167,7 +169,7 @@ namespace BusInfo
                         {
                             if (context.Principal?.Identity is ClaimsIdentity claimsIdentity)
                             {
-                                var userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
+                                IUserService userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
                                 await userService.GetOrCreateUserAsync(context.Principal);
                                 claimsIdentity.AddClaim(new Claim("claims_last_refresh", System.DateTimeOffset.UtcNow.ToString("o")));
                             }
