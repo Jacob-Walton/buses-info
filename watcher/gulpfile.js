@@ -1,4 +1,4 @@
-const { src, dest, watch, series } = require('gulp');
+const { src, dest, watch, series, parallel } = require('gulp');
 const sass = require('gulp-sass')(require('sass'));
 const autoprefixer = require('autoprefixer');
 const postcss = require('gulp-postcss');
@@ -23,13 +23,12 @@ function minifyJs() {
 
 // Watch task
 function watchTask() {
-  watch(['src/styles/**/*.scss'], series(buildStyles));
-  watch(['js/**/*.js'], series(minifyJs));
+  watch(['src/styles/**/*.scss'], buildStyles);
+  watch(['js/**/*.js'], minifyJs);
 }
 
-// Default Gulp task
-exports.default = series(
-  buildStyles,
-  minifyJs,
-  watchTask
-);
+// Exports
+exports.buildStyles = buildStyles;
+exports.minifyJs = minifyJs;
+exports.watchTask = watchTask;
+exports.default = series(buildStyles, minifyJs, watchTask);
