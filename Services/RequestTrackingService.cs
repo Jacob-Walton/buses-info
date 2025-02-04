@@ -24,8 +24,8 @@ namespace BusInfo.Services
 
             ITransaction transaction = db.CreateTransaction();
 
-            await transaction.StringIncrementAsync(API_REQUESTS_COUNT_KEY);
-            await transaction.StringIncrementAsync(API_RESPONSE_TIMES_KEY, (long)milliseconds);
+            _ = transaction.StringIncrementAsync(API_REQUESTS_COUNT_KEY);
+            _ = transaction.StringIncrementAsync(API_RESPONSE_TIMES_KEY, (long)milliseconds);
 
             bool success = await transaction.ExecuteAsync();
             if (!success)

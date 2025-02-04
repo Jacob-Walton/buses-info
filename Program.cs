@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Net;
@@ -6,6 +7,10 @@ using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AspNetCoreRateLimit;
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
+using BusInfo.Authentication;
+using BusInfo.Authentication.RateLimiting;
 using BusInfo.Data;
 using BusInfo.Models;
 using BusInfo.Services;
@@ -15,6 +20,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -26,12 +32,43 @@ using Serilog;
 using Serilog.Formatting.Compact;
 using Serilog.Sinks.SystemConsole.Themes;
 using StackExchange.Redis;
+using Azure.Extensions.AspNetCore.Configuration.Secrets;
+using System.Security.Cryptography.X509Certificates;
+using System.Net.Http;
+using Microsoft.AspNetCore.ResponseCompression;
+using System.Linq;
+using BusInfo.Services.BackgroundServices;
 
 namespace BusInfo
 {
+    public class Marker { }
+
+    public class CustomKeyVaultSecretManager : KeyVaultSecretManager
+    {
+        public override string GetKey(KeyVaultSecret secret)
+        {
+            return secret.Name.Replace("--", ":", StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
     public static class Program
     {
-        public static async Task Main(string[] args)
+        private static X509Certificate2 LoadCertificateFromKeyVault(string keyVaultUri)
+        {
+            SecretClient keyVaultClient = new(new Uri(keyVaultUri), new DefaultAzureCredential());
+            string certificateBase64 = keyVaultClient.GetSecret("Main").Value?.Value
+                ?? throw new InvalidOperationException("Certificate not found in Key Vault");
+            byte[] certificateBytes = Convert.FromBase64String(certificateBase64);
+
+            return new X509Certificate2(
+                certificateBytes,
+                (string)null!,
+                X509KeyStorageFlags.MachineKeySet |
+                X509KeyStorageFlags.PersistKeySet |
+                X509KeyStorageFlags.Exportable);
+        }
+
+        public static void Main(string[] args)
         {
             try
             {
@@ -43,15 +80,16 @@ namespace BusInfo
 
                 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
+                ConfigureConfiguration(builder);
                 ConfigureSerilog(builder);
 
-                await LoadAndConfigureServicesAsync(builder);
+                LoadAndConfigureServices(builder);
 
                 WebApplication app = builder.Build();
 
                 ConfigureApp(app);
 
-                await app.RunAsync();
+                app.Run();
             }
             catch (Exception)
             {
@@ -61,7 +99,42 @@ namespace BusInfo
             }
             finally
             {
-                await Log.CloseAndFlushAsync();
+                Log.CloseAndFlush();
+            }
+        }
+
+        private static void ConfigureConfiguration(WebApplicationBuilder builder)
+        {
+            ConfigurationManager config = builder.Configuration;
+
+            // Base configuration
+            config.SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
+
+            try
+            {
+                string keyVaultUri = config["KeyVault:Uri"] ?? throw new InvalidOperationException("KeyVault URI is not configured");
+                DefaultAzureCredential credential = new(new DefaultAzureCredentialOptions
+                {
+                    Retry = { MaxRetries = 3, NetworkTimeout = TimeSpan.FromSeconds(5) }
+                });
+
+                config.AddAzureKeyVault(
+                    new Uri(keyVaultUri),
+                    credential,
+                    new AzureKeyVaultConfigurationOptions
+                    {
+                        ReloadInterval = TimeSpan.FromMinutes(5),
+                        Manager = new CustomKeyVaultSecretManager()
+                    });
+
+                Log.Information("Successfully configured Azure Key Vault with URI: {KeyVaultUri}", keyVaultUri);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to configure Azure Key Vault");
+                throw;
             }
         }
 
@@ -88,16 +161,29 @@ namespace BusInfo
             );
         }
 
-        private static async Task LoadAndConfigureServicesAsync(WebApplicationBuilder builder)
+        private static void LoadAndConfigureServices(WebApplicationBuilder builder)
         {
             ConfigurationManager config = builder.Configuration;
+            string keyVaultUri = config["KeyVault:Uri"] ?? throw new InvalidOperationException("KeyVault URI is not configured");
+
+            X509Certificate2 serverCertificate = LoadCertificateFromKeyVault(keyVaultUri);
+
+            // Configure Kestrel with the certificate
+            builder.WebHost.ConfigureKestrel(serverOptions =>
+            {
+                serverOptions.ConfigureHttpsDefaults(httpsOptions =>
+                {
+                    httpsOptions.ServerCertificate = serverCertificate;
+                });
+            });
 
             // Configure SMTP settings
             builder.Services.Configure<SmtpSettings>(config.GetSection("Smtp"));
+            builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
 
             // Configure Redis
-            ConnectionMultiplexer redis = await ConnectionMultiplexer.ConnectAsync(config["ConnectionStrings:Redis"] ?? "localhost:6379");
+            ConnectionMultiplexer redis = ConnectionMultiplexer.Connect(config["ConnectionStrings:Redis"] ?? "localhost:6379");
             builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
             builder.Services.AddScoped<IRedisService, RedisService>();
 
@@ -106,14 +192,14 @@ namespace BusInfo
             {
                 builder.Services.AddDataProtection()
                     .PersistKeysToStackExchangeRedis(redis, config["DataProtection:Keys:InstanceName"])
-                    .ProtectKeysWithDpapi(protectToLocalMachine: true)
+                    .ProtectKeysWithCertificate(serverCertificate)
                     .SetApplicationName(config["DataProtection:Keys:ApplicationName"] ?? "BusInfo");
             }
             else
             {
-                // Use the default file system data protection provider
                 builder.Services.AddDataProtection()
-                    .PersistKeysToFileSystem(new DirectoryInfo(config["DataProtection:Keys:Directory"] ?? "/var/dpkeys"))
+                    .PersistKeysToStackExchangeRedis(redis, config["DataProtection:Keys:InstanceName"])
+                    .ProtectKeysWithCertificate(serverCertificate)
                     .SetApplicationName(config["DataProtection:Keys:ApplicationName"] ?? "BusInfo");
             }
 
@@ -133,8 +219,6 @@ namespace BusInfo
             // Configure Bus Info Services
             builder.Services.AddScoped<IBusInfoService, BusInfoService>();
             builder.Services.AddScoped<IBusLaneService, BusLaneService>();
-
-            // Configure HttpClient
             builder.Services.AddHttpClient();
 
             // Configure Authentication
@@ -158,7 +242,7 @@ namespace BusInfo
                             ClaimsRefreshService claimsRefreshService = context.HttpContext.RequestServices
                                 .GetRequiredService<ClaimsRefreshService>();
 
-                            if (claimsRefreshService.ShouldRefreshClaims(context.Principal))
+                            if (context.Principal != null && claimsRefreshService.ShouldRefreshClaims(context.Principal))
                             {
                                 ClaimsPrincipal newPrincipal = await claimsRefreshService.RefreshClaimsAsync(context.Principal);
                                 context.ReplacePrincipal(newPrincipal);
@@ -192,21 +276,21 @@ namespace BusInfo
             {
                 options.AddPolicy("RequireAuthenticatedUser", policy =>
                     policy.RequireAuthenticatedUser());
-                options.AddPolicy("AdminOnly", policy =>
-                    policy.Requirements.Add(new AdminRequirement()));
+                // options.AddPolicy("AdminOnly", policy =>
+                //     policy.Requirements.Add(new AdminRequirement()));
             });
 
-            builder.Services.AddScoped<IAuthorizationHandler, AdminAuthorizationHandler>();
+            // builder.Services.AddScoped<IAuthorizationHandler, AdminAuthorizationHandler>();
 
             // Configure User Services
             builder.Services.AddScoped<IUserService, UserService>();
-            builder.Services.AddSingleton<IApiKeyGenerator, ApiKeyGenerator>();
+            // builder.Services.AddSingleton<IApiKeyGenerator, ApiKeyGenerator>();
 
             // Configure CORS
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowSpecificOrigin",
-                    builder => builder.WithOrigins(config["Cors:AllowedOrigins"].Split(","))
+                    builder => builder.WithOrigins((config["Cors:AllowedOrigins"] ?? "").Split(","))
                         .AllowAnyMethod()
                         .AllowAnyHeader()
                         .AllowCredentials());
@@ -227,10 +311,14 @@ namespace BusInfo
 
             // Add background services
             builder.Services.AddHostedService<BusInfoBackgroundService>();
-            builder.Services.AddHostedService<BusInfoMaintenanceService>();
+            // builder.Services.AddHostedService<BusInfoMaintenanceService>();
 
             // Add ConfigCat service registration
             builder.Services.AddSingleton<IConfigCatService, ConfigCatService>();
+
+            // Configure Weather Service
+            builder.Services.Configure<WeatherSettings>(builder.Configuration.GetSection("Weather"));
+            builder.Services.AddHttpClient<IWeatherService, OpenWeatherMapService>();
         }
 
         private static void ConfigureApp(WebApplication app)
@@ -288,6 +376,7 @@ namespace BusInfo
                 }
             });
 
+
             app.MapRazorPages();
             app.MapControllers();
         }
@@ -302,11 +391,13 @@ namespace BusInfo
 
             string clientId = string.Empty;
 
-            Claim userIdClaim = httpContext.User?.FindFirst(ClaimTypes.NameIdentifier);
+            // Try to get user id from claims
+            Claim? userIdClaim = httpContext.User?.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim != null)
             {
                 clientId = userIdClaim.Value;
             }
+            // If no user id, try to get API key
             else if (httpContext.Request.Headers.TryGetValue("X-API-Key", out Microsoft.Extensions.Primitives.StringValues apiKey))
             {
                 clientId = apiKey.ToString();
@@ -326,6 +417,7 @@ namespace BusInfo
             ClientResolvers.Add(new UserIdRateLimitContributor());
         }
     }
+
     public class ClientQueryParameterResolveContributor : IClientResolveContributor
     {
         public Task<string> ResolveClientAsync(HttpContext httpContext)
@@ -337,8 +429,14 @@ namespace BusInfo
                 return Task.FromResult($"api_{apiKey}");
             }
 
-            string userId = httpContext.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            return !string.IsNullOrEmpty(userId) ? Task.FromResult($"user_{userId}") : Task.FromResult(string.Empty);
+            string? userId = httpContext.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(userId))
+            {
+                return Task.FromResult($"user_{userId}");
+            }
+
+            // No valid client identifier found
+            return Task.FromResult(string.Empty);
         }
     }
     #endregion

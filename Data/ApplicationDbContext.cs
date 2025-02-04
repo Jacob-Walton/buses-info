@@ -10,12 +10,11 @@ namespace BusInfo.Data
         public DbSet<ApplicationUser> Users { get; set; }
         public DbSet<ApiKeyRequest> ApiKeyRequests { get; set; }
         public DbSet<AdminSettings> AdminSettings { get; set; }
+        public DbSet<BusArrival> BusArrivals { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder? modelBuilder)
         {
-            ArgumentNullException.ThrowIfNull(modelBuilder);
-
-            modelBuilder.Entity<ApplicationUser>(entity =>
+            modelBuilder?.Entity<ApplicationUser>(entity =>
                     {
                         entity.HasIndex(u => u.Email).IsUnique();
                         entity.HasIndex(u => u.ApiKey).IsUnique();
@@ -56,13 +55,13 @@ namespace BusInfo.Data
                             .HasColumnType("timestamp with time zone");
                     });
 
-            modelBuilder.Entity<ApiKeyRequest>()
+            modelBuilder?.Entity<ApiKeyRequest>()
                 .HasOne(r => r.User)
                 .WithMany()
                 .HasForeignKey(r => r.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<AdminSettings>(entity =>
+            modelBuilder?.Entity<AdminSettings>(entity =>
                 {
                     entity.HasKey(e => e.LastModified);
                     entity.Property(e => e.ApiRateLimit).IsRequired();
@@ -70,6 +69,18 @@ namespace BusInfo.Data
                     entity.Property(e => e.ArchivedDataRetentionDays).IsRequired();
                     entity.Property(e => e.MaintenanceWindow).IsRequired();
                     entity.Property(e => e.ModifiedBy).IsRequired();
+                });
+
+            modelBuilder?.Entity<BusArrival>(entity =>
+                {
+                    entity.HasKey(e => e.Id);
+                    entity.Property(e => e.Service).IsRequired().HasMaxLength(10);
+                    entity.Property(e => e.Bay).IsRequired().HasMaxLength(10);
+                    entity.Property(e => e.Status).IsRequired().HasMaxLength(50);
+                    entity.Property(e => e.Weather).HasMaxLength(50);
+                    entity.Property(e => e.ArrivalTime).HasColumnType("timestamp with time zone");
+
+                    entity.HasIndex(e => new { e.Service, e.ArrivalTime });
                 });
         }
     }
