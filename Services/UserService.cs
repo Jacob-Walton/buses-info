@@ -16,9 +16,9 @@ namespace BusInfo.Services
         private readonly IConfiguration _configuration = configuration;
         private static readonly System.Text.Json.JsonSerializerOptions _jsonOptions = new() { WriteIndented = true };
 
-        public async Task<ApplicationUser> AuthenticateAsync(string email, string password)
+        public async Task<ApplicationUser?> AuthenticateAsync(string email, string password)
         {
-            ApplicationUser user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            ApplicationUser? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
 
             if (user == null)
                 return null;
@@ -34,7 +34,7 @@ namespace BusInfo.Services
 
         public async Task<bool> CancelAccountDeletionAsync(string userIdOrEmail, bool isEmail = false)
         {
-            ApplicationUser user = isEmail
+            ApplicationUser? user = isEmail
                 ? _context.Users.FirstOrDefault(u => u.Email == userIdOrEmail)
                 : _context.Users.FirstOrDefault(u => u.Id == userIdOrEmail);
 
@@ -55,7 +55,7 @@ namespace BusInfo.Services
 
         public async Task<bool> ChangePasswordAsync(string userId, string currentPassword, string newPassword)
         {
-            ApplicationUser user = await _context.Users.FindAsync(userId);
+            ApplicationUser? user = await _context.Users.FindAsync(userId);
             if (user == null) return false;
 
             if (!VerifyPassword(currentPassword, user.PasswordHash, user.Salt))
@@ -72,7 +72,7 @@ namespace BusInfo.Services
 
         public async Task<bool> ConfirmAccountDeletionAsync(string userId)
         {
-            ApplicationUser user = await _context.Users.FindAsync(userId);
+            ApplicationUser? user = await _context.Users.FindAsync(userId);
             if (user == null || !user.DeletedAt.HasValue) return false;
 
             if ((DateTime.UtcNow - user.DeletedAt.Value).TotalDays >= 30)
@@ -81,7 +81,7 @@ namespace BusInfo.Services
                 user.Email = $"deleted_{userId}@deleted.com";
                 user.PasswordHash = string.Empty;
                 user.Salt = string.Empty;
-                user.ApiKey = null;
+                user.ApiKey = null!;
                 user.PreferredRoutes?.Clear();
                 user.IsEmailVerified = false;
 
@@ -94,7 +94,7 @@ namespace BusInfo.Services
 
         public async Task<bool> DeleteAccountAsync(string userId, string password)
         {
-            ApplicationUser user = await _context.Users.FindAsync(userId);
+            ApplicationUser? user = await _context.Users.FindAsync(userId);
             if (user == null) return false;
 
             if (!VerifyPassword(password, user.PasswordHash, user.Salt))
@@ -102,7 +102,7 @@ namespace BusInfo.Services
 
             user.Email = $"deleted_{userId}@deleted.com";
             user.IsEmailVerified = false;
-            user.ApiKey = null;
+            user.ApiKey = null!;
             user.DeletedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
@@ -131,15 +131,17 @@ namespace BusInfo.Services
         {
             ArgumentNullException.ThrowIfNull(principal, nameof(principal));
 
-            string email = principal.FindFirst("preferred_username").Value
-                ?? principal.FindFirst(ClaimTypes.Email).Value;
-            string name = principal.FindFirst("name").Value
-                ?? principal.FindFirst(ClaimTypes.Name).Value;
+            string email = principal.FindFirst("preferred_username")?.Value
+                ?? principal.FindFirst(ClaimTypes.Email)?.Value
+                ?? throw new ArgumentException("Email claim not found in principal", nameof(principal));
+            string name = principal.FindFirst("name")?.Value
+                ?? principal.FindFirst(ClaimTypes.Name)?.Value
+                ?? "Anonymous";
 
             if (string.IsNullOrEmpty(email))
                 throw new ArgumentException("Email claim not found in principal", nameof(principal));
 
-            ApplicationUser user = _context.Users.FirstOrDefault(u => u.Email == email);
+            ApplicationUser? user = _context.Users.FirstOrDefault(u => u.Email == email);
 
             if (user == null)
             {
@@ -166,14 +168,14 @@ namespace BusInfo.Services
             return user;
         }
 
-        public async Task<ApplicationUser> GetUserByIdAsync(string userId)
+        public async Task<ApplicationUser?> GetUserByIdAsync(string userId)
         {
             return await _context.Users.FindAsync(userId);
         }
 
-        public async Task<bool> InitiateAccountDeletionAsync(string userId, string password, string reason = null)
+        public async Task<bool> InitiateAccountDeletionAsync(string userId, string password, string? reason = null)
         {
-            ApplicationUser user = await _context.Users.FindAsync(userId);
+            ApplicationUser? user = await _context.Users.FindAsync(userId);
             if (user == null) return false;
 
             if (!VerifyPassword(password, user.PasswordHash, user.Salt))
@@ -193,7 +195,7 @@ namespace BusInfo.Services
 
         public async Task<bool> InitiatePasswordResetAsync(string email)
         {
-            ApplicationUser user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            ApplicationUser? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (user == null)
                 return false;
 
@@ -239,7 +241,7 @@ namespace BusInfo.Services
 
         public async Task<(bool Success, string Message)> ResetPasswordAsync(string token, string email, string newPassword)
         {
-            ApplicationUser user = await _context.Users.FirstOrDefaultAsync(u =>
+            ApplicationUser? user = await _context.Users.FirstOrDefaultAsync(u =>
                 u.Email == email &&
                 u.PasswordResetToken == token &&
                 u.PasswordResetTokenExpiry > DateTime.UtcNow);
@@ -260,7 +262,7 @@ namespace BusInfo.Services
 
         public async Task<bool> UpdateEmailPreferencesAsync(string userId, bool enableEmailNotifications)
         {
-            ApplicationUser user = await _context.Users.FindAsync(userId);
+            ApplicationUser? user = await _context.Users.FindAsync(userId);
             if (user == null) return false;
 
             user.EnableEmailNotifications = enableEmailNotifications;

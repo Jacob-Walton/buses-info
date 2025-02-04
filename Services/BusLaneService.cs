@@ -22,7 +22,7 @@ namespace BusInfo.Services
             ArgumentNullException.ThrowIfNull(bayServiceMap, nameof(bayServiceMap));
 
             string mapPath = Path.Combine(_environment.WebRootPath, "images", "buslanemap.png");
-            string fontPath = Path.Combine(_environment.WebRootPath, "fonts", "Montserrat-Bold.ttf");
+            string fontPath = Path.Combine(_environment.WebRootPath, "fonts", "Ubuntu", "Ubuntu-Bold.ttf");
 
             byte[] imageBytes = await File.ReadAllBytesAsync(mapPath);
             using SKBitmap bitmap = SKBitmap.Decode(imageBytes);
@@ -81,7 +81,7 @@ namespace BusInfo.Services
 
                 canvas.DrawText(bayNumber, x, y - 5, SKTextAlign.Center, textFont, textPaint);
 
-                if (bayServiceMap.TryGetValue(bayNumber, out string serviceName))
+                if (bayServiceMap.TryGetValue(bayNumber, out string? serviceName))
                 {
                     canvas.DrawText(serviceName, x, y + 15, SKTextAlign.Center, textFont, textPaint);
                 }

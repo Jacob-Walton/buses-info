@@ -15,7 +15,7 @@ namespace BusInfo.Services
         {
             ArgumentNullException.ThrowIfNull(principal, nameof(principal));
 
-            Claim lastRefreshClaim = principal.FindFirst("claims_last_refresh");
+            Claim? lastRefreshClaim = principal.FindFirst("claims_last_refresh");
 
             return lastRefreshClaim == null || !DateTime.TryParse(lastRefreshClaim.Value, out DateTime lastRefresh) || DateTime.UtcNow.Subtract(lastRefresh) > TimeSpan.FromMinutes(5);
         }
@@ -24,11 +24,12 @@ namespace BusInfo.Services
         {
             ArgumentNullException.ThrowIfNull(principal, nameof(principal));
 
-            string userId = principal.FindFirst(ClaimTypes.NameIdentifier).Value;
-            if (string.IsNullOrEmpty(userId))
+            Claim? nameIdentifier = principal.FindFirst(ClaimTypes.NameIdentifier);
+            if (nameIdentifier == null || string.IsNullOrEmpty(nameIdentifier.Value))
                 return principal;
+            string userId = nameIdentifier.Value;
 
-            ApplicationUser user = await _userService.GetUserByIdAsync(userId);
+            ApplicationUser? user = await _userService.GetUserByIdAsync(userId);
             if (user == null)
                 return principal;
 

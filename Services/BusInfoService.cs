@@ -5,49 +5,31 @@ using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using BusInfo.Data;
 using BusInfo.Models;
 using HtmlAgilityPack;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
-using MongoDB.Bson;
-using MongoDB.Bson.IO;
-using MongoDB.Driver;
 
 namespace BusInfo.Services
 {
-    public class BusInfoService : IBusInfoService
+    public sealed class BusInfoService(
+        IHttpClientFactory clientFactory,
+        IDistributedCache cache,
+        ApplicationDbContext dbContext) : IBusInfoService, IDisposable
     {
         private const string BUS_INFO_URL = "https://webservices.runshaw.ac.uk/bus/BusDepartures.aspx";
         private const string CACHE_KEY_LEGACY = "BusInfoCacheLegacy";
         private static readonly TimeSpan CACHE_EXPIRATION = TimeSpan.FromSeconds(30);
+        private static readonly TimeSpan REQUEST_TIMEOUT = TimeSpan.FromSeconds(10);
 
-        private readonly IHttpClientFactory _clientFactory;
-        private readonly IDistributedCache _cache;
-        private readonly IMongoCollection<BusStatusMongo> _busStatusCollection;
-
-        public BusInfoService(
-            IHttpClientFactory clientFactory,
-            IDistributedCache cache,
-            IConfiguration configuration)
-        {
-            _clientFactory = clientFactory ?? throw new ArgumentNullException(nameof(clientFactory));
-            _cache = cache ?? throw new ArgumentNullException(nameof(cache));
-
-            ArgumentNullException.ThrowIfNull(configuration);
-
-            try
-            {
-                using MongoClient mongoClient = new(configuration.GetConnectionString("MongoDb"));
-
-                _busStatusCollection = mongoClient.GetDatabase("bus-bot").GetCollection<BusStatusMongo>("busarrivals");
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException("Failed to initialise MongoDB", ex);
-            }
-        }
+        private readonly IHttpClientFactory _clientFactory = clientFactory ?? throw new ArgumentNullException(nameof(clientFactory));
+        private readonly IDistributedCache _cache = cache ?? throw new ArgumentNullException(nameof(cache));
+        private readonly ApplicationDbContext _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+        private bool _disposed;
 
         private static string Escape(string input)
         {
@@ -56,39 +38,50 @@ namespace BusInfo.Services
 
         public async Task<BusInfoLegacyResponse> GetLegacyBusInfoAsync()
         {
-            string cachedData = await _cache.GetStringAsync(CACHE_KEY_LEGACY);
+            string? cachedData = await _cache.GetStringAsync(CACHE_KEY_LEGACY);
             if (cachedData != null)
             {
-                return JsonSerializer.Deserialize<BusInfoLegacyResponse>(cachedData);
+                return JsonSerializer.Deserialize<BusInfoLegacyResponse>(cachedData)
+                    ?? await FetchLegacyBusInfoAsync();
             }
 
+            using CancellationTokenSource cts = new(REQUEST_TIMEOUT);
             BusInfoLegacyResponse response = await FetchLegacyBusInfoAsync();
 
-            DistributedCacheEntryOptions cacheOptions = new DistributedCacheEntryOptions()
-                .SetAbsoluteExpiration(CACHE_EXPIRATION);
+            DistributedCacheEntryOptions cacheOptions = new()
+            {
+                AbsoluteExpirationRelativeToNow = CACHE_EXPIRATION
+            };
 
             string serializedData = JsonSerializer.Serialize(response);
-            await _cache.SetStringAsync(CACHE_KEY_LEGACY, serializedData, cacheOptions);
+            await _cache.SetStringAsync(CACHE_KEY_LEGACY, serializedData, cacheOptions, cts.Token);
 
             return response;
         }
 
         private async Task<BusInfoLegacyResponse> FetchLegacyBusInfoAsync()
         {
+            using HttpClient client = _clientFactory.CreateClient();
+            using CancellationTokenSource cts = new(REQUEST_TIMEOUT);
+            client.DefaultRequestHeaders.ConnectionClose = true;  // Force connection to close
+
             try
             {
-                using HttpClient client = _clientFactory.CreateClient();
-                string response = await client.GetStringAsync(new Uri(BUS_INFO_URL));
+                using HttpResponseMessage response = await client.GetAsync(new Uri(BUS_INFO_URL), cts.Token);
+                response.EnsureSuccessStatusCode();
+
+                // Read content as string and dispose response immediately
+                string content = await response.Content.ReadAsStringAsync(cts.Token);
 
                 HtmlDocument doc = new();
-                doc.LoadHtml(response);
+                doc.LoadHtml(content);
 
                 Dictionary<string, string> busData = [];
 
                 HtmlNodeCollection rows = doc.DocumentNode.SelectNodes("//table[@id='grdAll']//tr");
                 if (rows != null)
                 {
-                    foreach (HtmlNode row in rows)
+                    foreach (HtmlNode? row in rows)
                     {
                         HtmlNodeCollection cells = row.SelectNodes("td");
                         if (cells != null && cells.Count >= 3)
@@ -111,9 +104,9 @@ namespace BusInfo.Services
                     LastUpdated = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture)
                 };
             }
-            catch (HttpRequestException ex)
+            catch (OperationCanceledException ex)
             {
-                throw new InvalidOperationException("Failed to fetch bus info", ex);
+                throw new InvalidOperationException("Request timed out", ex);
             }
             catch (Exception ex)
             {
@@ -123,13 +116,21 @@ namespace BusInfo.Services
 
         public async Task<BusInfoResponse> GetBusInfoAsync()
         {
+            using HttpClient client = _clientFactory.CreateClient();
+            client.Timeout = REQUEST_TIMEOUT;
+            client.DefaultRequestHeaders.ConnectionClose = true;  // Force connection to close
+
+            using HttpResponseMessage response = await client.GetAsync(new Uri(BUS_INFO_URL));
+            response.EnsureSuccessStatusCode();
+
+            // Read content fully and dispose response immediately
+            string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            response.Content.Dispose();
+
             try
             {
-                using HttpClient client = _clientFactory.CreateClient();
-                string response = await client.GetStringAsync(new Uri(BUS_INFO_URL));
-
                 HtmlDocument doc = new();
-                doc.LoadHtml(response);
+                doc.LoadHtml(content);
 
                 Dictionary<string, BusStatus> busData = [];
 
@@ -170,6 +171,10 @@ namespace BusInfo.Services
             {
                 throw new InvalidOperationException("Failed to fetch bus info", ex);
             }
+            catch (TaskCanceledException ex)
+            {
+                throw new InvalidOperationException("Request timed out", ex);
+            }
             catch (Exception ex)
             {
                 throw new InvalidOperationException("Failed to parse bus info", ex);
@@ -186,30 +191,36 @@ namespace BusInfo.Services
 
             try
             {
-                // Get all historical data for this service on weekdays
-                FilterDefinition<BusStatusMongo> filter = Builders<BusStatusMongo>.Filter.And(
-                    Builders<BusStatusMongo>.Filter.Eq(x => x.Service, service),
-                    Builders<BusStatusMongo>.Filter.In(x => x.DayOfWeek, [1, 2, 3, 4, 5]),
-                    Builders<BusStatusMongo>.Filter.Ne(x => x.Bay, string.Empty),
-                    Builders<BusStatusMongo>.Filter.Regex(x => x.Bay, new BsonRegularExpression("^[ABCT][0-9]{1,2}$"))
-                );
+                // Get current week of year
+                Calendar cal = CultureInfo.InvariantCulture.Calendar;
+                int currentWeek = cal.GetWeekOfYear(targetTime, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
 
-                List<BusStatusMongo> historicalData = await _busStatusCollection
-                    .Find(filter)
-                    .SortByDescending(a => a.ArrivalTime)
-                    .Limit(1000)
+                // Get all historical data for this service on weekdays, removing strict bay format check
+                List<BusArrival> historicalData = await _dbContext.BusArrivals
+                    .Where(x => x.Service == service &&
+                               x.DayOfWeek >= 1 && x.DayOfWeek <= 5 &&
+                               x.Bay != string.Empty)
+                    .OrderByDescending(x => x.ArrivalTime)
+                    .Take(2000)
                     .ToListAsync();
+
+                // Additional filtering in memory if needed
+                historicalData = [.. historicalData.Where(x => !string.IsNullOrWhiteSpace(x.Bay) &&
+                                                         x.Bay.Length >= 2 &&
+                                                         !x.Bay.Equals("No historical data", StringComparison.OrdinalIgnoreCase))];
 
                 if (historicalData.Count == 0)
                 {
                     return [new BayPrediction { Bay = "No historical data", Probability = 0 }];
                 }
 
-                // Temporal analysis windows
+                // Analysis windows
                 TimeSpan targetTimeOfDay = targetTime.TimeOfDay;
                 TimeSpan timeWindow = TimeSpan.FromMinutes(15);
+                int weekWindow = 4; // Consider data within 4 weeks before/after target week
 
-                // Bayesian probability calculation
+                BusArrival latestArrival = historicalData[0];
+
                 List<BayPrediction> bayStats = [.. historicalData
                     .GroupBy(a => a.Bay)
                     .Select(g => new
@@ -217,26 +228,35 @@ namespace BusInfo.Services
                         Bay = g.Key,
                         TotalOccurrences = g.Count(),
                         TimeMatches = g.Count(a => Math.Abs((a.ArrivalTime.TimeOfDay - targetTimeOfDay).TotalMinutes) <= timeWindow.TotalMinutes),
-                        RecentMatches = g.Count(a => (DateTime.UtcNow - a.ArrivalTime).TotalDays <= 30)
+                        RecentMatches = g.Count(a => (targetTime - a.ArrivalTime).TotalDays <= 30),
+                        WeatherMatches = g.Count(a => a.Weather == latestArrival.Weather),
+                        SeasonalMatches = g.Count(a =>
+                        {
+                            int arrivalWeek = cal.GetWeekOfYear(a.ArrivalTime, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
+                            int weekDiff = Math.Abs(arrivalWeek - currentWeek);
+                            if (weekDiff > 26) weekDiff = 52 - weekDiff; // Handle year wraparound
+                            return weekDiff <= weekWindow;
+                        }),
+                        SchoolTermMatches = g.Count(a => a.IsSchoolTerm == latestArrival.IsSchoolTerm)
                     })
                     .Select(x => new BayPrediction
                     {
                         Bay = x.Bay,
-                        Probability = CalculateBayesianProbability(
+                        Probability = CalculateWeightedProbability(
                             timeMatches: x.TimeMatches,
                             recentMatches: x.RecentMatches,
+                            weatherMatches: x.WeatherMatches,
+                            seasonalMatches: x.SeasonalMatches,
+                            schoolTermMatches: x.SchoolTermMatches,
                             totalOccurrences: x.TotalOccurrences,
                             totalRecords: historicalData.Count)
                     })
                     .OrderByDescending(x => x.Probability)
+                    .Where(x => x.Probability > 15)
                     .Take(3)];
 
                 return bayStats.Count > 0 ? bayStats :
                     [new BayPrediction { Bay = "No predictions", Probability = 0 }];
-            }
-            catch (MongoException ex)
-            {
-                throw new InvalidOperationException("Failed to fetch historical bus data", ex);
             }
             catch (Exception ex)
             {
@@ -244,26 +264,63 @@ namespace BusInfo.Services
             }
         }
 
-        private static int CalculateBayesianProbability(int timeMatches, int recentMatches, int totalOccurrences, int totalRecords)
+        private static int CalculateWeightedProbability(
+            int timeMatches,
+            int recentMatches,
+            int weatherMatches,
+            int seasonalMatches,
+            int schoolTermMatches,
+            int totalOccurrences,
+            int totalRecords)
         {
-            // Bayesian probability with temporal weighting
-            double timeWeight = 0.7;  // Weight for time window matches
-            double recencyWeight = 0.3; // Weight for recent matches
+            if (totalRecords == 0 || totalOccurrences == 0) return 0;
 
-            // Avoid division by zero
-            if (totalRecords == 0) return 0;
+            // Weighted factors
+            const double TimeWeight = 0.35;
+            const double RecencyWeight = 0.25;
+            const double WeatherWeight = 0.15;
+            const double SeasonalWeight = 0.15;
+            const double SchoolTermWeight = 0.10;
 
             double baseProbability = (double)totalOccurrences / totalRecords;
+
             double timeFactor = (double)timeMatches / totalOccurrences;
             double recencyFactor = (double)recentMatches / totalRecords;
+            double weatherFactor = (double)weatherMatches / totalOccurrences;
+            double seasonalFactor = (double)seasonalMatches / totalOccurrences;
+            double schoolTermFactor = (double)schoolTermMatches / totalOccurrences;
 
-            // Combined probability calculation
-            double probability = (timeWeight * timeFactor) +
-                               (recencyWeight * recencyFactor) +
-                               (0.2 * baseProbability); // Add base probability as prior
+            // Combined weighted probability
+            double probability =
+                (TimeWeight * timeFactor) +
+                (RecencyWeight * recencyFactor) +
+                (WeatherWeight * weatherFactor) +
+                (SeasonalWeight * seasonalFactor) +
+                (SchoolTermWeight * schoolTermFactor) +
+                (0.1 * baseProbability); // Add base probability as prior
 
-            // Normalize to 0-100 scale
             return (int)Math.Round(Math.Clamp(probability * 100, 0, 100));
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    if (_dbContext is IDisposable && !_dbContext.GetType().Name.Contains("Proxy", StringComparison.OrdinalIgnoreCase))
+                    {
+                        _dbContext.Dispose();
+                    }
+                }
+                _disposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

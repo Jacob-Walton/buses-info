@@ -6,4 +6,10 @@ wwwroot/css
 **/Properties
 *.lock
 appsettings*.json
+secrets.json
 *.sln
+.env
+.env.*
+!.env.example
+logs/
+Migrations/

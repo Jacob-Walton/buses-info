@@ -4,17 +4,16 @@ using System.Net.Mail;
 using System.Threading.Tasks;
 using BusInfo.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace BusInfo.Services
 {
-    public class EmailService(
-        SmtpSettings smtpSettings,
-        ILogger<EmailService> logger,
-        IEmailTemplateService templateService) : IEmailService
+    public class EmailService(IOptions<SmtpSettings> smtpSettings, ILogger<EmailService> logger, IEmailTemplateService templateService) : IEmailService
     {
-        private readonly SmtpSettings _smtpSettings = smtpSettings;
+        private readonly SmtpSettings _smtpSettings = smtpSettings.Value;
         private readonly ILogger<EmailService> _logger = logger;
         private readonly IEmailTemplateService _templateService = templateService;
+
         private static readonly Action<ILogger, string, Exception> _passwordResetEmailSent =
             LoggerMessage.Define<string>(LogLevel.Information,
                 new EventId(1, nameof(SendPasswordResetEmailAsync)),
@@ -69,7 +68,7 @@ namespace BusInfo.Services
             try
             {
                 await client.SendMailAsync(mail);
-                _passwordResetEmailSent(_logger, toEmail, null);
+                _passwordResetEmailSent(_logger, toEmail, null!);
             }
             catch (Exception ex)
             {
@@ -102,7 +101,7 @@ namespace BusInfo.Services
             try
             {
                 await client.SendMailAsync(mail);
-                _accountDeletionEmailSent(_logger, toEmail, null);
+                _accountDeletionEmailSent(_logger, toEmail, null!);
             }
             catch (Exception ex)
             {
@@ -136,7 +135,7 @@ namespace BusInfo.Services
             try
             {
                 await client.SendMailAsync(mail);
-                _accountReactivationEmailSent(_logger, toEmail, null);
+                _accountReactivationEmailSent(_logger, toEmail, null!);
             }
             catch (Exception ex)
             {
