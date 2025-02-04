@@ -1,13 +1,13 @@
-# BusInfo: Transit Information System Analysis
+# Bus Info
 
 ![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16.2-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-Stack-DC382D?style=for-the-badge&logo=redis&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)
 
-## Research Overview
+## Overview
 
-This repository documents the development of BusInfo, a transit information system developed to analyse and present real-time transport data. The project examines the practical application of data processing methods within the context of public transport information systems.
+This repository documents the development of BusInfo, a transit information system developed to analyse and present real-time transport data.
 
 ## Technical Framework
 
@@ -16,7 +16,7 @@ This repository documents the development of BusInfo, a transit information syst
 - ASP.NET Core 9.0
 - PostgreSQL 16.2
 - Redis Stack
-- Predictive Analysis System (WIP)
+- Prediction system (WIP)
 
 ### System Structure
 
@@ -58,18 +58,9 @@ The application utilises a layered approach:
 - Node.js
 ```
 
-### Database Configuration
-
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Database=businfo;Username=username;Password=password",
-    "Redis": "localhost:6379"
-  }
-}
-```
-
 ### Installation Steps
+
+**Ensure that you have setup your keyvault and appsettings beforehand.**
 
 ```shell
 # Clone the repository
