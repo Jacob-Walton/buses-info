@@ -1,7 +1,7 @@
 # Bus Info
 
 ![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16.2-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17.2-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-Stack-DC382D?style=for-the-badge&logo=redis&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)
 
@@ -14,7 +14,7 @@ This repository documents the development of BusInfo, a transit information syst
 ### Core Technologies
 
 - ASP.NET Core 9.0
-- PostgreSQL 16.2
+- PostgreSQL 17.2
 - Redis Stack
 - Prediction system (WIP)
 
@@ -22,7 +22,7 @@ This repository documents the development of BusInfo, a transit information syst
 
 The application utilises a layered approach:
 
-1. Data Storage: PostgreSQL 16.2
+1. Data Storage: PostgreSQL 17.2
 2. Cache System: Redis Stack
 3. Processing Layer: ASP.NET Core 9.0
 4. Interface Layer: Web-based presentation
