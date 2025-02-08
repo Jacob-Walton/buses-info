@@ -18,6 +18,7 @@ namespace BusInfo.Controllers.Api.V1
     [ApiController]
     [Route("api/v1/businfo")]
     [Produces("application/json")]
+    [Authorize(AuthenticationSchemes = "Cookies,ApiKey")]
     public class BusInfoController(ILogger<BusInfoController> logger, IBusInfoService busInfoService) : ControllerBase
     {
         private readonly IBusInfoService busInfoService = busInfoService;

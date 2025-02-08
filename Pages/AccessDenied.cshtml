@@ -1,0 +1,19 @@
+@page "/access-denied"
+@model BusInfo.Pages.AccessDeniedModel
+@{
+    ViewData["Title"] = "Access Denied";
+}
+
+<div class="container text-center mt-5">
+    <h1 class="text-danger">Access Denied</h1>
+    <h2 class="h4 mb-4">Sorry, you don't have permission to access this resource.</h2>
+    <p>You can try the following:</p>
+    <ul class="list-unstyled">
+        <li>Return to the <a href="/">homepage</a></li>
+        <li>Contact an administrator if you believe this is a mistake</li>
+        @if (!User.Identity?.IsAuthenticated ?? true)
+        {
+            <li>Try <a href="/login">logging in</a> with a different account</li>
+        }
+    </ul>
+</div>

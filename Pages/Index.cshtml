@@ -1,10 +1,26 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Home";
+    ViewData["ExpandedLogo"] = true;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="home-container">
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Bus Info</h1>
+            <p class="hero-subtitle">Unofficial bus arrival information</p>
+            
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <a href="/bus-info" class="button primary">View Bus Information</a>
+            }
+            else
+            {
+                <a href="/Login" class="button primary">Sign in to view bus information</a>
+            }
+            
+            <p class="disclaimer">This is an independent project and is not affiliated with or endorsed by Runshaw College.</p>
+        </div>
+    </section>
 </div>

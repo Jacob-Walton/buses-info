@@ -1,52 +1,270 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - BusInfo</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, maximum-scale=1.0, user-scalable=no" />
+    <title>@ViewData["Title"] - Bus Info</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/BusInfo.styles.css" asp-append-version="true" />
+    @* Disallow scraping *@
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="googlebot" content="noindex, nofollow" />
+    <meta name="bingbot" content="noindex, nofollow" />
+    <meta name="msvalidate.01" content="noindex, nofollow" />
+    <meta name="yandex" content="noindex, nofollow" />
+    <meta name="baidu" content="noindex, nofollow" />
+    <meta name="duckduckgo" content="noindex, nofollow" />
+    <script src="~/js/shared.js"></script>
+    @await RenderSectionAsync("Head", required: false)
 </head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container">
-                <a class="navbar-brand" asp-area="" asp-page="/Index">BusInfo</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
+
+<body class="@(User.Identity?.IsAuthenticated == true ? "user-authenticated" : "")">
+    <div id="legalModal" class="legal-modal" style="display: none;">
+        <div class="legal-modal-content">
+            <div class="legal-modal-header">
+                <i class="fas fa-balance-scale"></i>
+                <h2>Legal Notice & Terms of Use</h2>
+            </div>
+            <div class="legal-modal-body">
+                <p>PLEASE READ THIS LEGAL NOTICE CAREFULLY BEFORE USING THIS SITE</p>
+                <div class="legal-terms">
+                    <p>By accessing and using this website ("Site"), you hereby acknowledge, understand, and expressly
+                        agree to the following terms and conditions:</p>
+                    <ol>
+                        <li>This Site is an independent, personal project and maintains no affiliation, endorsement, or
+                            connection with Runshaw College;</li>
+                        <li>All information provided herein is unofficial, non-binding, and provided "as-is" without any
+                            warranties, express or implied;</li>
+                        <li>For authoritative bus service information, users must refer to <a
+                                href="https://www.runshaw.ac.uk" target="_blank" rel="noopener noreferrer">Runshaw
+                                College's official website</a>;</li>
+                        <li>The operator of this Site expressly disclaims all liability for any direct, indirect,
+                            consequential, incidental, or special damages arising out of or in any way connected with
+                            the use of this Site;</li>
+                        <li>Any reliance you place on the information contained herein is strictly at your own risk.
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
-                        </li>
-                    </ul>
+                    </ol>
                 </div>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+            <div class="legal-modal-footer">
+                <button id="acknowledgeLegal" class="btn-primary">
+                    <i class="fas fa-check"></i>
+                    I Acknowledge and Accept
+                </button>
+            </div>
+        </div>
+    </div>
+    <nav class="navbar">
+        <div class="container">
+            @if (ViewData["ExpandedLogo"] as bool? == true)
+            {
+                <div class="navbar-brand-container">
+                    <a class="navbar-brand expanded" asp-page="/Index"></a>
+                </div>
+            }
+            else
+            {
+                <div class="navbar-brand-container">
+                    <a class="navbar-brand simple" asp-page="/Index"></a>
+                </div>
+            }
+
+            <button id="mobileMenuTrigger" class="mobile-menu-trigger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <div class="navbar-menu" id="mobileMenu">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["Page"]?.ToString() == "/Index" ? "active" : "")"
+                            asp-page="/Index">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["Page"]?.ToString() == "/BusInfo" ? "active" : "")"
+                            asp-page="/BusInfo">Bus Information</a>
+                    </li>
+                </ul>
+
+                @if (User.Identity?.IsAuthenticated != true)
+                {
+                    <a class="nav-link nav-link__bold" asp-page="/Login">Sign In</a>
+                }
+                else
+                {
+                    <div class="profile-menu">
+                        <button class="profile-trigger" id="profileTrigger">
+                            <i class="fas fa-user"></i>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="profile-dropdown" id="profileDropdown">
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <a class="dropdown-item" asp-page="/Admin/Index">
+                                    <i class="fas fa-shield-alt"></i>
+                                    Admin
+                                </a>
+                            }
+                            <a class="dropdown-item" asp-page="/Account/Settings">
+                                <i class="fas fa-cog"></i>
+                                Settings
+                            </a>
+                            <form method="post" action="/signout/local">
+                                <button type="submit" class="dropdown-item danger">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    Sign Out
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </nav>
+
+    <div class="mobile-navbar" id="mobileNavbar">
+        <div class="mobile-navbar-header">
+            <div class="mobile-logo">
+                <a class="simple" asp-page="/Index"></a>
+            </div>
+            <button id="mobileMenuClose" class="mobile-menu-trigger active">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        <div class="mobile-navbar-content">
+            <ul class="mobile-nav-items">
+                <li class="mobile-nav-item">
+                    <a class="@(ViewContext.RouteData.Values["Page"]?.ToString() == "/Index" ? "active" : "")"
+                        asp-page="/Index">Home</a>
+                </li>
+                <li class="mobile-nav-item">
+                    <a class="@(ViewContext.RouteData.Values["Page"]?.ToString() == "/BusInfo" ? "active" : "")"
+                        asp-page="/BusInfo">Bus Information</a>
+                </li>
+            </ul>
+
+            <div class="mobile-auth-section">
+                @if (User.Identity?.IsAuthenticated != true)
+                {
+                    <div class="mobile-profile-menu">
+                        <ul class="mobile-profile-items">
+                            <li class="mobile-profile-item">
+                                <a class="danger" asp-page="/Login">
+                                    <i class="fas fa-sign-in-alt"></i>
+                                    Sign In
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                }
+                else
+                {
+                    <div class="mobile-profile-menu">
+                        <ul class="mobile-profile-items">
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="mobile-profile-item">
+                                    <a asp-page="/Admin/Index">
+                                        <i class="fas fa-shield-alt"></i>
+                                        Admin
+                                    </a>
+                                </li>
+                            }
+                            <li class="mobile-profile-item">
+                                <a asp-page="/Account/Settings">
+                                    <i class="fas fa-cog"></i>
+                                    Settings
+                                </a>
+                            </li>
+                            <li class="mobile-profile-item">
+                                <form method="post" action="/signout/local">
+                                    <button type="submit" class="danger">
+                                        <i class="fas fa-sign-out-alt"></i>
+                                        Sign Out
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                }
+            </div>
+        </div>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - BusInfo - <a asp-area="" asp-page="/Privacy">Privacy</a>
-        </div>
-    </footer>
+    <div class="mobile-navbar-overlay" id="mobileNavbarOverlay"></div>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <div class="content-wrapper">
+        <main role="main">
+            @RenderBody()
+        </main>
+
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-section">
+                        <h4>Navigation</h4>
+                        <ul>
+                            <li><a asp-page="/Index"><i class="fas fa-home"></i> Home</a></li>
+                            <li><a asp-page="/BusInfo"><i class="fas fa-bus"></i> Bus Information</a></li>
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <li><a asp-page="/Account/Settings"><i class="fas fa-cog"></i> Account Settings</a></li>
+                            }
+                            else
+                            {
+                                <li><a asp-page="/Login"><i class="fas fa-sign-in-alt"></i> Sign In</a></li>
+                            }
+                        </ul>
+                    </div>
+                    <div class="footer-section">
+                        <h4>Legal Information</h4>
+                        <ul>
+                            <li><a href="/privacy"><i class="fas fa-shield-alt"></i> Privacy Policy</a></li>
+                            <li><a href="/terms"><i class="fas fa-gavel"></i> Terms of Use</a></li>
+                            <li><a href="#" id="showLegalNotice"><i class="fas fa-balance-scale"></i> Legal Notice</a>
+                            </li>
+                            <li><a href="/disclaimer"><i class="fas fa-exclamation-circle"></i> Independence
+                                    Disclaimer</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-section">
+                        <h4>About</h4>
+                        <ul>
+                            <li><a href="#" id="aboutProject"><i class="fas fa-info-circle"></i> About This Project</a>
+                            </li>
+                            <li><a href="https://github.com/Jacob-Walton/buses-info" target="_blank"
+                                    rel="noopener noreferrer">
+                                    <i class="fab fa-github"></i> View Source Code
+                                </a></li>
+                            <li><a href="mailto:jacob-walton@konpeki.co.uk">
+                                    <i class="fas fa-envelope"></i> Contact Developer
+                                </a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <div class="footer-links">
+                        <a href="#" class="btn-scroll-top"><i class="fas fa-arrow-up"></i> Back to Top</a>
+                    </div>
+                    <div class="copyright">
+                        &copy; @DateTime.Now.Year - Bus Info Project - An Independent Open Source Project
+                        <div class="disclaimer-text">Not affiliated with or endorsed by any educational institution
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="~/js/toast.js"></script>
+    <script src="~/js/logging.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
+
 </html>

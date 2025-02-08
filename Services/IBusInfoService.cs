@@ -7,5 +7,7 @@ namespace BusInfo.Services
     {
         Task<BusInfoLegacyResponse> GetLegacyBusInfoAsync();
         Task<BusInfoResponse> GetBusInfoAsync();
+        Task<BusPredictionResponse> GetBusPredictionsAsync();
+        Task<PredictionInfo?> GetBusPredictionAsync(string busNumber);
     }
 }

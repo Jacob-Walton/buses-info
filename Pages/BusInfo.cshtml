@@ -1,0 +1,32 @@
+@page "/buses"
+@model BusInfoModel
+@{
+    ViewData["Title"] = "Buses";
+}
+
+<div class="bus-info-container">
+    <div class="content-container">
+        <div class="search-overlay">
+            <input type="text" id="searchInput" placeholder="Search by bus number" />
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+
+        <div id="busInfoList" class="bus-info-list">
+            @* Bus infomration will be populated here *@
+        </div>
+
+        <div id="loadingIndicator" class="loading" style="display:block none;">
+            <div class="spinner"></div>
+        </div>
+    </div>
+
+    <div class="info-footer">
+        <div id="lastUpdated"></div>
+        <div class="data-source">
+            Data provided by <a href="https://webservices.runshaw.ac.uk/bus/busdepartures.aspx" target="_blank"
+                rel="noopener noreferrer">Runshaw College</a>
+            • Updates every 30 seconds
+        </div>
+    </div>
+</div>
