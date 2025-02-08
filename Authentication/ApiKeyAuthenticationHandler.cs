@@ -35,7 +35,11 @@ namespace BusInfo.Authentication
                 return AuthenticateResult.Fail("Invalid API key");
             }
 
-            ApplicationUser? user = await _context.Users.FirstOrDefaultAsync(x => x.ApiKey == providedApiKey);
+            ApplicationUser? user = await _context.ApiKeys
+                .Where(k => k.Key == providedApiKey)
+                .Select(k => k.User)
+                .FirstOrDefaultAsync();
+
             if (user == null)
                 return AuthenticateResult.Fail("Invalid API key");
 

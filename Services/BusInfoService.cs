@@ -23,6 +23,8 @@ namespace BusInfo.Services
     {
         private const string BUS_INFO_URL = "https://webservices.runshaw.ac.uk/bus/BusDepartures.aspx";
         private const string CACHE_KEY_LEGACY = "BusInfoCacheLegacy";
+        private const string BUS_INFO_CACHE_KEY = "CurrentBusInfo";
+        private const string PREDICTION_CACHE_KEY_PREFIX = "BusPrediction_";
         private static readonly TimeSpan CACHE_EXPIRATION = TimeSpan.FromSeconds(30);
         private static readonly TimeSpan REQUEST_TIMEOUT = TimeSpan.FromSeconds(10);
 
@@ -34,6 +36,15 @@ namespace BusInfo.Services
         private static string Escape(string input)
         {
             return input.Replace("&nbsp;", " ", StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        private static bool IsValidTimeToCheck()
+        {
+            DateTime now = DateTime.Now;
+            return now.DayOfWeek != DayOfWeek.Saturday
+                && now.DayOfWeek != DayOfWeek.Sunday
+                && now.Hour >= 14
+                && now.Hour < 17;
         }
 
         public async Task<BusInfoLegacyResponse> GetLegacyBusInfoAsync()
@@ -116,6 +127,42 @@ namespace BusInfo.Services
 
         public async Task<BusInfoResponse> GetBusInfoAsync()
         {
+            if (!IsValidTimeToCheck())
+            {
+                return new BusInfoResponse
+                {
+                    BusData = [],
+                    LastUpdated = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture)
+                };
+            }
+
+            string? cachedData = await _cache.GetStringAsync(BUS_INFO_CACHE_KEY);
+            return cachedData != null
+                ? JsonSerializer.Deserialize<BusInfoResponse>(cachedData)
+                    ?? await FetchAndCacheBusInfoAsync()
+                : await FetchAndCacheBusInfoAsync();
+        }
+
+        private async Task<BusInfoResponse> FetchAndCacheBusInfoAsync()
+        {
+            BusInfoResponse busInfo = await FetchBusInfoAsync();
+
+            DistributedCacheEntryOptions cacheOptions = new()
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(30),
+                SlidingExpiration = TimeSpan.FromSeconds(10)
+            };
+
+            await _cache.SetStringAsync(
+                BUS_INFO_CACHE_KEY,
+                JsonSerializer.Serialize(busInfo),
+                cacheOptions);
+
+            return busInfo;
+        }
+
+        private async Task<BusInfoResponse> FetchBusInfoAsync()
+        {
             using HttpClient client = _clientFactory.CreateClient();
             client.Timeout = REQUEST_TIMEOUT;
             client.DefaultRequestHeaders.ConnectionClose = true;  // Force connection to close
@@ -149,16 +196,10 @@ namespace BusInfo.Services
                             busData[service] = new BusStatus
                             {
                                 Status = status,
-                                Bay = bay
+                                Bay = string.IsNullOrWhiteSpace(bay) ? default : bay
                             };
                         }
                     }
-                }
-
-                foreach ((string service, BusStatus status) in busData)
-                {
-                    status.PredictedBays = [.. await PredictBayForServiceAsync(service, DateTime.UtcNow)];
-                    status.PredictionConfidence = status.PredictedBays.Count != 0 ? (int)status.PredictedBays.Average(p => p.Probability) : 0;
                 }
 
                 return new BusInfoResponse
@@ -181,6 +222,64 @@ namespace BusInfo.Services
             }
         }
 
+        public async Task<BusPredictionResponse> GetBusPredictionsAsync()
+        {
+            // Use cached bus info
+            BusInfoResponse currentInfo = await GetBusInfoAsync();
+            Dictionary<string, PredictionInfo> predictions = [];
+
+            foreach ((string service, BusStatus _) in currentInfo.BusData)
+            {
+                PredictionInfo? prediction = await GetBusPredictionAsync(service);
+                if (prediction != null)
+                {
+                    predictions[service] = prediction;
+                }
+            }
+
+            return new BusPredictionResponse
+            {
+                Predictions = predictions,
+                LastUpdated = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture)
+            };
+        }
+
+        public async Task<PredictionInfo?> GetBusPredictionAsync(string busNumber)
+        {
+            string cacheKey = $"{PREDICTION_CACHE_KEY_PREFIX}{busNumber}";
+            string? cachedPrediction = await _cache.GetStringAsync(cacheKey);
+
+            if (cachedPrediction != null)
+            {
+                return JsonSerializer.Deserialize<PredictionInfo>(cachedPrediction);
+            }
+
+            // Check if bus exists first using cached bus info
+            BusInfoResponse currentInfo = await GetBusInfoAsync();
+            if (!currentInfo.BusData.ContainsKey(busNumber))
+            {
+                return null;
+            }
+
+            PredictionInfo prediction = new()
+            {
+                Predictions = await PredictBayForServiceAsync(busNumber, DateTime.UtcNow)
+            };
+
+            DistributedCacheEntryOptions cacheOptions = new()
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5),
+                SlidingExpiration = TimeSpan.FromMinutes(1)
+            };
+
+            await _cache.SetStringAsync(
+                cacheKey,
+                JsonSerializer.Serialize(prediction),
+                cacheOptions);
+
+            return prediction;
+        }
+
         private async Task<List<BayPrediction>> PredictBayForServiceAsync(string service, DateTime targetTime)
         {
             // Handle weekends immediately
@@ -195,7 +294,6 @@ namespace BusInfo.Services
                 Calendar cal = CultureInfo.InvariantCulture.Calendar;
                 int currentWeek = cal.GetWeekOfYear(targetTime, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
 
-                // Get all historical data for this service on weekdays, removing strict bay format check
                 List<BusArrival> historicalData = await _dbContext.BusArrivals
                     .Where(x => x.Service == service &&
                                x.DayOfWeek >= 1 && x.DayOfWeek <= 5 &&
@@ -204,7 +302,6 @@ namespace BusInfo.Services
                     .Take(2000)
                     .ToListAsync();
 
-                // Additional filtering in memory if needed
                 historicalData = [.. historicalData.Where(x => !string.IsNullOrWhiteSpace(x.Bay) &&
                                                          x.Bay.Length >= 2 &&
                                                          !x.Bay.Equals("No historical data", StringComparison.OrdinalIgnoreCase))];

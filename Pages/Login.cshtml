@@ -1,0 +1,125 @@
+@page "/login"
+@model LoginModel
+@{
+    ViewData["Title"] = "Log in";
+}
+
+<div class="login-page">
+    <div class="login-container">
+        <h1 class="login-title">Welcome Back</h1>
+
+        <div asp-validation-summary="ModelOnly" class="error-summary" role="alert"></div>
+
+        <form method="post" class="login-form" id="loginForm">
+            @Html.AntiForgeryToken()
+
+            <div class="form-group">
+                <label asp-for="LoginInput.Username">Email</label>
+                <input asp-for="LoginInput.Username" type="text" required placeholder="Enter your email"
+                    autocomplete="off" autofocus />
+                <span asp-validation-for="LoginInput.Username" class="error-message"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="LoginInput.Password">Password</label>
+                <input asp-for="LoginInput.Password" type="password" required placeholder="Enter your password"
+                    autocomplete="current-password" />
+                <span asp-validation-for="LoginInput.Password" class="error-message"></span>
+            </div>
+
+            <label class="option">
+                <div class="checkbox-wrapper">
+                    <input asp-for="LoginInput.RememberMe" type="checkbox" />
+                    <div class="checkbox-custom"></div>
+                </div>
+                <span>Keep me signed in</span>
+            </label>
+
+            <button type="submit" class="btn-primary" id="submitButton">
+                <i class="fas fa-sign-in-alt"></i>
+                Sign In
+            </button>
+        </form>
+
+        <div class="login-links">
+            <a asp-page="/Register">Create new account</a>
+            <span>·</span>
+            <a asp-page="/ForgotPassword">Forgot password?</a>
+        </div>
+    </div>
+</div>
+
+@if (Model.ShowReactivationModal)
+{
+    <div class="custom-modal" id="reactivationModal">
+        <div class="custom-modal-content">
+            <h2>Account Pending Deletion</h2>
+            <p>Your account is currently scheduled for deletion. Would you like to reactivate it?</p>
+            <form method="post" asp-page-handler="ReactivateAccount" id="reactivateForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="email" value="@Model.PendingReactivationEmail" />
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="window.location.href='/'">Cancel</button>
+                    <button type="submit" class="btn-primary" id="reactivateButton">
+                        <i class="fas fa-undo"></i>
+                        Reactivate Account
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById('loginForm')?.addEventListener('submit', function (e) {
+            var submitButton = document.getElementById('submitButton');
+            if (submitButton.disabled) {
+                e.preventDefault();
+                return false;
+            }
+            submitButton.disabled = true;
+            return true;
+        });
+
+        document.getElementById('reactivateForm')?.addEventListener('submit', function (e) {
+            var reactivateButton = document.getElementById('reactivateButton');
+            if (reactivateButton.disabled) {
+                e.preventDefault();
+                return false;
+            }
+            reactivateButton.disabled = true;
+            return true;
+        });
+
+        window.addEventListener('pageshow', function (event) {
+            if (event.persisted) {
+                document.getElementById('loginForm')?.reset();
+                var submitButton = document.getElementById('submitButton');
+                if (submitButton) submitButton.disabled = false;
+
+                var reactivateButton = document.getElementById('reactivateButton');
+                if (reactivateButton) reactivateButton.disabled = false;
+            }
+        });
+
+        document.querySelectorAll('.form-group input').forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.classList.add('focused');
+            });
+            input.addEventListener('blur', () => {
+                input.parentElement.classList.remove('focused');
+            });
+        });
+    </script>
+
+    @if (Model.ShowReactivationModal)
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                document.getElementById('reactivationModal').style.display = 'flex';
+            });
+        </script>
+    }
+}

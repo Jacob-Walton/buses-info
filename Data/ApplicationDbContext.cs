@@ -11,14 +11,13 @@ namespace BusInfo.Data
         public DbSet<ApiKeyRequest> ApiKeyRequests { get; set; }
         public DbSet<AdminSettings> AdminSettings { get; set; }
         public DbSet<BusArrival> BusArrivals { get; set; }
+        public DbSet<ApiKey> ApiKeys { get; set; }
 
         protected override void OnModelCreating(ModelBuilder? modelBuilder)
         {
             modelBuilder?.Entity<ApplicationUser>(entity =>
                     {
                         entity.HasIndex(u => u.Email).IsUnique();
-                        entity.HasIndex(u => u.ApiKey).IsUnique();
-
                         // Basic columns
                         entity.Property(u => u.Email).IsRequired().HasMaxLength(256);
                         entity.Property(u => u.PasswordHash).IsRequired();
@@ -31,8 +30,6 @@ namespace BusInfo.Data
                             .HasColumnType("text[]");
 
                         // Nullable columns with specific types
-                        entity.Property(u => u.ApiKey)
-                            .HasColumnType("varchar(100)");
                         entity.Property(u => u.PasswordResetToken)
                             .HasColumnType("varchar(100)");
                         entity.Property(u => u.EmailVerificationToken)
@@ -82,6 +79,18 @@ namespace BusInfo.Data
 
                     entity.HasIndex(e => new { e.Service, e.ArrivalTime });
                 });
+
+            modelBuilder?.Entity<ApiKey>(entity =>
+            {
+                entity.HasKey(e => e.Key);
+                entity.Property(e => e.Key).HasMaxLength(100);
+                entity.Property(e => e.CreatedAt).HasColumnType("timestamp with time zone");
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
         }
     }
 }

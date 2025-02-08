@@ -38,12 +38,13 @@ using System.Net.Http;
 using Microsoft.AspNetCore.ResponseCompression;
 using System.Linq;
 using BusInfo.Services.BackgroundServices;
+using BusInfo.Authentication.Authorization;
 
 namespace BusInfo
 {
     public class Marker { }
 
-    public class CustomKeyVaultSecretManager : KeyVaultSecretManager
+    public class KeyVaultSecretNameFormatter : KeyVaultSecretManager
     {
         public override string GetKey(KeyVaultSecret secret)
         {
@@ -126,7 +127,7 @@ namespace BusInfo
                     new AzureKeyVaultConfigurationOptions
                     {
                         ReloadInterval = TimeSpan.FromMinutes(5),
-                        Manager = new CustomKeyVaultSecretManager()
+                        Manager = new KeyVaultSecretNameFormatter()
                     });
 
                 Log.Information("Successfully configured Azure Key Vault with URI: {KeyVaultUri}", keyVaultUri);
@@ -222,13 +223,15 @@ namespace BusInfo
             builder.Services.AddHttpClient();
 
             // Configure Authentication
+            builder.Services.AddScoped<ClaimsRefreshService>();
+
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
                     options.LoginPath = "/login";
                     options.LogoutPath = "/logout";
                     options.AccessDeniedPath = "/accessdenied";
-                    options.ExpireTimeSpan = System.TimeSpan.FromDays(30);
+                    options.ExpireTimeSpan = TimeSpan.FromDays(30);
                     options.SlidingExpiration = true;
                     options.Cookie.Name = "BusInfo.Auth";
                     options.Cookie.HttpOnly = true;
@@ -266,34 +269,42 @@ namespace BusInfo
 
             builder.Services.AddAuthorization(options =>
             {
+                // Default policy for web routes uses only cookie authentication
                 options.DefaultPolicy = new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
-                    .AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme, "ApiKey")
+                    .AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme)
                     .Build();
-            });
 
-            builder.Services.AddAuthorization(options =>
-            {
+                // API policy uses both cookie and API key authentication
+                options.AddPolicy("ApiPolicy", policy =>
+                    policy.RequireAuthenticatedUser()
+                         .AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme, "ApiKey"));
+
                 options.AddPolicy("RequireAuthenticatedUser", policy =>
                     policy.RequireAuthenticatedUser());
-                // options.AddPolicy("AdminOnly", policy =>
-                //     policy.Requirements.Add(new AdminRequirement()));
+                options.AddPolicy("AdminOnly", policy =>
+                    policy.Requirements.Add(new AdminRequirement()));
             });
 
-            // builder.Services.AddScoped<IAuthorizationHandler, AdminAuthorizationHandler>();
+            builder.Services.AddScoped<IAuthorizationHandler, AdminAuthorizationHandler>();
 
             // Configure User Services
             builder.Services.AddScoped<IUserService, UserService>();
-            // builder.Services.AddSingleton<IApiKeyGenerator, ApiKeyGenerator>();
+            builder.Services.AddScoped<IApiKeyGenerator, ApiKeyGenerator>();
 
             // Configure CORS
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("AllowSpecificOrigin",
-                    builder => builder.WithOrigins((config["Cors:AllowedOrigins"] ?? "").Split(","))
-                        .AllowAnyMethod()
-                        .AllowAnyHeader()
-                        .AllowCredentials());
+                options.AddDefaultPolicy(builder =>
+                    builder.SetIsOriginAllowed(origin =>
+                    {
+                        string[] allowedOrigins = (config["Cors:AllowedOrigins"] ?? "").Split(",");
+                        return allowedOrigins.Contains(origin) ||
+                               origin.EndsWith(".cloudflareinsights.com", StringComparison.OrdinalIgnoreCase);
+                    })
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials());
             });
 
             // Configure Rate Limiting
@@ -337,7 +348,7 @@ namespace BusInfo
             app.UseStaticFiles();
             app.UseRouting();
 
-            app.UseCors("AllowSpecificOrigin");
+            app.UseCors();
 
             app.UseAuthentication();
             app.UseAuthorization();
@@ -376,9 +387,8 @@ namespace BusInfo
                 }
             });
 
-
+            app.MapControllers().RequireAuthorization("ApiPolicy");
             app.MapRazorPages();
-            app.MapControllers();
         }
     }
 

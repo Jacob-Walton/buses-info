@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using BusInfo.Exceptions;
 using BusInfo.Models;
 using BusInfo.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
@@ -16,6 +17,7 @@ namespace BusInfo.Controllers.Api.V2
     [ApiController]
     [Route("api/v2/businfo")]
     [Produces("application/json")]
+    [Authorize(AuthenticationSchemes = "Cookies,ApiKey")]
     public class BusInfoController(
         IBusInfoService busInfoService,
         IBusLaneService busLaneService,
@@ -154,6 +156,91 @@ namespace BusInfo.Controllers.Api.V2
             {
                 _logError(_logger, DateTime.UtcNow, "Invalid operation while generating map", ex);
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while generating the bus lane map.");
+            }
+        }
+
+        [HttpGet("predictions")]
+        [ProducesResponseType(typeof(BusPredictionResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetBusPredictionsAsync()
+        {
+            try
+            {
+                bool predictionsEnabled = await _configCatService.GetFlagValueAsync(User, "busBayPredictions", false);
+                if (!predictionsEnabled)
+                {
+                    return NotFound("Predictions are not currently enabled");
+                }
+
+                BusPredictionResponse predictions = await _busInfoService.GetBusPredictionsAsync();
+                return Ok(predictions);
+            }
+            catch (ApiException ex)
+            {
+                _logError(_logger, DateTime.UtcNow, "Error getting predictions", ex);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while fetching predictions.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logError(_logger, DateTime.UtcNow, "Error getting predictions", ex);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing predictions.");
+            }
+        }
+
+        [HttpGet("predictions/{busNumbers}")]
+        [ProducesResponseType(typeof(Dictionary<string, PredictionInfo>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> GetBatchBusPredictionsAsync(string busNumbers)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(busNumbers))
+                {
+                    return BadRequest("No bus numbers provided");
+                }
+
+                string[] requestedBuses = busNumbers.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+                if (requestedBuses.Length == 0)
+                {
+                    return BadRequest("No valid bus numbers provided");
+                }
+
+                if (requestedBuses.Length > 50)
+                {
+                    return BadRequest("Too many bus numbers requested (maximum 50)");
+                }
+
+                bool predictionsEnabled = await _configCatService.GetFlagValueAsync(User, "busBayPredictions", false);
+                if (!predictionsEnabled)
+                {
+                    return NotFound("Predictions are not currently enabled");
+                }
+
+                Dictionary<string, PredictionInfo> predictions = [];
+                foreach (string? busNumber in requestedBuses.Distinct())
+                {
+                    PredictionInfo? prediction = await _busInfoService.GetBusPredictionAsync(busNumber);
+                    if (prediction != null)
+                    {
+                        predictions[busNumber] = prediction;
+                    }
+                }
+
+                return predictions.Count > 0 ? Ok(predictions) : NotFound("No valid bus numbers found");
+            }
+            catch (ApiException ex)
+            {
+                _logError(_logger, DateTime.UtcNow, "API error getting predictions", ex);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while fetching predictions.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logError(_logger, DateTime.UtcNow, "Invalid operation while getting predictions", ex);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing the request.");
             }
         }
     }

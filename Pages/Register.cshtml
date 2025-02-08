@@ -1,0 +1,74 @@
+@page "/register"
+@model RegisterModel
+@{
+    ViewData["Title"] = "Create Account";
+}
+
+<div class="login-page">
+    <div class="login-container">
+        <h1 class="login-title">Create Account</h1>
+        
+        <div asp-validation-summary="ModelOnly" class="error-summary" role="alert"></div>
+        
+        <form method="post" class="login-form" autocomplete="off">
+            <div class="form-group">
+                <label asp-for="RegisterInput.Email">Email Address</label>
+                <input asp-for="RegisterInput.Email" type="email" autocomplete="email" required 
+                       placeholder="Enter your email address" />
+                <span asp-validation-for="RegisterInput.Email" class="error-message"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="RegisterInput.Password">Create Password</label>
+                <input asp-for="RegisterInput.Password" type="password" autocomplete="new-password" required 
+                       placeholder="Enter a strong password" />
+                <span asp-validation-for="RegisterInput.Password" class="error-message"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="RegisterInput.ConfirmPassword">Confirm Password</label>
+                <input asp-for="RegisterInput.ConfirmPassword" type="password" autocomplete="new-password" required 
+                       placeholder="Confirm your password" />
+                <span asp-validation-for="RegisterInput.ConfirmPassword" class="error-message"></span>
+            </div>
+
+            <div class="form-group terms-agreement">
+                <label class="checkbox-wrapper">
+                    <input asp-for="RegisterInput.AgreeToTerms" type="checkbox" />
+                    <span class="checkbox-custom"></span>
+                    <span class="terms-text">
+                        I agree to the <a href="/terms" target="_blank">Terms and Conditions</a> and acknowledge the <a href="/disclaimer" target="_blank">Independence Disclaimer</a>
+                    </span>
+                </label>
+                <span asp-validation-for="RegisterInput.AgreeToTerms" class="error-message"></span>
+            </div>
+
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-user-plus"></i>
+                Create Account
+            </button>
+        </form>
+
+        <div class="login-links">
+            <a asp-page="/Login">
+                <i class="fas fa-arrow-left"></i>
+                Already have an account? Sign in
+            </a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Add focused class to form groups
+        document.querySelectorAll('.form-group input').forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.classList.add('focused');
+            });
+            input.addEventListener('blur', () => {
+                input.parentElement.classList.remove('focused');
+            });
+        });
+    </script>
+}

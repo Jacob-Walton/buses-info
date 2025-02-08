@@ -3,9 +3,20 @@
     "autoprefixer": "^10.4.20",
     "gulp": "^5.0.0",
     "gulp-clean-css": "^4.3.0",
+    "gulp-javascript-obfuscator": "^1.1.6",
     "gulp-postcss": "^10.0.0",
     "gulp-sass": "^6.0.0",
     "gulp-terser": "^2.1.0",
-    "sass": "^1.83.4"
+    "javascript-obfuscator": "^4.1.1",
+    "sass": "^1.84.0"
+  },
+  "devDependencies": {
+    "gulp-plumber": "^1.2.1",
+    "gulp-remove-sourcemaps": "^1.0.5",
+    "@rollup/plugin-node-resolve": "^13.3.0",
+    "rollup": "^2.79.1",
+    "gulp-rollup": "^2.17.0",
+    "gulp-better-rollup": "^4.0.1",
+    "@rollup/plugin-terser": "^0.4.4"
   }
 }

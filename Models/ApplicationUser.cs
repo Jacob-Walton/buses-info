@@ -9,17 +9,16 @@ namespace BusInfo.Models
         public ApplicationUser()
         {
             Id = Guid.NewGuid().ToString();
-            RecoveryCodes = new ReadOnlyCollection<string>([]);
+            RecoveryCodes = [];
             PreferredRoutes = [];
         }
         public string Id { get; set; } = Guid.NewGuid().ToString();
         public string Email { get; set; } = string.Empty;
-        public string ApiKey { get; set; } = string.Empty;
         public bool HasRequestedApiAccess { get; set; }
         public bool IsAdmin { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime LastLoginAt { get; set; }
-        public Collection<string> PreferredRoutes { get; set; }
+        public List<string> PreferredRoutes { get; set; }
         public bool ShowPreferredRoutesFirst { get; set; } = true;
         public bool EnableEmailNotifications { get; set; } = true;
         public string PasswordHash { get; set; } = string.Empty;
@@ -36,7 +35,7 @@ namespace BusInfo.Models
 
         public bool TwoFactorEnabled { get; set; }
         public string? TwoFactorSecret { get; set; }
-        public ReadOnlyCollection<string> RecoveryCodes { get; set; }
+        public List<string> RecoveryCodes { get; set; }
         public int FailedLoginAttempts { get; set; }
         public DateTime? LockoutEnd { get; set; }
         public bool IsLocked => LockoutEnd.HasValue && LockoutEnd.Value > DateTime.UtcNow;
@@ -48,5 +47,7 @@ namespace BusInfo.Models
 
         public bool HasAgreedToTerms { get; set; }
         public DateTime? TermsAgreedAt { get; set; }
+
+        public ApiKey? ActiveApiKey { get; set; }
     }
 }

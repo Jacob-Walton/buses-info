@@ -81,7 +81,7 @@ namespace BusInfo.Services
                 user.Email = $"deleted_{userId}@deleted.com";
                 user.PasswordHash = string.Empty;
                 user.Salt = string.Empty;
-                user.ApiKey = null!;
+                _context.ApiKeys.RemoveRange(_context.ApiKeys.Where(k => k.UserId == userId));
                 user.PreferredRoutes?.Clear();
                 user.IsEmailVerified = false;
 
@@ -102,7 +102,7 @@ namespace BusInfo.Services
 
             user.Email = $"deleted_{userId}@deleted.com";
             user.IsEmailVerified = false;
-            user.ApiKey = null!;
+            _context.ApiKeys.RemoveRange(_context.ApiKeys.Where(k => k.UserId == userId));
             user.DeletedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
@@ -120,7 +120,7 @@ namespace BusInfo.Services
                 user.LastLoginAt,
                 user.PreferredRoutes,
                 user.EnableEmailNotifications,
-                ApiAccess = !string.IsNullOrEmpty(user.ApiKey)
+                ApiAccess = !string.IsNullOrEmpty(_context.ApiKeys.FirstOrDefault(k => k.UserId == userId)?.Key),
             };
             string json = System.Text.Json.JsonSerializer.Serialize(userData, _jsonOptions);
 

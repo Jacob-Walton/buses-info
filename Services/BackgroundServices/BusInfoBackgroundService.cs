@@ -21,14 +21,28 @@ namespace BusInfo.Services.BackgroundServices
         private readonly ILogger<BusInfoBackgroundService> _logger = logger;
         private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
         private readonly Dictionary<string, string> _previousBusData = [];
-        private DateTime _lastCheckDate = DateTime.MinValue;
+        private DateTime _lastCheckTime = DateTime.MinValue;
         private const int CHECK_INTERVAL_SECONDS = 30;
+        private static bool IsValidTimeToCheck()
+        {
+            DateTime now = DateTime.Now;
+            return now.DayOfWeek != DayOfWeek.Saturday
+                && now.DayOfWeek != DayOfWeek.Sunday
+                && now.Hour >= 14
+                && now.Hour < 17;
+        }
 
         private static readonly Action<ILogger, DateTime, Exception?> LogRequestReceived =
             LoggerMessage.Define<DateTime>(
                 LogLevel.Information,
                 new EventId(1, "CheckingBuses"),
                 "Checking buses at {Timestamp}");
+
+        private static readonly Action<ILogger, DateTime, Exception?> LogRequestSkipped =
+            LoggerMessage.Define<DateTime>(
+                LogLevel.Information,
+                new EventId(1, "CheckingBuses"),
+                "Skipping bus check at {Timestamp}");
 
         private static readonly Action<ILogger, string, string, Exception?> LogNewArrival =
             LoggerMessage.Define<string, string>(
@@ -54,9 +68,17 @@ namespace BusInfo.Services.BackgroundServices
             {
                 try
                 {
-                    if (IsCheckTime())
+                    if (IsValidTimeToCheck())
                     {
                         await CheckBusesAsync(stoppingToken);
+                    }
+                    else if (DateTime.UtcNow - _lastCheckTime > TimeSpan.FromHours(1))
+                    {
+                        ResetPreviousBusData();
+                    }
+                    else
+                    {
+                        LogRequestSkipped(_logger, DateTime.UtcNow, null);
                     }
                     await Task.Delay(TimeSpan.FromSeconds(CHECK_INTERVAL_SECONDS), stoppingToken);
                 }
@@ -72,22 +94,10 @@ namespace BusInfo.Services.BackgroundServices
             }
         }
 
-        private bool IsCheckTime()
-        {
-            DateTime now = DateTime.UtcNow;
-            if (now.Date != _lastCheckDate.Date)
-            {
-                ResetPreviousBusData();
-                return true;
-            }
-
-            return now.Second % CHECK_INTERVAL_SECONDS == 0;
-        }
-
         private void ResetPreviousBusData()
         {
             _previousBusData.Clear();
-            _lastCheckDate = DateTime.UtcNow;
+            _lastCheckTime = DateTime.UtcNow;
             LogDataReset(_logger, null);
         }
 
