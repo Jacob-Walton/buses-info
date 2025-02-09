@@ -132,20 +132,20 @@ class SettingsManager {
         apiContainer.innerHTML = `
           <div class="api-request-form">
               <div class="form-group">
-                  <label asp-for="ApiKeyRequestForm.Reason">Reason for API Access</label>
-                  <textarea name="ApiKeyRequestForm.Reason" class="form-control" rows="3"
+                  <label>Reason for API Access</label>
+                  <textarea name="reason" class="form-control" rows="3"
                       placeholder="Explain why you need API access"></textarea>
-                  <span class="text-danger field-validation-error"></span>
+                  <span class="text-danger"></span>
               </div>
 
               <div class="form-group">
-                  <label asp-for="ApiKeyRequestForm.IntendedUse">Intended Use</label>
-                  <textarea name="ApiKeyRequestForm.IntendedUse" class="form-control" rows="3"
+                  <label>Intended Use</label>
+                  <textarea name="intendedUse" class="form-control" rows="3"
                       placeholder="Describe how you will use the API"></textarea>
-                  <span class="text-danger field-validation-error"></span>
+                  <span class="text-danger"></span>
               </div>
 
-              <button type="button" class="btn-primary" onclick="submitApiRequest()">
+              <button type="button" class="btn-primary" onclick="window.settings.requestApiAccess()">
                   <i class="fas fa-paper-plane"></i> Submit Request
               </button>
           </div>`;
@@ -448,8 +448,8 @@ class SettingsManager {
 
   async requestApiAccess() {
     const form = this.form.querySelector('.api-request-form');
-    const reason = form.querySelector('[name="ApiKeyRequestForm.Reason"]')?.value;
-    const intendedUse = form.querySelector('[name="ApiKeyRequestForm.IntendedUse"]')?.value;
+    const reason = form.querySelector('textarea[name="reason"]')?.value;
+    const intendedUse = form.querySelector('textarea[name="intendedUse"]')?.value;
 
     if (!reason || !intendedUse) {
       this.showAlert("Please fill in all fields", "error");
