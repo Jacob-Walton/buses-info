@@ -1,5 +1,6 @@
 wwwroot/lib
 wwwroot/css
+wwwroot/js/
 **/node_modules
 **/bin
 **/obj
@@ -13,3 +14,4 @@ secrets.json
 !.env.example
 logs/
 Migrations/
+package-lock.json
