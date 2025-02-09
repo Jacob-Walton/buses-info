@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BusInfo.Models.Accounts;
+using System.Collections.Generic;
 
 namespace BusInfo.Controllers
 {
@@ -187,6 +188,79 @@ namespace BusInfo.Controllers
             }
         }
 
+        [HttpGet("api-keys")]
+        public async Task<IActionResult> GetApiKeyStatusAsync()
+        {
+            string? userId = GetCurrentUserId();
+            if (userId == null) return Unauthorized();
+
+            ApiKey? activeKey = await _context.ApiKeys
+                .FirstOrDefaultAsync(k => k.UserId == userId && k.IsActive);
+
+            return Ok(new
+            {
+                hasApiKey = activeKey != null,
+                key = activeKey?.Key
+            });
+        }
+
+        [HttpGet("profile")]
+        public async Task<IActionResult> GetProfileAsync()
+        {
+            string? userId = GetCurrentUserId();
+            if (userId == null) return Unauthorized();
+
+            var user = await _context.Users
+                .Select(u => new
+                {
+                    u.Id,
+                    u.Email,
+                    u.CreatedAt,
+                    LastLogin = u.LastLoginAt,
+                    u.EnableEmailNotifications
+                })
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            return user == null ? NotFound() : Ok(user);
+        }
+
+        [HttpPut("profile")]
+        public async Task<IActionResult> UpdateProfileAsync([FromBody] UpdateProfileModel model)
+        {
+            string? userId = GetCurrentUserId();
+            if (userId == null) return Unauthorized();
+
+            ApplicationUser? user = await _userService.GetUserByIdAsync(userId);
+            if (user == null) return NotFound();
+
+            user.EnableEmailNotifications = model.EnableEmailNotifications;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                return Ok(new { message = "Profile updated successfully" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error updating profile", error = ex.Message });
+            }
+        }
+
+        [HttpDelete("feedback")]
+        public async Task<IActionResult> SubmitDeletionFeedbackAsync([FromBody] DeletionFeedbackModel model)
+        {
+            string? userId = GetCurrentUserId();
+            if (userId == null) return Unauthorized();
+
+            ApplicationUser? user = await _userService.GetUserByIdAsync(userId);
+            if (user == null) return NotFound();
+
+            user.DeletionReason = model.Reason;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Feedback submitted successfully" });
+        }
+
         // Password Operations
         [HttpPut("password")]
         public async Task<IActionResult> UpdatePasswordAsync([FromBody] ChangePasswordModel model)
@@ -199,6 +273,38 @@ namespace BusInfo.Controllers
                 return BadRequest(new { message = "Invalid current password" });
 
             return Ok(new { message = "Password updated successfully" });
+        }
+
+        [HttpGet("routes")]
+        public async Task<IActionResult> GetAvailableRoutesAsync()
+        {
+            try
+            {
+                List<string> routes = await _context.BusArrivals
+                    .AsNoTracking()
+                    .Select(b => b.Service)
+                    .Where(s => !string.IsNullOrEmpty(s))
+                    .Distinct()
+                    .OrderBy(s => s)
+                    .ToListAsync();
+
+                // Fallback to default routes if none found in database
+                if (routes.Count == 0)
+                {
+                    routes = ["102", "103", "115", "117", "119", "125", "566", "712", "715",
+                             "718", "720", "760", "761", "762", "763", "764", "765", "778",
+                             "800", "801", "803", "807", "809", "819", "820", "821", "822",
+                             "823", "824", "825", "826", "953", "954", "956", "957", "958",
+                             "959", "959B", "961", "962", "963", "964", "965", "965B", "975",
+                             "983", "998"];
+                }
+
+                return Ok(new { routes });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error retrieving routes" });
+            }
         }
 
         private string? GetCurrentUserId()
