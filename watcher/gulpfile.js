@@ -37,7 +37,8 @@ const isProd = process.env.NODE_ENV === 'production';
 const config = {
   entryPoints: [
     'js/site.js',
-    'js/businfo.js'
+    'js/businfo.js',
+    'js/settings.js'
   ],
   modulesDir: 'js/modules',
   outputDir: '../wwwroot/js'

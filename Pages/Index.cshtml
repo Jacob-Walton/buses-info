@@ -2,7 +2,6 @@
 @model IndexModel
 @{
     ViewData["Title"] = "Home";
-    ViewData["ExpandedLogo"] = true;
 }
 
 <div class="home-container">
@@ -13,7 +12,7 @@
             
             @if (User.Identity?.IsAuthenticated == true)
             {
-                <a href="/bus-info" class="button primary">View Bus Information</a>
+                <a href="/buses" class="button primary">View Bus Information</a>
             }
             else
             {

@@ -57,18 +57,9 @@
     </div>
     <nav class="navbar">
         <div class="container">
-            @if (ViewData["ExpandedLogo"] as bool? == true)
-            {
-                <div class="navbar-brand-container">
-                    <a class="navbar-brand expanded" asp-page="/Index"></a>
-                </div>
-            }
-            else
-            {
-                <div class="navbar-brand-container">
-                    <a class="navbar-brand simple" asp-page="/Index"></a>
-                </div>
-            }
+            <div class="navbar-brand-container">
+                <a class="navbar-brand simple" asp-page="/Index"></a>
+            </div>
 
             <button id="mobileMenuTrigger" class="mobile-menu-trigger">
                 <span></span>
@@ -111,7 +102,7 @@
                                 <i class="fas fa-cog"></i>
                                 Settings
                             </a>
-                            <form method="post" action="/signout/local">
+                            <form method="post" action="/api/accounts/logout">
                                 <button type="submit" class="dropdown-item danger">
                                     <i class="fas fa-sign-out-alt"></i>
                                     Sign Out

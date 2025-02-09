@@ -1,0 +1,186 @@
+@page "/account/settings"
+@model SettingsModel
+@{
+    ViewData["Title"] = "Settings";
+}
+
+<input type="hidden" id="availableRoutes" value="@Json.Serialize(Model.AvailableRoutes)" />
+<input type="hidden" id="lastLoginData" value="@(Model.LastLogin?.ToString("O") ?? "")" />
+
+<div class="settings-wrapper">
+    <div class="settings-container">
+        <!-- Settings Navigation -->
+        <div class="settings-nav">
+            <ul>
+                <li><a href="#" class="active" data-section="profile"><i class="fas fa-user"></i> Profile</a></li>
+                <li><a href="#" data-section="routes"><i class="fas fa-bus"></i> Bus Routes</a></li>
+                <li><a href="#" data-section="api"><i class="fas fa-key"></i> API Access</a></li>
+                <li><a href="#" data-section="account"><i class="fas fa-cog"></i> Account</a></li>
+            </ul>
+        </div>
+
+        <!-- Settings Content -->
+        <div class="settings-content">
+            <div id="alertContainer"></div>
+            <form id="settingsForm">
+                <!-- Profile Section -->
+                <section id="profile-section" class="settings-section">
+                    <h2>Profile Information</h2>
+                    <div class="settings-row">
+                        <div class="settings-field">
+                            <label>Email Address</label>
+                            <input type="text" id="userEmail" readonly />
+                        </div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-field">
+                            <label>Account Created</label>
+                            <input type="text" id="accountCreated" readonly />
+                        </div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-field">
+                            <label>Last Login</label>
+                            <input type="text" id="lastLogin" readonly />
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Routes Section -->
+                <section id="routes-section" class="settings-section" style="display: none;">
+                    <h2>Bus Route Preferences</h2>
+                    <div class="settings-row">
+                        <div class="settings-field full-width">
+                            <label>Preferred Routes</label>
+                            <div class="custom-dropdown">
+                                <div class="selected-options">
+                                    <span id="selected-count">0 routes selected</span>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="dropdown-options">
+                                    <div class="search-box">
+                                        <input type="text" placeholder="Search routes...">
+                                    </div>
+                                    <div id="routesContainer" class="options-container">
+                                        <!-- Routes will be populated by JS -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-field">
+                            <label class="switch-label">
+                                <span>Show preferred routes first</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="showPreferredRoutesFirst" />
+                                    <span class="slider"></span>
+                                </label>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- API Section -->
+                <section id="api-section" class="settings-section" style="display: none;">
+                    <h2>API Access</h2>
+                    <div class="settings-row">
+                        <div class="settings-field">
+                            <div id="apiKeyContainer">
+                                <div class="api-request-form">
+                                    <div class="form-group">
+                                        <label>Reason for API Access</label>
+                                        <textarea name="reason" class="form-control" rows="3"
+                                            placeholder="Explain why you need API access"></textarea>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Intended Use</label>
+                                        <textarea name="intendedUse" class="form-control" rows="3"
+                                            placeholder="Describe how you will use the API"></textarea>
+                                    </div>
+
+                                    <button type="button" class="btn-primary"
+                                        onclick="window.settings.requestApiAccess()">
+                                        <i class="fas fa-paper-plane"></i> Submit Request
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Account Section -->
+                <section id="account-section" class="settings-section" style="display: none;">
+                    <h2>Account Management</h2>
+                    <div class="settings-field">
+                        <h3>Notifications</h3>
+                        <label class="switch-label">
+                            <span>Enable email notifications</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="enableEmailNotifications" />
+                                <span class="slider"></span>
+                            </label>
+                        </label>
+                    </div>
+                    <!-- Change Password -->
+                    <div class="settings-row">
+                        <div class="settings-field">
+                            <h3>Change Password</h3>
+                            <div class="password-form">
+                                <div class="form-group">
+                                    <label for="currentPassword">Current Password</label>
+                                    <input type="password" id="currentPassword" name="currentPassword" required
+                                        minlength="8" autocomplete="current-password" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="newPassword">New Password</label>
+                                    <input type="password" id="newPassword" name="newPassword" required minlength="8"
+                                        autocomplete="new-password"
+                                        pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@@$!%*?&])[A-Za-z\d@@$!%*?&]{8,}"
+                                        title="Must contain at least 8 characters, one uppercase, one lowercase, one number and one special character" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="confirmPassword">Confirm New Password</label>
+                                    <input type="password" id="confirmPassword" name="confirmPassword" required
+                                        minlength="8" autocomplete="new-password" />
+                                </div>
+                                <button type="button" class="btn-primary change-password-btn">
+                                    <i class="fas fa-key"></i> Change Password
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-field">
+                        <h3>Export Data</h3>
+                        <button type="button" class="btn-secondary">
+                            <i class="fas fa-download"></i> Export Account Data
+                        </button>
+                    </div>
+                    <div class="settings-field">
+                        <h3>Delete Account</h3>
+                        <button type="button" class="btn-danger">
+                            <i class="fas fa-trash"></i> Delete Account
+                        </button>
+                    </div>
+                </section>
+
+                <div class="settings-save-bar">
+                    <div class="save-bar-content">
+                        <span class="save-message">
+                            <i class="fas fa-circle"></i>
+                            Unsaved changes
+                        </span>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/settings.js" asp-append-version="true"></script>
+}

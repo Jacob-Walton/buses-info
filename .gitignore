@@ -1,5 +1,6 @@
 wwwroot/lib
 wwwroot/css
+wwwroot/js/
 **/node_modules
 **/bin
 **/obj

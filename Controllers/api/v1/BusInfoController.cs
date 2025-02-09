@@ -17,7 +17,6 @@ namespace BusInfo.Controllers.Api.V1
     /// </summary>
     [ApiController]
     [Route("api/v1/businfo")]
-    [Produces("application/json")]
     [Authorize(AuthenticationSchemes = "Cookies,ApiKey")]
     public class BusInfoController(ILogger<BusInfoController> logger, IBusInfoService busInfoService) : ControllerBase
     {

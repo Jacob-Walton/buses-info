@@ -299,8 +299,7 @@ namespace BusInfo
                     builder.SetIsOriginAllowed(origin =>
                     {
                         string[] allowedOrigins = (config["Cors:AllowedOrigins"] ?? "").Split(",");
-                        return allowedOrigins.Contains(origin) ||
-                               origin.EndsWith(".cloudflareinsights.com", StringComparison.OrdinalIgnoreCase);
+                        return allowedOrigins.Contains(origin, StringComparer.OrdinalIgnoreCase);
                     })
                     .AllowAnyMethod()
                     .AllowAnyHeader()
@@ -345,6 +344,20 @@ namespace BusInfo
             }
 
             app.UseHttpsRedirection();
+
+            app.Use(async (context, next) =>
+            {
+                if (context.Request.Path.StartsWithSegments("/images", StringComparison.OrdinalIgnoreCase))
+                {
+                    string cdnBaseUrl = app.Configuration["Cdn:BaseUrl"] ??
+                        throw new InvalidOperationException("CDN BaseUrl is not configured");
+                    string originalPath = context.Request.Path.Value ?? "";
+                    context.Response.Redirect(cdnBaseUrl + originalPath.Replace("/images", "", StringComparison.OrdinalIgnoreCase));
+                    return;
+                }
+                await next();
+            });
+
             app.UseStaticFiles();
             app.UseRouting();
 

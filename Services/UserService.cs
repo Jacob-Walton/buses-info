@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using BusInfo.Data;
 using BusInfo.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
