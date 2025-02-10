@@ -43,7 +43,7 @@ namespace BusInfo.Services
             DateTime now = DateTime.Now;
             return now.DayOfWeek != DayOfWeek.Saturday
                 && now.DayOfWeek != DayOfWeek.Sunday
-                && now.Hour >= 14
+                && now.Hour >= 7
                 && now.Hour < 17;
         }
 
