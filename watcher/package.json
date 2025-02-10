@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development gulp",
+    "start": "cross-env NODE_ENV=production gulp"
+  },
   "dependencies": {
     "@babel/core": "^7.26.8",
     "@babel/preset-env": "^7.26.8",
@@ -21,5 +25,8 @@
     "sass": "^1.84.0",
     "vinyl-buffer": "^1.0.1",
     "vinyl-source-stream": "^2.0.0"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
   }
 }

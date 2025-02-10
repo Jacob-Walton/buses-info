@@ -68,18 +68,7 @@ function buildStyles() {
       includePaths: ['node_modules']
     }).on('error', sass.logError))
     // Apply vendor prefixes via autoprefixer
-    .pipe(postcss([autoprefixer()]))
-    .pipe(cleancss({
-      level: {
-        1: {
-          specialComments: 0,
-          removeEmpty: true,
-          removeWhitespace: true,
-          removeNegativePaddings: true,
-          removeQuotes: true,
-        }
-      }
-    }));
+    .pipe(postcss([autoprefixer()]));
    
   // Strip sourcemaps in production mode
   if (isProd) {

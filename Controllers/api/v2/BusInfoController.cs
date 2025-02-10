@@ -220,15 +220,10 @@ namespace BusInfo.Controllers.Api.V2
                     return NotFound("Predictions are not currently enabled");
                 }
 
-                Dictionary<string, PredictionInfo> predictions = [];
-                foreach (string? busNumber in requestedBuses.Distinct())
-                {
-                    PredictionInfo? prediction = await _busInfoService.GetBusPredictionAsync(busNumber);
-                    if (prediction != null)
-                    {
-                        predictions[busNumber] = prediction;
-                    }
-                }
+                BusPredictionResponse allPredictions = await _busInfoService.GetBusPredictionsAsync();
+                Dictionary<string, PredictionInfo> predictions = allPredictions.Predictions
+                    .Where(kvp => requestedBuses.Contains(kvp.Key))
+                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
                 return predictions.Count > 0 ? Ok(predictions) : NotFound("No valid bus numbers found");
             }

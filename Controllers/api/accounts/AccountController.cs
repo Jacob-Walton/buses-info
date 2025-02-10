@@ -197,10 +197,14 @@ namespace BusInfo.Controllers
             ApiKey? activeKey = await _context.ApiKeys
                 .FirstOrDefaultAsync(k => k.UserId == userId && k.IsActive);
 
+            bool hasPendingRequest = await _context.ApiKeyRequests
+                .AnyAsync(r => r.UserId == userId && r.Status == "Pending");
+
             return Ok(new
             {
                 hasApiKey = activeKey != null,
-                key = activeKey?.Key
+                key = activeKey?.Key,
+                pendingRequest = hasPendingRequest
             });
         }
 

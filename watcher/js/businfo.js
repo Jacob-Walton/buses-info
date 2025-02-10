@@ -34,7 +34,7 @@ const BusInfoModule = (() => {
 			today: "HH:mm",
 			other: "DD/MM HH:mm",
 		},
-		PREFERENCES_ENDPOINT: "/api/preferences",
+		PREFERENCES_ENDPOINT: "/api/accounts/preferences",
 		SECTION_STORAGE_KEY: 'businfo_collapsed_sections',
 	});
 
@@ -61,11 +61,7 @@ const BusInfoModule = (() => {
 		initialized: false,
 		collapsedSections: new Set(),
 		mapDisplayed: false,
-		predictionsDisplayed: false,
-		flags: {
-			busMap: false,
-			busBayPredictions: false,
-		},
+		predictionsDisplayed: false
 	};
 
 	/** @type {Object.<string, HTMLElement>} */
@@ -100,7 +96,7 @@ const BusInfoModule = (() => {
 	}
 
 	function displayBusMap() {
-		if (state.mapDisplayed || state.flags.busMap === false) return;
+		if (state.mapDisplayed) return;
 
 		const mapSection = document.createElement('div');
 		mapSection.className = 'bus-section map-section';
@@ -168,29 +164,11 @@ const BusInfoModule = (() => {
 		state.mapDisplayed = true; // Set the flag after successful map creation
 	}
 
-	async function refreshFeatureFlags() {
-		try {
-			const response = await fetch('/api/featureflags');
-			if (!response.ok) return;
-			const data = await response.json();
-
-			state.flags = data;
-			Logger.debug('Feature flags loaded', JSON.stringify(state.flags));
-		} catch (error) {
-			console.error('Error fetching feature flags:', error);
-		}
-	}
-
 	/**
 	 * Fetches bus information from the API
 	 * @returns {Promise<void>}
 	 */
 	async function fetchBusInfo() {
-		if (state.isLoading) return;
-
-		// Refresh feature flags before fetching bus info
-		await refreshFeatureFlags();
-
 		Logger.info("Fetching bus information");
 		Logger.startPerformanceMark("fetchBusInfo");
 		showLoading(true);
@@ -211,6 +189,10 @@ const BusInfoModule = (() => {
 			displayBusMap();
 			state.lastFetchTime = new Date();
 			updateLastFetchedTime();
+
+			// Fetch and update predictions from new BusInfoController endpoint
+			fetchAndDisplayPredictions();
+
 			Logger.info("Bus information fetched successfully", {
 				busCount: Object.keys(state.busData).length,
 			});
@@ -325,7 +307,6 @@ const BusInfoModule = (() => {
 
 			fragment.appendChild(busInfoSections);
 			elements.busInfoList.appendChild(fragment);
-			displayPredictions(busData);
 			hideError();
 		} else {
 			Logger.warn("No bus information available");
@@ -692,93 +673,114 @@ const BusInfoModule = (() => {
 		Logger.info("BusInfoModule cleanup complete");
 	}
 
-	function displayPredictions(busData) {
-		if (state.predictionsDisplayed || !state.flags.busBayPredictions) return;
+	// Updated fetchAndDisplayPredictions with extra status and JSON validation
+	async function fetchAndDisplayPredictions() {
+		try {
+			const response = await fetch(`${CONFIG.API_ENDPOINT}/predictions`);
+			if (response.status === 429) {
+				Logger.warn("Too many requests to predictions endpoint (HTTP 429)");
+				return;
+			}
+			if (!response.ok) {
+				Logger.warn("Predictions not enabled or failed to fetch");
+				return;
+			}
+			const predictionData = await response.json();
+			if (!predictionData || typeof predictionData !== "object" || !predictionData.predictions) {
+				throw new Error("Invalid predictions response format");
+			}
+			updatePredictionsDisplay(predictionData);
+		} catch (error) {
+			Logger.error("Error fetching bus predictions", { error: error.message });
+		}
+	}
 
-		const predictionsSection = document.createElement('div');
-		predictionsSection.className = 'bus-section map-section predictions-section';
+	// Updated updatePredictionsDisplay with a guard check
+	function updatePredictionsDisplay(predictionData) {
+		if (!predictionData || typeof predictionData !== "object" || !predictionData.predictions) {
+			Logger.error("Cannot render predictions: Invalid data format");
+			return;
+		}
+		// ...existing code...
+		let predictionsSection = document.querySelector('.predictions-section');
+		if (!predictionsSection) {
+			predictionsSection = document.createElement('div');
+			predictionsSection.className = 'bus-section map-section predictions-section';
 
-		const predictionsHeader = document.createElement('div');
-		predictionsHeader.className = 'bus-section-header';
+			const predictionsHeader = document.createElement('div');
+			predictionsHeader.className = 'bus-section-header';
 
-		const predictionsContent = document.createElement('div');
-		predictionsContent.className = 'bus-section-content single-column collapsed';
+			const predictionsContent = document.createElement('div');
+			predictionsContent.className = 'bus-section-content single-column collapsed';
 
-		predictionsHeader.innerHTML = `
-			<div class="section-header-content">
-				<h3>Bay Predictions</h3>
-				<div class="predictions-search">
-					<input type="text" id="predictionsSearch" placeholder="Search bus number...">
+			predictionsHeader.innerHTML = `
+				<div class="section-header-content">
+					<h3>Bay Predictions</h3>
+					<div class="predictions-search">
+						<input type="text" id="predictionsSearch" placeholder="Search bus number...">
+					</div>
 				</div>
-			</div>
-			<button class="section-toggle" aria-label="Toggle section">
-				<i class="fas fa-chevron-down"></i>
-			</button>
-		`;
+				<button class="section-toggle" aria-label="Toggle section">
+					<i class="fas fa-chevron-down"></i>
+				</button>
+			`;
 
-		predictionsContent.innerHTML = `
-			<div id="predictionsList"></div>
-		`;
+			predictionsContent.innerHTML = `
+				<div id="predictionsList" class="predictions-list"></div>
+			`;
 
-		predictionsSection.appendChild(predictionsHeader);
-		predictionsSection.appendChild(predictionsContent);
-		
-		// Append it below the bus info list
-		elements.busInfoList.insertAdjacentElement('afterend', predictionsSection);
+			predictionsSection.appendChild(predictionsHeader);
+			predictionsSection.appendChild(predictionsContent);
+
+			// Insert after the map section if it exists, otherwise after the bus info list
+			const mapSection = document.querySelector('.map-section');
+			if (mapSection) {
+				mapSection.insertAdjacentElement('afterend', predictionsSection);
+			} else {
+				elements.busInfoList.insertAdjacentElement('afterend', predictionsSection);
+			}
+
+			// Add predictions section toggle handling
+			predictionsHeader.addEventListener('click', (event) => {
+				// Don't toggle if clicking in the search input
+				if (event.target.closest('.predictions-search')) return;
+				
+				predictionsContent.classList.toggle('collapsed');
+				predictionsHeader.querySelector('.section-toggle').style.transform =
+					predictionsContent.classList.contains('collapsed') ? 'rotate(-180deg)' : 'rotate(0)';
+			});
+
+			setupPredictionsSearch();
+		}
 
 		const predictionsList = document.getElementById('predictionsList');
+		if (!predictionsList) return;
 		predictionsList.innerHTML = '';
 
-		Object.entries(busData).forEach(([number, info]) => {
-			if (info.predictedBays?.length > 0) {
+		Object.entries(predictionData.predictions).forEach(([busNumber, info]) => {
+			if (info.predictions && info.predictions.length > 0) {
 				const card = document.createElement('div');
 				card.className = 'prediction-card';
-				card.dataset.busNumber = number.toLowerCase();
-
+				card.dataset.busNumber = busNumber.toLowerCase();
 				card.innerHTML = `
 					<div class="prediction-header">
-						<div class="bus-number">${escapeHTML(number)}</div>
+						<div class="bus-number">${escapeHTML(busNumber)}</div>
 						<div class="confidence">
 							<i class="fas fa-chart-line"></i>
-							${info.predictionConfidence}% confidence
+							${info.predictions[0].probability}% confidence
 						</div>
 					</div>
 					<div class="prediction-content">
-						${info.predictedBays.map(pred => `
+						${info.predictions.map(pred => `
 							<div class="predicted-bay">
 								Bay ${pred.bay}
 								<span class="probability">${pred.probability}%</span>
-							</div>
-						`).join('')}
+							</div>`).join('')}
 					</div>
 				`;
-
 				predictionsList.appendChild(card);
 			}
 		});
-
-		// Add predictions section toggle handling
-		predictionsHeader.addEventListener('click', () => {
-			predictionsContent.classList.toggle('collapsed');
-			predictionsHeader.querySelector('.section-toggle').style.transform =
-				predictionsContent.classList.contains('collapsed') ? 'rotate(-180deg)' : 'rotate(0)';
-		});
-
-		// Add keyboard support for accessibility
-		document.addEventListener('keydown', (e) => {
-			if (e.key === 'Enter' || e.key === ' ') {
-				const header = e.target.closest('.bus-section-header');
-				if (header) {
-					e.preventDefault();
-					const section = header.closest('.bus-section');
-					if (section) {
-						toggleSection(section.id);
-					}
-				}
-			}
-		});
-
-		state.predictionsDisplayed = true; // Set the flag after successful predictions creation
 	}
 
 	function setupPredictionsSearch() {
