@@ -123,14 +123,88 @@ Response format:
   "busData": {
     "102": {
       "status": "Arrived",
-      "bay": "A1",
-      "predictedBays": [
+      "bay": "A1"
+    }
+  },
+  "lastUpdated": "2025-02-03T12:00:00Z"
+}
+```
+
+```http
+GET /api/v2/businfo/predictions
+Headers:
+    X-Api-Key: {key}
+```
+
+Response format:
+
+```json
+{
+  "predictions": {
+    "102": {
+      "predictions": [
         {
-          "bay": "A1",
-          "probability": 100
+          "bay": "A13",
+          "probability": 52
+        },
+        {
+          "bay": "C13",
+          "probability": 37
+        },
+        {
+          "bay": "B8",
+          "probability": 37
         }
-      ],
-      "predictionConfidence": 100
+      ]
+    }
+  },
+  "lastUpdated": "2025-02-03T12:00:00Z"
+}
+```
+
+```http
+GET /api/v2/businfo/predictions/809;819
+
+Headers:
+    X-Api-Key: {key}
+```
+
+Response format:
+
+```json
+{
+  "predictions": {
+    "809": {
+      "predictions": [
+        {
+          "bay": "A13",
+          "probability": 52
+        },
+        {
+          "bay": "C13",
+          "probability": 37
+        },
+        {
+          "bay": "B8",
+          "probability": 37
+        }
+      ]
+    },
+    "819": {
+      "predictions": [
+        {
+          "bay": "A13",
+          "probability": 52
+        },
+        {
+          "bay": "C13",
+          "probability": 37
+        },
+        {
+          "bay": "B8",
+          "probability": 37
+        }
+      ]
     }
   },
   "lastUpdated": "2025-02-03T12:00:00Z"
