@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using BusInfo.Exceptions;
+using BusInfo.Extensions;
 using BusInfo.Models;
 using BusInfo.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -19,9 +20,9 @@ namespace BusInfo.Controllers.Api.V2
     [Produces("application/json")]
     [Authorize(AuthenticationSchemes = "Cookies,ApiKey")]
     public class BusInfoController(
+        ILogger<BusInfoController> logger,
         IBusInfoService busInfoService,
         IBusLaneService busLaneService,
-        ILogger<BusInfoController> logger,
         IMemoryCache cache,
         IConfigCatService configCatService) : ControllerBase
     {
@@ -91,12 +92,10 @@ namespace BusInfo.Controllers.Api.V2
             {
                 BusInfoResponse busInfo = await _busInfoService.GetBusInfoAsync();
 
-                Dictionary<string, string> bayServiceMap = busInfo.BusData
-                    .Where(kvp => !string.IsNullOrEmpty(kvp.Value.Bay))
-                    .ToDictionary(
-                        kvp => kvp.Value.Bay!,
-                        kvp => kvp.Key
-                    );
+                // Use the new extension method to handle duplicate bays
+                Dictionary<string, string> bayServiceMap = busInfo.BusData.ToDictionaryWithFirstValue(
+                    x => x.Value.Bay ?? string.Empty,
+                    x => x.Key);
 
                 string cacheKey = MapCacheKeyPrefix + string.Join("_", bayServiceMap.Select(kvp => $"{kvp.Key}:{kvp.Value}"));
 

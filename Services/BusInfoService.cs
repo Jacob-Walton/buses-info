@@ -180,48 +180,43 @@ namespace BusInfo.Services
             {
                 try
                 {
-                    // Fetch and parse the HTML document
                     using HttpResponseMessage response = await client.GetAsync(new Uri(BUS_INFO_URL), cts.Token);
                     response.EnsureSuccessStatusCode();
                     string content = await response.Content.ReadAsStringAsync(cts.Token);
+
                     HtmlDocument doc = new();
                     doc.LoadHtml(content);
 
-                    // Extract bus data from the table
-                    Dictionary<string, BusStatus> busData = doc.DocumentNode
-                        .SelectNodes("//table[@id='grdAll']//tr[td]")
-                        ?.AsParallel()
-                        .Select(static row =>
+                    ConcurrentDictionary<string, BusStatus> busData = new();
+                    HtmlNodeCollection nodes = doc.DocumentNode.SelectNodes("//table[@id='grdAll']//tr[td]");
+
+                    if (nodes != null)
+                    {
+                        Parallel.ForEach(nodes, row =>
                         {
-                            // Extract service number and bay information from each row
                             HtmlNodeCollection cells = row.SelectNodes("td");
-                            return cells?.Count >= 3
-                                ? (new
-                                {
-                                    Service = cells[0].InnerText.Trim(), // Service number
-                                    Bay = Escape(cells[2].InnerText).Trim() // Bay information
-                                })
-                                : null; // Skip invalid rows
-                        })
-                        ?.Where(x => x != null)
-                        ?.ToDictionary(
-                            x => x!.Service,
-                            // Convert bay information into status - "Arrived" if bay is set, "Not arrived" if empty
-                            x => new BusStatus
+                            if (cells?.Count >= 3)
                             {
-                                Status = string.IsNullOrWhiteSpace(x!.Bay) ? "Not arrived" : "Arrived", // Set status to "Not arrived" if bay is empty
-                                Bay = string.IsNullOrWhiteSpace(x.Bay) ? default : x.Bay // Set bay to null if empty (will be omitted in JSON)
-                            }) ?? []; // Default to empty dictionary if no valid rows are found
+                                string service = cells[0].InnerText.Trim();
+                                string bay = Escape(cells[2].InnerText).Trim();
+
+                                busData.TryAdd(service, new BusStatus
+                                {
+                                    Status = string.IsNullOrWhiteSpace(bay) ? "Not arrived" : "Arrived",
+                                    Bay = string.IsNullOrWhiteSpace(bay) ? default : bay
+                                });
+                            }
+                        });
+                    }
 
                     return new BusInfoResponse
                     {
-                        BusData = busData,
+                        BusData = new Dictionary<string, BusStatus>(busData),
                         LastUpdated = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture)
                     };
                 }
                 catch (Exception ex)
                 {
-                    // Retry after a delay if the request fails
                     retryCount++;
                     if (retryCount == maxRetries)
                         throw new InvalidOperationException($"Failed to fetch bus info after {maxRetries} attempts", ex);
@@ -268,104 +263,101 @@ namespace BusInfo.Services
         /// <param name="services">List of bus services to generate predictions for.</param>
         private async Task<BusPredictionResponse> GetBusPredictionDataAsync(List<string> services)
         {
-            BusPredictionResponse response = new();
+            BusPredictionResponse response = new()
+            {
+                Predictions = [] // Initialize dictionary
+            };
+
             if (services.Count == 0 || IsWeekend())
                 return HandleSpecialCases(services, response);
 
             DateTime now = DateTime.UtcNow;
+            int currentDayOfWeek = (int)now.DayOfWeek;
 
-            // First attempt: Get recent data from the last 28 days
-            List<BusArrival> historicalData = await _dbContext.BusArrivals
+            // Get historical data
+            var historicalData = await _dbContext.BusArrivals
                 .Where(ba => services.Contains(ba.Service) &&
-                             ba.ArrivalTime >= now.AddDays(-28) &&
-                             !string.IsNullOrEmpty(ba.Bay))
-                .OrderByDescending(ba => ba.ArrivalTime)
+                            ba.ArrivalTime >= now.AddDays(-28) &&
+                            ba.DayOfWeek == currentDayOfWeek &&
+                            !string.IsNullOrEmpty(ba.Bay))
+                .Select(ba => new { ba.Service, ba.Bay, ba.ArrivalTime })
                 .ToListAsync();
 
-            // Fallback: If no recent data, get the last 1000 records regardless of date
+            // If no recent data, get any data for these services
             if (historicalData.Count == 0)
             {
                 historicalData = await _dbContext.BusArrivals
                     .Where(ba => services.Contains(ba.Service) &&
                                 !string.IsNullOrEmpty(ba.Bay))
-                    .OrderByDescending(ba => ba.ArrivalTime)
+                    .Select(ba => new { ba.Service, ba.Bay, ba.ArrivalTime })
                     .Take(1000)
                     .ToListAsync();
             }
 
             if (historicalData.Count == 0)
-            {
                 return HandleSpecialCases(services, response);
-            }
 
-            // Calculate bay assignment patterns and probabilities
-            Dictionary<string, IEnumerable<(string Bay, double Score)>> servicePatterns = historicalData
-                .GroupBy(h => h.Service)
-                .ToDictionary(
-                    g => g.Key,
-                    g =>
-                    {
-                        // Get top 3 most common bays for each service
-                        IEnumerable<(string Bay, int Count)> bayGroups = g.GroupBy(x => x.Bay)
-                            .OrderByDescending(x => x.Count())
-                            .Take(3)
-                            .Select(bg => (
-                                Bay: bg.Key,
-                                Count: bg.Count()
-                            ));
-
-                        // Calculate probability scores based on historical frequency
-                        int totalArrivals = g.Count();
-                        return bayGroups.Select(bg => (bg.Bay,
-                            Score: (double)bg.Count / totalArrivals
-                        ));
-                    });
-
-            // Build prediction response for each service
             foreach (string service in services)
             {
-                response.Predictions[service] = servicePatterns.TryGetValue(service, out IEnumerable<(string Bay, double Score)>? patterns)
-                    ? new PredictionInfo
+                if (string.IsNullOrEmpty(service)) continue; // Skip null/empty services
+
+                var serviceData = historicalData.Where(h => h.Service == service).ToList();
+                if (serviceData.Count == 0)
+                {
+                    response.Predictions[service] = new PredictionInfo
                     {
-                        // Convert probability scores to percentages
-                        Predictions = new ReadOnlyCollection<BayPrediction>([.. patterns
-                            .Select(p => new BayPrediction
-                            {
-                                Bay = p.Bay,
-                                Probability = (int)Math.Round(p.Score * 100)
-                            })])
-                    }
-                    : new PredictionInfo
-                    {
-                        Predictions = new ReadOnlyCollection<BayPrediction>(
+                        Predictions =
                         [
-                            new() { Bay = "No data for service", Probability = 0 } // No data available for this service
-                        ])
+                            new() { Bay = "No historical data", Probability = 0 }
+                        ]
                     };
+                    continue;
+                }
+
+                List<BayPrediction> bayGroups = [.. serviceData
+                    .GroupBy(x => x.Bay)
+                    .Select(g =>
+                    {
+                        int totalCount = serviceData.Count;
+                        int bayCount = g.Count();
+                        int recentCount = g.Count(x => x.ArrivalTime >= now.AddDays(-7));
+                        double score = (((double)bayCount / totalCount) + ((double)recentCount / Math.Max(1, g.Count()))) / 2;
+                        return new BayPrediction
+                        {
+                            Bay = g.Key ?? "Unknown",
+                            Probability = (int)Math.Round(score * 100)
+                        };
+                    })
+                    .OrderByDescending(x => x.Probability)
+                    .Take(3)];
+
+                // Calculate overall confidence based on probability distribution
+                int overallConfidence = CalculateOverallConfidence(bayGroups);
+
+                response.Predictions[service] = new PredictionInfo
+                {
+                    Predictions = bayGroups,
+                    OverallConfidence = overallConfidence
+                };
             }
 
             return response;
         }
 
-        /// <summary>
-        /// Handles special cases when predictions cannot be made.
-        /// </summary>
-        /// <param name="services">List of bus services.</param>
-        /// <param name="response">Response object to populate.</param>
         private static BusPredictionResponse HandleSpecialCases(List<string> services, BusPredictionResponse response)
         {
-            foreach (string service in services)
+            foreach (string service in services.Where(s => !string.IsNullOrEmpty(s)))
             {
                 response.Predictions[service] = new PredictionInfo
                 {
-                    Predictions = new ReadOnlyCollection<BayPrediction>(
+                    Predictions =
                     [
                         new()
                         {
                             Bay = IsWeekend() ? "No weekend service" : "No historical data",
                             Probability = 0
                         }
-                    ])
+                    ]
                 };
             }
             return response;
@@ -400,6 +392,35 @@ namespace BusInfo.Services
         {
             Dispose(true);
             GC.SuppressFinalize(this);
+        }
+
+        private static int CalculateOverallConfidence(List<BayPrediction> predictions)
+        {
+            if (predictions.Count == 0) return 0;
+            if (predictions.Count == 1) return predictions[0].Probability;
+
+            List<BayPrediction> orderedPredictions = [.. predictions.OrderByDescending(p => p.Probability)];
+            int highestProb = orderedPredictions[0].Probability;
+            int secondProb = orderedPredictions[1].Probability;
+
+            // Both probabilities are high (>70%)
+            if (highestProb >= 70 && secondProb >= 70)
+            {
+                return Math.Max(70, highestProb - 10); // Keep high confidence but slightly reduced
+            }
+
+            // Equal probabilities
+            if (highestProb == secondProb)
+            {
+                return (int)(highestProb * 0.8); // 80% of highest prob when equal
+            }
+
+            // Calculate confidence based on difference
+            int difference = highestProb - secondProb;
+            double ratio = difference / (double)highestProb;
+
+            // More gradual confidence reduction
+            return (int)(highestProb * (0.7 + (ratio * 0.3)));
         }
     }
 
