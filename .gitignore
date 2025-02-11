@@ -6,7 +6,7 @@ wwwroot/js/
 **/obj
 **/Properties
 *.lock
-appsettings*.json
+appsettings-*.json
 secrets.json
 *.sln
 .env
