@@ -1,7 +1,7 @@
 // TODO: Rewrite to accomodate our new API and project structure
 
-import dayjs from 'dayjs';
-import Logger from './modules/logging.js';
+import dayjs from "dayjs";
+import Logger from "./modules/logging.js";
 
 /**
  * @fileoverview JavaScript module for displaying bus information
@@ -35,7 +35,7 @@ const BusInfoModule = (() => {
 			other: "DD/MM HH:mm",
 		},
 		PREFERENCES_ENDPOINT: "/api/accounts/preferences",
-		SECTION_STORAGE_KEY: 'businfo_collapsed_sections',
+		SECTION_STORAGE_KEY: "businfo_collapsed_sections",
 	});
 
 	/**
@@ -61,7 +61,7 @@ const BusInfoModule = (() => {
 		initialized: false,
 		collapsedSections: new Set(),
 		mapDisplayed: false,
-		predictionsDisplayed: false
+		predictionsDisplayed: false,
 	};
 
 	/** @type {Object.<string, HTMLElement>} */
@@ -98,14 +98,14 @@ const BusInfoModule = (() => {
 	function displayBusMap() {
 		if (state.mapDisplayed) return;
 
-		const mapSection = document.createElement('div');
-		mapSection.className = 'bus-section map-section';
+		const mapSection = document.createElement("div");
+		mapSection.className = "bus-section map-section";
 
-		const mapHeader = document.createElement('div');
-		mapHeader.className = 'bus-section-header';
+		const mapHeader = document.createElement("div");
+		mapHeader.className = "bus-section-header";
 
-		const mapContent = document.createElement('div');
-		mapContent.className = 'bus-section-content single-column collapsed';
+		const mapContent = document.createElement("div");
+		mapContent.className = "bus-section-content single-column collapsed";
 
 		mapHeader.innerHTML = `
 			<div class="section-header-content">
@@ -120,40 +120,41 @@ const BusInfoModule = (() => {
 			<div id="busMap"></div>
 		`;
 
-		const map = mapContent.querySelector('#busMap');
+		const map = mapContent.querySelector("#busMap");
 
-
-		fetch('/api/v2/businfo/map')
-			.then(response => response.blob())
-			.then(blob => {
+		fetch("/api/v2/businfo/map")
+			.then((response) => response.blob())
+			.then((blob) => {
 				const url = URL.createObjectURL(blob);
 				map.innerHTML = `<img src="${url}" alt="Bus map" class="bus-map"/>`;
 			})
-			.catch(error => {
-				map.innerHTML = 'Error loading map';
-				console.error('Error loading map:', error);
+			.catch((error) => {
+				map.innerHTML = "Error loading map";
+				console.error("Error loading map:", error);
 			});
 
 		mapSection.appendChild(mapHeader);
 		mapSection.appendChild(mapContent);
 
 		// Append it below the bus info list
-		elements.busInfoList.insertAdjacentElement('afterend', mapSection);
+		elements.busInfoList.insertAdjacentElement("afterend", mapSection);
 
 		// Add map section toggle handling
-		mapHeader.addEventListener('click', () => {
-			mapContent.classList.toggle('collapsed');
-			mapHeader.querySelector('.section-toggle').style.transform =
-				mapContent.classList.contains('collapsed') ? 'rotate(-180deg)' : 'rotate(0)';
+		mapHeader.addEventListener("click", () => {
+			mapContent.classList.toggle("collapsed");
+			mapHeader.querySelector(".section-toggle").style.transform =
+				mapContent.classList.contains("collapsed")
+					? "rotate(-180deg)"
+					: "rotate(0)";
 		});
 
 		// Add keyboard support for accessibility
-		document.addEventListener('keydown', (e) => {
-			if (e.key === 'Enter' || e.key === ' ') {
-				const header = e.target.closest('.bus-section-header');
+		document.addEventListener("keydown", (e) => {
+			if (e.key === "Enter" || e.key === " ") {
+				const header = e.target.closest(".bus-section-header");
 				if (header) {
 					e.preventDefault();
-					const section = header.closest('.bus-section');
+					const section = header.closest(".bus-section");
 					if (section) {
 						toggleSection(section.id);
 					}
@@ -249,10 +250,10 @@ const BusInfoModule = (() => {
 				preferredBuses.length > 0 &&
 				state.preferences.showPreferredRoutesFirst
 			) {
-				const sectionId = 'preferred-routes-section';
-				const preferredSection = document.createElement('div');
+				const sectionId = "preferred-routes-section";
+				const preferredSection = document.createElement("div");
 				preferredSection.id = sectionId;
-				preferredSection.className = 'bus-section preferred-section';
+				preferredSection.className = "bus-section preferred-section";
 
 				preferredSection.innerHTML = `
 					<div class="bus-section-header" role="button" tabindex="0">
@@ -281,10 +282,10 @@ const BusInfoModule = (() => {
 			);
 
 			if (otherBuses.length > 0) {
-				const sectionId = 'all-routes-section';
-				const otherSection = document.createElement('div');
+				const sectionId = "all-routes-section";
+				const otherSection = document.createElement("div");
 				otherSection.id = sectionId;
-				otherSection.className = 'bus-section';
+				otherSection.className = "bus-section";
 
 				otherSection.innerHTML = `
 					<div class="bus-section-header" role="button" tabindex="0">
@@ -316,7 +317,8 @@ const BusInfoModule = (() => {
 
 	// Helper function to render bus cards
 	function renderBusCards(buses) {
-		return buses.sort((a, b) => a[0].localeCompare(b[0]))
+		return buses
+			.sort((a, b) => a[0].localeCompare(b[0]))
 			.map(([number, info]) => {
 				const isPreferred = state.preferences.preferredRoutes.includes(number);
 				const arrivalTime = info.lastArrival;
@@ -330,7 +332,7 @@ const BusInfoModule = (() => {
             </div>
             <div class="bus-number">${escapeHTML(number)}</div>
             <div class="bus-bay">
-              ${info.bay ? `Bay <span class="bus-bay__number">${escapeHTML(info.bay)}</span>` : 'Not arrived'}
+              ${info.bay ? `Bay <span class="bus-bay__number">${escapeHTML(info.bay)}</span>` : "Not arrived"}
             </div>
           </div>
         </div>
@@ -387,12 +389,8 @@ const BusInfoModule = (() => {
 			dateToFormat < new Date(today.getTime() + 24 * 60 * 60 * 1000);
 
 		return isToday
-			? dayjs(dateToFormat).format(
-				CONFIG.TIME_FORMAT.today,
-			)
-			: dayjs(dateToFormat).format(
-				CONFIG.TIME_FORMAT.other,
-			);
+			? dayjs(dateToFormat).format(CONFIG.TIME_FORMAT.today)
+			: dayjs(dateToFormat).format(CONFIG.TIME_FORMAT.other);
 	}
 
 	/**
@@ -438,40 +436,52 @@ const BusInfoModule = (() => {
 		window.addEventListener("focus", fetchBusInfo);
 
 		// Add map section toggle handling
-		const mapHeader = document.querySelectorAll('.map-section .bus-section-header')[1];
-		const mapContent = document.querySelectorAll('.map-section .bus-section-content')[1];
+		const mapHeader = document.querySelectorAll(
+			".map-section .bus-section-header",
+		)[1];
+		const mapContent = document.querySelectorAll(
+			".map-section .bus-section-content",
+		)[1];
 
 		if (mapHeader && mapContent) {
-			mapHeader.addEventListener('click', () => {
-				mapContent.classList.toggle('collapsed');
-				mapHeader.querySelector('.section-toggle').style.transform =
-					mapContent.classList.contains('collapsed') ? 'rotate(-180deg)' : 'rotate(0)';
+			mapHeader.addEventListener("click", () => {
+				mapContent.classList.toggle("collapsed");
+				mapHeader.querySelector(".section-toggle").style.transform =
+					mapContent.classList.contains("collapsed")
+						? "rotate(-180deg)"
+						: "rotate(0)";
 			});
 		}
 
-		const predictionsHeader = document.querySelector('.predictions-section .bus-section-header');
-		const predictionsContent = document.querySelector('.predictions-section .bus-section-content');
+		const predictionsHeader = document.querySelector(
+			".predictions-section .bus-section-header",
+		);
+		const predictionsContent = document.querySelector(
+			".predictions-section .bus-section-content",
+		);
 
 		if (predictionsHeader && predictionsContent) {
-			predictionsHeader.addEventListener('click', () => {
+			predictionsHeader.addEventListener("click", () => {
 				// check we're not clicking in an input
-				const notClickingInInput = !event.target.closest('input');
+				const notClickingInInput = !event.target.closest("input");
 				if (!notClickingInInput) {
-					return
+					return;
 				}
-				
-				predictionsContent.classList.toggle('collapsed');
-				predictionsHeader.querySelector('.section-toggle').style.transform =
-					predictionsContent.classList.contains('collapsed') ? 'rotate(-180deg)' : 'rotate(0)';
+
+				predictionsContent.classList.toggle("collapsed");
+				predictionsHeader.querySelector(".section-toggle").style.transform =
+					predictionsContent.classList.contains("collapsed")
+						? "rotate(-180deg)"
+						: "rotate(0)";
 			});
 		}
 
 		// Add event delegation for section toggling
-		document.addEventListener('click', (e) => {
-			const header = e.target.closest('.bus-section-header');
+		document.addEventListener("click", (e) => {
+			const header = e.target.closest(".bus-section-header");
 			if (header) {
-				const section = header.closest('.bus-section');
-				
+				const section = header.closest(".bus-section");
+
 				if (section) {
 					toggleSection(section.id, event);
 				}
@@ -479,12 +489,12 @@ const BusInfoModule = (() => {
 		});
 
 		// Add keyboard support for accessibility
-		document.addEventListener('keydown', (e) => {
-			if (e.key === 'Enter' || e.key === ' ') {
-				const header = e.target.closest('.bus-section-header');
+		document.addEventListener("keydown", (e) => {
+			if (e.key === "Enter" || e.key === " ") {
+				const header = e.target.closest(".bus-section-header");
 				if (header) {
 					e.preventDefault();
-					const section = header.closest('.bus-section');
+					const section = header.closest(".bus-section");
 					if (section) {
 						toggleSection(section.id);
 					}
@@ -557,7 +567,7 @@ const BusInfoModule = (() => {
 				state.collapsedSections = new Set(JSON.parse(stored));
 			}
 		} catch (error) {
-			Logger.error('Error loading section states', { error: error.message });
+			Logger.error("Error loading section states", { error: error.message });
 		}
 	}
 
@@ -568,10 +578,10 @@ const BusInfoModule = (() => {
 		try {
 			localStorage.setItem(
 				CONFIG.SECTION_STORAGE_KEY,
-				JSON.stringify([...state.collapsedSections])
+				JSON.stringify([...state.collapsedSections]),
 			);
 		} catch (error) {
-			Logger.error('Error saving section states', { error: error.message });
+			Logger.error("Error saving section states", { error: error.message });
 		}
 	}
 
@@ -585,24 +595,24 @@ const BusInfoModule = (() => {
 
 		if (event) {
 			// check it's not an input element
-			const notClickingInInput = !event.target.closest('input');
+			const notClickingInInput = !event.target.closest("input");
 			if (!notClickingInInput) {
-				return
+				return;
 			}
 		}
 
-		const content = section.querySelector('.bus-section-content');
-		const header = section.querySelector('.bus-section-header');
+		const content = section.querySelector(".bus-section-content");
+		const header = section.querySelector(".bus-section-header");
 		const isCollapsed = state.collapsedSections.has(sectionId);
 
 		if (isCollapsed) {
 			state.collapsedSections.delete(sectionId);
 			content.style.maxHeight = `${content.scrollHeight}px`;
-			header.classList.remove('collapsed');
+			header.classList.remove("collapsed");
 		} else {
 			state.collapsedSections.add(sectionId);
-			content.style.maxHeight = '0px';
-			header.classList.add('collapsed');
+			content.style.maxHeight = "0px";
+			header.classList.add("collapsed");
 		}
 
 		saveSectionStates();
@@ -616,16 +626,16 @@ const BusInfoModule = (() => {
 		const section = document.getElementById(sectionId);
 		if (!section) return;
 
-		const content = section.querySelector('.bus-section-content');
-		const header = section.querySelector('.bus-section-header');
+		const content = section.querySelector(".bus-section-content");
+		const header = section.querySelector(".bus-section-header");
 		const isCollapsed = state.collapsedSections.has(sectionId);
 
 		if (isCollapsed) {
-			content.style.maxHeight = '0px';
-			header.classList.add('collapsed');
+			content.style.maxHeight = "0px";
+			header.classList.add("collapsed");
 		} else {
 			content.style.maxHeight = `${content.scrollHeight}px`;
-			header.classList.remove('collapsed');
+			header.classList.remove("collapsed");
 		}
 	}
 
@@ -650,7 +660,10 @@ const BusInfoModule = (() => {
 			clearInterval(state.refreshInterval);
 			clearInterval(state.updateTimeInterval);
 
-			state.refreshInterval = setInterval(fetchBusInfo, CONFIG.REFRESH_INTERVAL);
+			state.refreshInterval = setInterval(
+				fetchBusInfo,
+				CONFIG.REFRESH_INTERVAL,
+			);
 			state.updateTimeInterval = setInterval(updateLastFetchedTime, 1000);
 
 			loadSectionStates();
@@ -686,7 +699,11 @@ const BusInfoModule = (() => {
 				return;
 			}
 			const predictionData = await response.json();
-			if (!predictionData || typeof predictionData !== "object" || !predictionData.predictions) {
+			if (
+				!predictionData ||
+				typeof predictionData !== "object" ||
+				!predictionData.predictions
+			) {
 				throw new Error("Invalid predictions response format");
 			}
 			updatePredictionsDisplay(predictionData);
@@ -697,21 +714,27 @@ const BusInfoModule = (() => {
 
 	// Updated updatePredictionsDisplay with a guard check
 	function updatePredictionsDisplay(predictionData) {
-		if (!predictionData || typeof predictionData !== "object" || !predictionData.predictions) {
+		if (
+			!predictionData ||
+			typeof predictionData !== "object" ||
+			!predictionData.predictions
+		) {
 			Logger.error("Cannot render predictions: Invalid data format");
 			return;
 		}
 		// ...existing code...
-		let predictionsSection = document.querySelector('.predictions-section');
+		let predictionsSection = document.querySelector(".predictions-section");
 		if (!predictionsSection) {
-			predictionsSection = document.createElement('div');
-			predictionsSection.className = 'bus-section map-section predictions-section';
+			predictionsSection = document.createElement("div");
+			predictionsSection.className =
+				"bus-section map-section predictions-section";
 
-			const predictionsHeader = document.createElement('div');
-			predictionsHeader.className = 'bus-section-header';
+			const predictionsHeader = document.createElement("div");
+			predictionsHeader.className = "bus-section-header";
 
-			const predictionsContent = document.createElement('div');
-			predictionsContent.className = 'bus-section-content single-column collapsed';
+			const predictionsContent = document.createElement("div");
+			predictionsContent.className =
+				"bus-section-content single-column collapsed";
 
 			predictionsHeader.innerHTML = `
 				<div class="section-header-content">
@@ -733,34 +756,39 @@ const BusInfoModule = (() => {
 			predictionsSection.appendChild(predictionsContent);
 
 			// Insert after the map section if it exists, otherwise after the bus info list
-			const mapSection = document.querySelector('.map-section');
+			const mapSection = document.querySelector(".map-section");
 			if (mapSection) {
-				mapSection.insertAdjacentElement('afterend', predictionsSection);
+				mapSection.insertAdjacentElement("afterend", predictionsSection);
 			} else {
-				elements.busInfoList.insertAdjacentElement('afterend', predictionsSection);
+				elements.busInfoList.insertAdjacentElement(
+					"afterend",
+					predictionsSection,
+				);
 			}
 
 			// Add predictions section toggle handling
-			predictionsHeader.addEventListener('click', (event) => {
+			predictionsHeader.addEventListener("click", (event) => {
 				// Don't toggle if clicking in the search input
-				if (event.target.closest('.predictions-search')) return;
-				
-				predictionsContent.classList.toggle('collapsed');
-				predictionsHeader.querySelector('.section-toggle').style.transform =
-					predictionsContent.classList.contains('collapsed') ? 'rotate(-180deg)' : 'rotate(0)';
+				if (event.target.closest(".predictions-search")) return;
+
+				predictionsContent.classList.toggle("collapsed");
+				predictionsHeader.querySelector(".section-toggle").style.transform =
+					predictionsContent.classList.contains("collapsed")
+						? "rotate(-180deg)"
+						: "rotate(0)";
 			});
 
 			setupPredictionsSearch();
 		}
 
-		const predictionsList = document.getElementById('predictionsList');
+		const predictionsList = document.getElementById("predictionsList");
 		if (!predictionsList) return;
-		predictionsList.innerHTML = '';
+		predictionsList.innerHTML = "";
 
 		Object.entries(predictionData.predictions).forEach(([busNumber, info]) => {
 			if (info.predictions && info.predictions.length > 0) {
-				const card = document.createElement('div');
-				card.className = 'prediction-card';
+				const card = document.createElement("div");
+				card.className = "prediction-card";
 				card.dataset.busNumber = busNumber.toLowerCase();
 				card.innerHTML = `
 					<div class="prediction-header">
@@ -771,11 +799,15 @@ const BusInfoModule = (() => {
 						</div>
 					</div>
 					<div class="prediction-content">
-						${info.predictions.map(pred => `
+						${info.predictions
+							.map(
+								(pred) => `
 							<div class="predicted-bay">
 								Bay ${pred.bay}
 								<span class="probability">${pred.probability}%</span>
-							</div>`).join('')}
+							</div>`,
+							)
+							.join("")}
 					</div>
 				`;
 				predictionsList.appendChild(card);
@@ -784,16 +816,16 @@ const BusInfoModule = (() => {
 	}
 
 	function setupPredictionsSearch() {
-		const searchInput = document.getElementById('predictionsSearch');
+		const searchInput = document.getElementById("predictionsSearch");
 		if (!searchInput) return;
 
-		searchInput.addEventListener('input', (e) => {
+		searchInput.addEventListener("input", (e) => {
 			const searchTerm = e.target.value.toLowerCase();
-			const cards = document.querySelectorAll('.prediction-card');
+			const cards = document.querySelectorAll(".prediction-card");
 
-			cards.forEach(card => {
+			cards.forEach((card) => {
 				const busNumber = card.dataset.busNumber;
-				card.classList.toggle('hidden', !busNumber.includes(searchTerm));
+				card.classList.toggle("hidden", !busNumber.includes(searchTerm));
 			});
 		});
 	}

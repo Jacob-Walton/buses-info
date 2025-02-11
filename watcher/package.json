@@ -1,32 +1,32 @@
 {
-  "scripts": {
-    "dev": "cross-env NODE_ENV=development gulp",
-    "start": "cross-env NODE_ENV=production gulp"
-  },
-  "dependencies": {
-    "@babel/core": "^7.26.8",
-    "@babel/preset-env": "^7.26.8",
-    "@rollup/plugin-babel": "^6.0.4",
-    "@rollup/plugin-commonjs": "^28.0.2",
-    "@rollup/plugin-node-resolve": "^13.3.0",
-    "autoprefixer": "^10.4.20",
-    "gulp": "^5.0.0",
-    "gulp-clean-css": "^4.3.0",
-    "gulp-javascript-obfuscator": "^1.1.6",
-    "gulp-notify": "^5.0.0",
-    "gulp-plumber": "^1.2.1",
-    "gulp-postcss": "^10.0.0",
-    "gulp-remove-sourcemaps": "^1.0.5",
-    "gulp-sass": "^6.0.0",
-    "gulp-size": "^5.0.0",
-    "gulp-terser": "^2.1.0",
-    "javascript-obfuscator": "^4.1.1",
-    "rollup": "^2.79.2",
-    "sass": "^1.84.0",
-    "vinyl-buffer": "^1.0.1",
-    "vinyl-source-stream": "^2.0.0"
-  },
-  "devDependencies": {
-    "cross-env": "^7.0.3"
-  }
+	"scripts": {
+		"dev": "cross-env NODE_ENV=development gulp",
+		"start": "cross-env NODE_ENV=production gulp"
+	},
+	"dependencies": {
+		"@babel/core": "^7.26.8",
+		"@babel/preset-env": "^7.26.8",
+		"@rollup/plugin-babel": "^6.0.4",
+		"@rollup/plugin-commonjs": "^28.0.2",
+		"@rollup/plugin-node-resolve": "^13.3.0",
+		"autoprefixer": "^10.4.20",
+		"gulp": "^5.0.0",
+		"gulp-clean-css": "^4.3.0",
+		"gulp-javascript-obfuscator": "^1.1.6",
+		"gulp-notify": "^5.0.0",
+		"gulp-plumber": "^1.2.1",
+		"gulp-postcss": "^10.0.0",
+		"gulp-remove-sourcemaps": "^1.0.5",
+		"gulp-sass": "^6.0.0",
+		"gulp-size": "^5.0.0",
+		"gulp-terser": "^2.1.0",
+		"javascript-obfuscator": "^4.1.1",
+		"rollup": "^2.79.2",
+		"sass": "^1.84.0",
+		"vinyl-buffer": "^1.0.1",
+		"vinyl-source-stream": "^2.0.0"
+	},
+	"devDependencies": {
+		"cross-env": "^7.0.3"
+	}
 }
