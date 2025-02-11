@@ -85,12 +85,6 @@ namespace BusInfo
                 ConfigureConfiguration(builder);
                 ConfigureSerilog(builder);
 
-                string? port = Environment.GetEnvironmentVariable("PORT");
-                if (!string.IsNullOrEmpty(port))
-                {
-                    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
-                }
-
                 LoadAndConfigureServices(builder);
 
                 WebApplication app = builder.Build();
@@ -187,8 +181,7 @@ namespace BusInfo
                 .WriteTo.Console(
                     outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}",
                     formatProvider: CultureInfo.InvariantCulture,
-                    theme: AnsiConsoleTheme.Code,
-                    restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning)
+                    theme: AnsiConsoleTheme.Code)
                 .WriteTo.File(new CompactJsonFormatter(),
                               Path.Combine("logs", "log-.ndjson"),
                               fileSizeLimitBytes: 10_000_000,
@@ -259,7 +252,7 @@ namespace BusInfo
             builder.Services.AddHttpClient();
 
             // Configure Authentication
-            // builder.Services.AddScoped<ClaimsRefreshService>();
+            builder.Services.AddScoped<ClaimsRefreshService>();
 
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
@@ -276,18 +269,18 @@ namespace BusInfo
 
                     options.Events = new CookieAuthenticationEvents
                     {
-                        // OnValidatePrincipal = async context =>
-                        // {
-                        //     ClaimsRefreshService claimsRefreshService = context.HttpContext.RequestServices
-                        //         .GetRequiredService<ClaimsRefreshService>();
+                        OnValidatePrincipal = async context =>
+                        {
+                            ClaimsRefreshService claimsRefreshService = context.HttpContext.RequestServices
+                                .GetRequiredService<ClaimsRefreshService>();
 
-                        //     if (context.Principal != null && claimsRefreshService.ShouldRefreshClaims(context.Principal))
-                        //     {
-                        //         ClaimsPrincipal newPrincipal = await claimsRefreshService.RefreshClaimsAsync(context.Principal);
-                        //         context.ReplacePrincipal(newPrincipal);
-                        //         context.ShouldRenew = true;
-                        //     }
-                        // },
+                            if (context.Principal != null && claimsRefreshService.ShouldRefreshClaims(context.Principal))
+                            {
+                                ClaimsPrincipal newPrincipal = await claimsRefreshService.RefreshClaimsAsync(context.Principal);
+                                context.ReplacePrincipal(newPrincipal);
+                                context.ShouldRenew = true;
+                            }
+                        },
                         OnSigningIn = async context =>
                         {
                             if (context.Principal?.Identity is ClaimsIdentity claimsIdentity)
@@ -361,16 +354,16 @@ namespace BusInfo
 
             // Configure Rate Limiting
             builder.Services.AddMemoryCache();
-            // builder.Services.Configure<ClientRateLimitOptions>(config.GetSection("ClientRateLimiting"));
-            // builder.Services.Configure<IpRateLimitOptions>(opt => { });
-            // builder.Services.AddSingleton<IClientPolicyStore, RedisClientPolicyStore>();
-            // builder.Services.AddSingleton<IRateLimitCounterStore, RedisRateLimitCounterStore>();
-            // builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
-            // builder.Services.AddSingleton<IProcessingStrategy, RedisProcessingStrategy>();
+            builder.Services.Configure<ClientRateLimitOptions>(config.GetSection("ClientRateLimiting"));
+            builder.Services.Configure<IpRateLimitOptions>(opt => { });
+            builder.Services.AddSingleton<IClientPolicyStore, RedisClientPolicyStore>();
+            builder.Services.AddSingleton<IRateLimitCounterStore, RedisRateLimitCounterStore>();
+            builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+            builder.Services.AddSingleton<IProcessingStrategy, RedisProcessingStrategy>();
 
             // Add rate limit resolver
-            // builder.Services.AddScoped<IClientResolveContributor, UserIdRateLimitContributor>();
-            // builder.Services.AddScoped<IRequestTrackingService, RequestTrackingService>();
+            builder.Services.AddScoped<IClientResolveContributor, UserIdRateLimitContributor>();
+            builder.Services.AddScoped<IRequestTrackingService, RequestTrackingService>();
 
             // Add background services
             builder.Services.AddHostedService<BusInfoBackgroundService>();
@@ -417,27 +410,27 @@ namespace BusInfo
                 };
             });
 
-            // app.UseClientRateLimiting();
+            app.UseClientRateLimiting();
 
-            // app.Use(async (context, next) =>
-            // {
-            //     if (context.Request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase))
-            //     {
-            //         IRequestTrackingService tracker = context.RequestServices.GetRequiredService<IRequestTrackingService>();
-            //         System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
+            app.Use(async (context, next) =>
+            {
+                if (context.Request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase))
+                {
+                    IRequestTrackingService tracker = context.RequestServices.GetRequiredService<IRequestTrackingService>();
+                    System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
 
-            //         await tracker.IncrementApiRequestCountAsync();
+                    await tracker.IncrementApiRequestCountAsync();
 
-            //         await next();
+                    await next();
 
-            //         sw.Stop();
-            //         await tracker.RecordResponseTimeAsync(sw.Elapsed.TotalMilliseconds);
-            //     }
-            //     else
-            //     {
-            //         await next();
-            //     }
-            // });
+                    sw.Stop();
+                    await tracker.RecordResponseTimeAsync(sw.Elapsed.TotalMilliseconds);
+                }
+                else
+                {
+                    await next();
+                }
+            });
 
             app.MapControllers().RequireAuthorization("ApiPolicy");
             app.MapRazorPages();

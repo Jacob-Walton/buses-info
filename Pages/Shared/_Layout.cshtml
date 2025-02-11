@@ -5,8 +5,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, maximum-scale=1.0, user-scalable=no" />
     <title>@ViewData["Title"] - Bus Info</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <!-- Defer non-critical CSS -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></noscript>
+
     @* Disallow scraping *@
     <meta name="robots" content="noindex, nofollow" />
     <meta name="googlebot" content="noindex, nofollow" />
@@ -18,7 +23,7 @@
     @await RenderSectionAsync("Head", required: false)
 </head>
 
-<body class="@(User.Identity?.IsAuthenticated == true ? "user-authenticated" : "")">
+<body>
     <div id="legalModal" class="legal-modal" style="display: none;">
         <div class="legal-modal-content">
             <div class="legal-modal-header">
@@ -250,7 +255,8 @@
         </footer>
     </div>
 
-    <script src="https://dhfrjz15mb441.cloudfront.net/bus-info/js/site.js"></script>
+    <!-- Defer non-critical scripts -->
+    <script src="~/js/site.js" defer></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 

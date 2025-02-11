@@ -1,1 +1,1143 @@
-function _0x1aee(_0x4e9cfd,_0x5ef7c6){const _0x5f33b1=_0x3cdd();return _0x1aee=function(_0xb4712b,_0x58f282){_0xb4712b=_0xb4712b-0x1d9;let _0x977edd=_0x5f33b1[_0xb4712b];if(_0x1aee['VgHGWj']===undefined){var _0x3cddf5=function(_0x15b138){const _0x131c23='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';let _0x2b67e4='',_0x225bb5='';for(let _0x5c4a86=0x0,_0x5c1858,_0x337300,_0x50b77e=0x0;_0x337300=_0x15b138['charAt'](_0x50b77e++);~_0x337300&&(_0x5c1858=_0x5c4a86%0x4?_0x5c1858*0x40+_0x337300:_0x337300,_0x5c4a86++%0x4)?_0x2b67e4+=String['fromCharCode'](0xff&_0x5c1858>>(-0x2*_0x5c4a86&0x6)):0x0){_0x337300=_0x131c23['indexOf'](_0x337300);}for(let _0x26a0b5=0x0,_0x16f3e9=_0x2b67e4['length'];_0x26a0b5<_0x16f3e9;_0x26a0b5++){_0x225bb5+='%'+('00'+_0x2b67e4['charCodeAt'](_0x26a0b5)['toString'](0x10))['slice'](-0x2);}return decodeURIComponent(_0x225bb5);};_0x1aee['eHPoMW']=_0x3cddf5,_0x4e9cfd=arguments,_0x1aee['VgHGWj']=!![];}const _0x1aee48=_0x5f33b1[0x0],_0x3a58ca=_0xb4712b+_0x1aee48,_0x226d78=_0x4e9cfd[_0x3a58ca];return!_0x226d78?(_0x977edd=_0x1aee['eHPoMW'](_0x977edd),_0x4e9cfd[_0x3a58ca]=_0x977edd):_0x977edd=_0x226d78,_0x977edd;},_0x1aee(_0x4e9cfd,_0x5ef7c6);}(function(_0x496aef,_0x1366d4){const _0x2cb7fa=_0x1aee,_0x4abc82=_0x496aef();while(!![]){try{const _0x53daeb=-parseInt(_0x2cb7fa(0x391))/0x1+parseInt(_0x2cb7fa(0x35b))/0x2+-parseInt(_0x2cb7fa(0x36a))/0x3+-parseInt(_0x2cb7fa(0x3b7))/0x4*(-parseInt(_0x2cb7fa(0x212))/0x5)+parseInt(_0x2cb7fa(0x343))/0x6*(parseInt(_0x2cb7fa(0x3ce))/0x7)+parseInt(_0x2cb7fa(0x3bd))/0x8*(parseInt(_0x2cb7fa(0x373))/0x9)+parseInt(_0x2cb7fa(0x280))/0xa*(parseInt(_0x2cb7fa(0x2dc))/0xb);if(_0x53daeb===_0x1366d4)break;else _0x4abc82['push'](_0x4abc82['shift']());}catch(_0x5784b4){_0x4abc82['push'](_0x4abc82['shift']());}}}(_0x3cdd,0xb6dd1));var businfo=(function(){const _0xf48ddb=_0x1aee,_0x5c4a86=(function(){let _0x26a0b5=!![];return function(_0x16f3e9,_0x15b2f2){const _0x6c1c4a=_0x26a0b5?function(){if(_0x15b2f2){const _0x332e84=_0x15b2f2['apply'](_0x16f3e9,arguments);return _0x15b2f2=null,_0x332e84;}}:function(){};return _0x26a0b5=![],_0x6c1c4a;};}()),_0x5c1858=_0x5c4a86(this,function(){const _0x12aecd=_0x1aee;let _0x4698a3;try{const _0x3b332e=Function(_0x12aecd(0x1fb)+'n\x20(fu'+_0x12aecd(0x3b4)+'n()\x20'+('{}.co'+'nstru'+'ctor('+_0x12aecd(0x30b)+_0x12aecd(0x39b)+'is\x22)('+'\x20)')+');');_0x4698a3=_0x3b332e();}catch(_0xe9ed85){_0x4698a3=window;}const _0x5ae3eb=_0x4698a3['conso'+'le']=_0x4698a3[_0x12aecd(0x2ab)+'le']||{},_0x1c0751=['log',_0x12aecd(0x210),_0x12aecd(0x252),_0x12aecd(0x3a4),'excep'+_0x12aecd(0x3ab),'table','trace'];for(let _0x230525=0x0;_0x230525<_0x1c0751[_0x12aecd(0x1fe)+'h'];_0x230525++){const _0x932e05=_0x5c4a86[_0x12aecd(0x348)+_0x12aecd(0x315)+'r']['proto'+_0x12aecd(0x37a)]['bind'](_0x5c4a86),_0xc3861d=_0x1c0751[_0x230525],_0x16f71a=_0x5ae3eb[_0xc3861d]||_0x932e05;_0x932e05[_0x12aecd(0x270)+_0x12aecd(0x38c)]=_0x5c4a86[_0x12aecd(0x387)](_0x5c4a86),_0x932e05['toStr'+'ing']=_0x16f71a[_0x12aecd(0x358)+_0x12aecd(0x398)][_0x12aecd(0x387)](_0x16f71a),_0x5ae3eb[_0xc3861d]=_0x932e05;}});_0x5c1858();'use strict';const _0x337300=((()=>{const _0x3394a7=_0x1aee,_0x277398=Object[_0x3394a7(0x327)+'e']({'TRACE':0x0,'DEBUG':0x1,'INFO':0x2,'WARN':0x3,'ERROR':0x4,'FATAL':0x5}),_0x26d999=Object[_0x3394a7(0x327)+'e']({'TRACE':'color'+_0x3394a7(0x37f)+'A9A9','DEBUG':_0x3394a7(0x2ad)+_0x3394a7(0x2b1)+_0x3394a7(0x303),'INFO':_0x3394a7(0x2ad)+_0x3394a7(0x22d)+'8B57','WARN':'color'+_0x3394a7(0x1dd)+_0x3394a7(0x33a),'ERROR':'color'+_0x3394a7(0x32d)+_0x3394a7(0x20f),'FATAL':_0x3394a7(0x2ad)+_0x3394a7(0x2ea)+_0x3394a7(0x35f)+'\x20font'+_0x3394a7(0x27c)+_0x3394a7(0x3d0)+'old'}),_0x282044={'MIN_LOG_LEVEL':_0x277398[_0x3394a7(0x341)],'MAX_CONSOLE_LOGS':0x3e8,'TRACE_ENABLED':!0x1,'PERFORMANCE_LOGGING':!0x1,'GROUP_LOGS':!0x0};let _0x190e87=0x0;const _0x5e152b=new Map();function _0x4229a3(_0x40a237,_0x529446,_0x3308db){!function(_0x14d4b1,_0x5e5599,_0x18c550){const _0x169fd0=_0x1aee;new Date()['toISO'+_0x169fd0(0x2d6)+'g'](),_0x18c550&&JSON['strin'+_0x169fd0(0x236)](_0x18c550,null,0x2);}(_0x40a237,_0x529446,_0x3308db),!function(_0x403d1d){const _0x5c5a15=_0x1aee;_0x403d1d>=_0x282044['MIN_L'+_0x5c5a15(0x231)+'VEL']&&(_0x403d1d===_0x277398[_0x5c5a15(0x2c7)]||_0x403d1d===_0x277398['DEBUG']||_0x403d1d===_0x277398[_0x5c5a15(0x227)]||_0x277398['WARN'],_0x26d999[Object[_0x5c5a15(0x2a8)](_0x277398)[_0x403d1d]],_0x190e87++);}(_0x40a237);}return(function(){const _0x510399=_0x3394a7,_0x1b61ca=[_0x510399(0x325)+_0x510399(0x3d2)+_0x510399(0x304)+'pple-'+_0x510399(0x293)+_0x510399(0x2e1)+'inkMa'+'cSyst'+'emFon'+_0x510399(0x335)+_0x510399(0x261)+'UI\x27,\x20'+_0x510399(0x306)+'o,\x20\x27H'+_0x510399(0x338)+_0x510399(0x317)+_0x510399(0x2cb)+'\x20Aria'+_0x510399(0x34c)+_0x510399(0x2f9)+'rif',_0x510399(0x24c)+_0x510399(0x2f8)+_0x510399(0x333)+'5','paddi'+_0x510399(0x375)+_0x510399(0x3bf)]['join'](';');[_0x510399(0x3c4)+'round'+_0x510399(0x26f)+_0x510399(0x2ac)+'84430',_0x510399(0x2ad)+':\x20#ff'+'ffff',_0x510399(0x325)+_0x510399(0x1e0)+'\x2018px','font-'+_0x510399(0x24d)+'t:\x20bo'+'ld',_0x1b61ca][_0x510399(0x26b)](';'),[_0x510399(0x3c4)+'round'+_0x510399(0x26f)+_0x510399(0x2ff)+'3253c','color'+_0x510399(0x209)+_0x510399(0x3a7),_0x510399(0x325)+_0x510399(0x1e0)+_0x510399(0x240),'font-'+'weigh'+'t:\x20bo'+'ld',_0x1b61ca]['join'](';'),[_0x510399(0x3c4)+_0x510399(0x258)+'-colo'+_0x510399(0x2ff)+'3253c',_0x510399(0x2ad)+':\x20#ff'+_0x510399(0x3a7),'font-'+_0x510399(0x1e0)+'\x2014px',_0x510399(0x325)+'weigh'+_0x510399(0x22b)+_0x510399(0x305),_0x1b61ca][_0x510399(0x26b)](';');}()),{'setConfig':_0x151276=>{const _0x360462=_0x3394a7;Object[_0x360462(0x384)+'n'](_0x282044,_0x151276);},'trace':(_0x15e355,_0x268133)=>{const _0x10fa1d=_0x3394a7;_0x282044['TRACE'+_0x10fa1d(0x1f6)+_0x10fa1d(0x38e)]&&_0x4229a3(_0x277398[_0x10fa1d(0x2c7)],_0x15e355,_0x268133);},'debug':(_0x49223d,_0x41a9f0)=>_0x4229a3(_0x277398[_0x3394a7(0x1e2)],_0x49223d,_0x41a9f0),'info':(_0x3f36f5,_0x21a7f1)=>_0x4229a3(_0x277398[_0x3394a7(0x227)],_0x3f36f5,_0x21a7f1),'warn':(_0x1adb23,_0xff04cd)=>_0x4229a3(_0x277398['WARN'],_0x1adb23,_0xff04cd),'error':(_0x4f3caa,_0x36ba4a)=>_0x4229a3(_0x277398[_0x3394a7(0x232)],_0x4f3caa,_0x36ba4a),'fatal':(_0x2206e1,_0x4b123e)=>_0x4229a3(_0x277398[_0x3394a7(0x23d)],_0x2206e1,_0x4b123e),'startPerformanceMark':function(_0x3a7496){const _0x520c0a=_0x3394a7;if(_0x282044[_0x520c0a(0x2a6)+'RMANC'+'E_LOG'+_0x520c0a(0x1de)]){const _0x25e437=performance['now']();_0x5e152b['set'](_0x3a7496,_0x25e437);}},'endPerformanceMark':function(_0x2fcd73){const _0x359d3b=_0x3394a7;if(_0x282044['PERFO'+_0x359d3b(0x28d)+_0x359d3b(0x388)+_0x359d3b(0x1de)]&&_0x5e152b[_0x359d3b(0x301)](_0x2fcd73)){const _0x5dc9e3=performance['now']()-_0x5e152b['get'](_0x2fcd73);_0x5e152b[_0x359d3b(0x37b)+'e'](_0x2fcd73),_0x4229a3(_0x277398['DEBUG'],'Perfo'+'rmanc'+'e:\x20'+_0x2fcd73+('\x20took'+'\x20')+_0x5dc9e3['toFix'+'ed'](0x2)+'ms');}},'getLogCount':()=>_0x190e87};})()),_0x50b77e=((()=>{const _0x5ee613=_0x1aee,_0x368416=Object[_0x5ee613(0x327)+'e']({'API_ENDPOINT':'/api/'+'v2/bu'+'sinfo','REFRESH_INTERVAL':0x7530,'ERROR_DISPLAY_DURATION':0x1388,'SEARCH_DEBOUNCE_DELAY':0x12c,'SELECTORS':Object['freez'+'e']({'busInfoList':_0x5ee613(0x31f)+'nfoLi'+'st','lastUpdated':'#last'+'Updat'+'ed','error':_0x5ee613(0x355)+'r','loadingIndicator':_0x5ee613(0x23c)+_0x5ee613(0x276)+'dicat'+'or','searchInput':'#sear'+'chInp'+'ut'}),'TIME_FORMAT':{'today':'HH:mm','other':_0x5ee613(0x2ba)+'\x20HH:m'+'m'},'PREFERENCES_ENDPOINT':_0x5ee613(0x245)+_0x5ee613(0x389)+'nts/p'+_0x5ee613(0x29e)+'ences','SECTION_STORAGE_KEY':'busin'+_0x5ee613(0x288)+_0x5ee613(0x3ae)+_0x5ee613(0x24e)+'ction'+'s'}),_0x1920d3={'isLoading':!0x1,'lastFetchTime':null,'errorTimeout':null,'busData':null,'preferences':{'preferredRoutes':[],'showPreferredRoutesFirst':!0x0},'refreshInterval':null,'updateTimeInterval':null,'initialized':!0x1,'collapsedSections':new Set(_0xb167c()||[]),'mapDisplayed':!0x1,'predictionsDisplayed':!0x1},_0x965783={};function _0x2a6bcf(_0x5131ed){const _0xeb5aed=_0x5ee613;_0x1920d3['isLoa'+'ding']=_0x5131ed,_0x965783['loadi'+_0xeb5aed(0x374)+'icato'+'r']['style']['displ'+'ay']=_0x5131ed?'flex':_0xeb5aed(0x35a),_0x337300[_0xeb5aed(0x200)]('Loadi'+_0xeb5aed(0x3a5)+_0xeb5aed(0x22f)+_0xeb5aed(0x20a)+(_0x5131ed?'shown':'hidde'+'n'));}function _0x2a6bcf(_0x3e67dd){const _0x56194c=_0x5ee613;_0x1920d3['isLoa'+_0x56194c(0x2e3)]=_0x3e67dd,_0x965783[_0x56194c(0x390)+'ngInd'+_0x56194c(0x334)+'r'][_0x56194c(0x352)][_0x56194c(0x2dd)+'ay']=_0x3e67dd?_0x56194c(0x39a):'none',_0x337300['debug']('Loadi'+_0x56194c(0x3a5)+'dicat'+'or\x20'+(_0x3e67dd?_0x56194c(0x1e8):_0x56194c(0x2c8)+'n'));}async function _0x20765d(){const _0x2781f3=_0x5ee613;_0x337300['info']('Fetch'+'ing\x20b'+_0x2781f3(0x367)+'forma'+_0x2781f3(0x3ab)),_0x337300['start'+'Perfo'+_0x2781f3(0x2e2)+_0x2781f3(0x251)](_0x2781f3(0x2f7)+_0x2781f3(0x2bc)+'fo'),_0x2a6bcf(!0x0);try{const _0x508293=await fetch(_0x368416['API_E'+_0x2781f3(0x39c)+'NT']);if(!_0x508293['ok'])throw new Error('Faile'+_0x2781f3(0x249)+_0x2781f3(0x2f7)+'\x20bus\x20'+'infor'+'matio'+'n:\x20'+_0x508293[_0x2781f3(0x2b6)+'s']+'\x20'+_0x508293['statu'+'sText']);const _0x437939=await _0x508293[_0x2781f3(0x33d)]();if(!_0x437939||'objec'+'t'!=typeof _0x437939||!_0x437939[_0x2781f3(0x3c9)+'ta'])throw new Error(_0x2781f3(0x22a)+'id\x20AP'+'I\x20res'+'ponse');_0x1920d3[_0x2781f3(0x3c9)+'ta']=_0x437939[_0x2781f3(0x3c9)+'ta'],_0x1add07(),(function(){const _0x1b7c7c=_0x2781f3;if(_0x1920d3['mapDi'+_0x1b7c7c(0x3d1)+'ed'])return;const _0x31e229=document['creat'+'eElem'+'ent']('div');_0x31e229[_0x1b7c7c(0x2e7)+_0x1b7c7c(0x332)]='bus-s'+'ectio'+'n\x20map'+_0x1b7c7c(0x2bf)+'ion';const _0x20f87a=document[_0x1b7c7c(0x27b)+'eElem'+'ent'](_0x1b7c7c(0x378));_0x20f87a['class'+'Name']=_0x1b7c7c(0x285)+'ectio'+_0x1b7c7c(0x346)+'der';const _0x549d2b=document['creat'+'eElem'+_0x1b7c7c(0x202)](_0x1b7c7c(0x378));_0x549d2b['class'+'Name']=_0x1b7c7c(0x285)+'ectio'+_0x1b7c7c(0x265)+_0x1b7c7c(0x33c)+_0x1b7c7c(0x21d)+_0x1b7c7c(0x3d3)+_0x1b7c7c(0x362)+_0x1b7c7c(0x27a)+_0x1b7c7c(0x24a),_0x20f87a[_0x1b7c7c(0x2e6)+_0x1b7c7c(0x300)]=_0x1b7c7c(0x3c5)+_0x1b7c7c(0x38a)+'lass='+_0x1b7c7c(0x322)+_0x1b7c7c(0x25e)+_0x1b7c7c(0x1e9)+_0x1b7c7c(0x218)+'ent\x22>'+'\x0a\x09\x09\x09\x09'+_0x1b7c7c(0x347)+_0x1b7c7c(0x1ef)+_0x1b7c7c(0x1ff)+_0x1b7c7c(0x2a9)+_0x1b7c7c(0x223)+_0x1b7c7c(0x2a9)+_0x1b7c7c(0x27f)+'on\x20cl'+'ass=\x22'+'secti'+_0x1b7c7c(0x27d)+_0x1b7c7c(0x2e0)+'\x20aria'+'-labe'+_0x1b7c7c(0x28e)+_0x1b7c7c(0x36d)+'secti'+'on\x22>\x0a'+_0x1b7c7c(0x3d6)+_0x1b7c7c(0x29c)+_0x1b7c7c(0x1f3)+'as\x20fa'+'-chev'+'ron-u'+_0x1b7c7c(0x3a6)+'i>\x0a\x09\x09'+_0x1b7c7c(0x1e6)+'tton>'+'\x0a\x09\x09',_0x549d2b[_0x1b7c7c(0x2e6)+'HTML']=_0x1b7c7c(0x3c5)+_0x1b7c7c(0x297)+_0x1b7c7c(0x242)+'sMap\x22'+'></di'+'v>\x0a\x09\x09';const _0xe8e344=_0x549d2b['query'+_0x1b7c7c(0x392)+_0x1b7c7c(0x266)]('#busM'+'ap');fetch(_0x368416['API_E'+'NDPOI'+'NT']+_0x1b7c7c(0x254))[_0x1b7c7c(0x2b9)](_0x3b6879=>_0x3b6879[_0x1b7c7c(0x369)]())['then'](_0x476487=>{const _0x540255=_0x1b7c7c,_0x34643e=URL[_0x540255(0x27b)+_0x540255(0x24f)+_0x540255(0x250)](_0x476487);_0xe8e344['inner'+_0x540255(0x300)]='<img\x20'+'src=\x22'+_0x34643e+('\x22\x20alt'+_0x540255(0x296)+_0x540255(0x377)+'\x20clas'+'s=\x22bu'+'s-map'+'\x22>');})[_0x1b7c7c(0x1fa)](_0x2f2654=>{const _0x5e3009=_0x1b7c7c;_0xe8e344['inner'+_0x5e3009(0x300)]='<p\x20cl'+'ass=\x22'+_0x5e3009(0x3a4)+'\x22>Fai'+'led\x20t'+_0x5e3009(0x396)+'d\x20bus'+_0x5e3009(0x361)+_0x5e3009(0x329),_0x337300[_0x5e3009(0x3a4)]('Faile'+_0x5e3009(0x249)+'load\x20'+_0x5e3009(0x394)+'ap',_0x2f2654);}),_0x31e229[_0x1b7c7c(0x34b)+_0x1b7c7c(0x385)+'d'](_0x20f87a),_0x31e229['appen'+_0x1b7c7c(0x385)+'d'](_0x549d2b),_0x965783[_0x1b7c7c(0x2a4)+_0x1b7c7c(0x3b1)+'t'][_0x1b7c7c(0x294)+_0x1b7c7c(0x2aa)+'centE'+'lemen'+'t']('after'+'end',_0x31e229),_0x20f87a[_0x1b7c7c(0x2ec)+'entLi'+_0x1b7c7c(0x345)+'r'](_0x1b7c7c(0x2d7),()=>{const _0x46968c=_0x1b7c7c;_0x549d2b['class'+'List']['toggl'+'e']('colla'+'psed'),_0x20f87a[_0x46968c(0x2a1)+'Selec'+'tor']('.sect'+_0x46968c(0x2a3)+_0x46968c(0x29d))['style'][_0x46968c(0x30e)+'form']=_0x549d2b['class'+'List']['conta'+_0x46968c(0x299)]('colla'+'psed')?'rotat'+'e(0)':'rotat'+'e(180'+'deg)',_0x234c40();}),document['addEv'+_0x1b7c7c(0x366)+'stene'+'r']('keydo'+'wn',_0x70d96b=>{const _0x5433e9=_0x1b7c7c;if(_0x5433e9(0x33b)===_0x70d96b['key']||'\x20'===_0x70d96b['key']){const _0x39262a=_0x70d96b[_0x5433e9(0x2be)+'t'][_0x5433e9(0x1e1)+'st'](_0x5433e9(0x2f6)+_0x5433e9(0x3ca)+_0x5433e9(0x31d)+_0x5433e9(0x331));if(_0x39262a){_0x70d96b['preve'+'ntDef'+_0x5433e9(0x38f)]();const _0x4d9cd6=_0x39262a[_0x5433e9(0x1e1)+'st'](_0x5433e9(0x2f6)+_0x5433e9(0x3ca)+'on');_0x4d9cd6&&_0x36ce04(_0x4d9cd6['id']);}}}),_0x1920d3['mapDi'+'splay'+'ed']=!0x0;}()),_0x1920d3[_0x2781f3(0x26e)+_0x2781f3(0x2ed)+_0x2781f3(0x2d5)]=new Date(),_0x1370d5(),(async function(){const _0x4c917e=_0x2781f3;try{const _0x28e72b=await fetch(_0x368416[_0x4c917e(0x3ad)+'NDPOI'+'NT']+('/pred'+_0x4c917e(0x32b)+'ns'));if(0x1ad===_0x28e72b[_0x4c917e(0x2b6)+'s'])return void _0x337300['warn'](_0x4c917e(0x35e)+_0x4c917e(0x3a8)+'eques'+'ts\x20fo'+'r\x20pre'+_0x4c917e(0x3a9)+'ons');if(!_0x28e72b['ok'])throw new Error(_0x4c917e(0x1d9)+_0x4c917e(0x249)+'fetch'+_0x4c917e(0x278)+_0x4c917e(0x380)+'ction'+'s:\x20'+_0x28e72b['statu'+'s']+'\x20'+_0x28e72b['statu'+_0x4c917e(0x39f)]);const _0x3103f2=await _0x28e72b['json']();if(!_0x3103f2||_0x4c917e(0x21a)+'t'!=typeof _0x3103f2||!_0x3103f2['predi'+'ction'+'s'])throw new Error(_0x4c917e(0x22a)+'id\x20AP'+'I\x20res'+'ponse');!function(_0x11f17f){const _0x4ab67f=_0x4c917e;if(!_0x11f17f||_0x4ab67f(0x21a)+'t'!=typeof _0x11f17f||!_0x11f17f['predi'+_0x4ab67f(0x37d)+'s'])return void _0x337300[_0x4ab67f(0x210)](_0x4ab67f(0x23b)+_0x4ab67f(0x2fb)+_0x4ab67f(0x211)+'to\x20di'+_0x4ab67f(0x3d1));document['query'+_0x4ab67f(0x392)+_0x4ab67f(0x266)]('.pred'+'ictio'+'ns-se'+_0x4ab67f(0x37d))||(function(){const _0x2f5f33=_0x4ab67f,_0x38767c=document['creat'+_0x2f5f33(0x2c3)+_0x2f5f33(0x202)](_0x2f5f33(0x378));if(_0x38767c)return;_0x38767c=document[_0x2f5f33(0x27b)+_0x2f5f33(0x2c3)+_0x2f5f33(0x202)](_0x2f5f33(0x378)),_0x38767c['class'+'Name']='bus-s'+'ectio'+'n\x20map'+'-sect'+'ion\x20p'+_0x2f5f33(0x3b8)+'tions'+'-sect'+_0x2f5f33(0x2d8);const _0x21b9d6=document[_0x2f5f33(0x27b)+'eElem'+_0x2f5f33(0x202)]('div');_0x21b9d6[_0x2f5f33(0x2e7)+_0x2f5f33(0x332)]='bus-s'+'ectio'+'n-hea'+_0x2f5f33(0x3c2);const _0x56cbfd=document['creat'+_0x2f5f33(0x2c3)+'ent'](_0x2f5f33(0x378));_0x56cbfd[_0x2f5f33(0x2e7)+'Name']='bus-s'+_0x2f5f33(0x221)+_0x2f5f33(0x265)+_0x2f5f33(0x33c)+_0x2f5f33(0x21d)+_0x2f5f33(0x3d3)+_0x2f5f33(0x362)+_0x2f5f33(0x27a)+_0x2f5f33(0x24a),_0x21b9d6['inner'+'HTML']='\x0a\x09\x09\x09\x09'+_0x2f5f33(0x23a)+'class'+'=\x22sec'+_0x2f5f33(0x230)+'heade'+'r-con'+'tent\x22'+'>\x0a\x09\x09\x09'+'\x09\x09<h3'+'>Bay\x20'+'Predi'+_0x2f5f33(0x37d)+_0x2f5f33(0x399)+'>\x0a\x09\x09\x09'+_0x2f5f33(0x2a2)+'v\x20cla'+_0x2f5f33(0x3c1)+_0x2f5f33(0x3b8)+_0x2f5f33(0x311)+_0x2f5f33(0x3b9)+_0x2f5f33(0x1f4)+_0x2f5f33(0x342)+_0x2f5f33(0x36c)+_0x2f5f33(0x307)+'pe=\x22t'+'ext\x22\x20'+_0x2f5f33(0x1f9)+_0x2f5f33(0x3b8)+_0x2f5f33(0x311)+'Searc'+'h\x22\x20pl'+_0x2f5f33(0x2e4)+'lder='+_0x2f5f33(0x1f7)+'ch\x20bu'+_0x2f5f33(0x287)+_0x2f5f33(0x2cc)+_0x2f5f33(0x35d)+_0x2f5f33(0x3d6)+'/div>'+'\x0a\x09\x09\x09\x09'+'</div'+_0x2f5f33(0x2a9)+_0x2f5f33(0x33e)+'ton\x20c'+'lass='+'\x22sect'+_0x2f5f33(0x2a3)+_0x2f5f33(0x29d)+_0x2f5f33(0x3c3)+_0x2f5f33(0x3be)+'el=\x22T'+_0x2f5f33(0x29d)+'\x20sect'+_0x2f5f33(0x222)+'\x0a\x09\x09\x09\x09'+_0x2f5f33(0x321)+_0x2f5f33(0x320)+'\x22fas\x20'+'fa-ch'+_0x2f5f33(0x208)+_0x2f5f33(0x26d)+'\x22></i'+_0x2f5f33(0x2a9)+_0x2f5f33(0x1e6)+_0x2f5f33(0x25c)+_0x2f5f33(0x340),_0x56cbfd[_0x2f5f33(0x2e6)+_0x2f5f33(0x300)]='\x0a\x09\x09\x09\x09'+_0x2f5f33(0x23a)+_0x2f5f33(0x1f9)+'redic'+_0x2f5f33(0x311)+'List\x22'+'\x20clas'+_0x2f5f33(0x3c0)+_0x2f5f33(0x2fb)+_0x2f5f33(0x206)+'list\x22'+_0x2f5f33(0x2d4)+'v>\x0a\x09\x09'+'\x09',_0x38767c[_0x2f5f33(0x34b)+'dChil'+'d'](_0x21b9d6),_0x38767c['appen'+_0x2f5f33(0x385)+'d'](_0x56cbfd);const _0x46374a=document[_0x2f5f33(0x2a1)+'Selec'+'tor']('.map-'+'secti'+'on');_0x46374a?_0x46374a['inser'+'tAdja'+'centE'+'lemen'+'t']('after'+_0x2f5f33(0x269),_0x38767c):_0x965783[_0x2f5f33(0x2a4)+_0x2f5f33(0x3b1)+'t']['inser'+'tAdja'+_0x2f5f33(0x27e)+'lemen'+'t']('after'+_0x2f5f33(0x269),_0x38767c),(_0x21b9d6[_0x2f5f33(0x2ec)+_0x2f5f33(0x366)+_0x2f5f33(0x345)+'r'](_0x2f5f33(0x2d7),_0xab3c5e=>{const _0x32f2b7=_0x2f5f33;_0xab3c5e[_0x32f2b7(0x2be)+'t'][_0x32f2b7(0x1e1)+'st']('.pred'+_0x32f2b7(0x32b)+_0x32f2b7(0x2f9)+'arch')||(_0x56cbfd[_0x32f2b7(0x2e7)+'List'][_0x32f2b7(0x241)+'e']('colla'+'psed'),_0x21b9d6[_0x32f2b7(0x2a1)+'Selec'+_0x32f2b7(0x266)](_0x32f2b7(0x2f2)+'ion-t'+'oggle')['style']['trans'+_0x32f2b7(0x29f)]=_0x56cbfd['class'+'List'][_0x32f2b7(0x3a0)+_0x32f2b7(0x299)](_0x32f2b7(0x292)+_0x32f2b7(0x371))?'rotat'+_0x32f2b7(0x277)+_0x32f2b7(0x2fc):_0x32f2b7(0x260)+_0x32f2b7(0x359),_0x234c40());}),(function(){const _0x1c1e20=_0x2f5f33,_0x2b29c9=document['getEl'+_0x1c1e20(0x3b0)+_0x1c1e20(0x30f)](_0x1c1e20(0x380)+'ction'+'sSear'+'ch');if(!_0x2b29c9)return;_0x2b29c9['addEv'+_0x1c1e20(0x366)+_0x1c1e20(0x345)+'r']('input',_0x398574=>{const _0x48d159=_0x1c1e20,_0x50b950=_0x398574['targe'+'t'][_0x48d159(0x28f)]['toLow'+'erCas'+'e']();document['query'+'Selec'+_0x48d159(0x2e5)+'l'](_0x48d159(0x2c6)+_0x48d159(0x32b)+'n-car'+'d')[_0x48d159(0x216)+'ch'](_0x365995=>{const _0x2b2158=_0x48d159,_0x68c6f5=_0x365995[_0x2b2158(0x255)+'et'][_0x2b2158(0x2af)+'mber'];_0x365995['class'+'List'][_0x2b2158(0x241)+'e']('hidde'+'n',!_0x68c6f5[_0x2b2158(0x2d9)+'des'](_0x50b950));});});}()));}());const _0x529383=document['getEl'+'ement'+'ById'](_0x4ab67f(0x380)+_0x4ab67f(0x37d)+_0x4ab67f(0x248));if(!_0x529383)return;_0x529383['inner'+_0x4ab67f(0x300)]='';const _0x2649a6=document['creat'+'eDocu'+_0x4ab67f(0x228)+_0x4ab67f(0x3a1)+'nt'](),_0x2c7a72=Object['entri'+'es'](_0x11f17f);for(const [_0x341fb1,_0x404014]of _0x2c7a72)if(_0x404014['predi'+'ction'+'s']&&_0x404014['predi'+_0x4ab67f(0x37d)+'s'][_0x4ab67f(0x1fe)+'h']>0x0){const _0x7baba5=document[_0x4ab67f(0x27b)+_0x4ab67f(0x2c3)+_0x4ab67f(0x202)](_0x4ab67f(0x378));_0x7baba5['class'+_0x4ab67f(0x332)]='predi'+'ction'+'-card',_0x7baba5[_0x4ab67f(0x255)+'et'][_0x4ab67f(0x2af)+'mber']=_0x341fb1['toLow'+_0x4ab67f(0x309)+'e'](),_0x7baba5[_0x4ab67f(0x2e6)+_0x4ab67f(0x300)]=_0x4ab67f(0x2f1)+_0x4ab67f(0x2a7)+_0x4ab67f(0x282)+'s=\x22pr'+'edict'+'ion-h'+_0x4ab67f(0x1e9)+'\x22>\x0a\x09\x09'+'\x09\x09\x09\x09<'+_0x4ab67f(0x38a)+_0x4ab67f(0x320)+'\x22bus-'+'numbe'+_0x4ab67f(0x20b)+_0x4e130b(_0x341fb1)+('</div'+_0x4ab67f(0x2a9)+'\x09\x09\x09<d'+'iv\x20cl'+'ass=\x22'+_0x4ab67f(0x397)+_0x4ab67f(0x23f)+'\x22>\x0a\x09\x09'+_0x4ab67f(0x342)+_0x4ab67f(0x1e7)+_0x4ab67f(0x2da)+'fas\x20f'+_0x4ab67f(0x1f1)+_0x4ab67f(0x3bb)+_0x4ab67f(0x357)+_0x4ab67f(0x204)+_0x4ab67f(0x342)+'\x09')+_0x404014[_0x4ab67f(0x26a)+_0x4ab67f(0x3d4)+_0x4ab67f(0x2a5)+'ce']+(_0x4ab67f(0x314)+_0x4ab67f(0x2a5)+'ce\x0a\x09\x09'+'\x09\x09\x09\x09<'+_0x4ab67f(0x350)+'\x0a\x09\x09\x09\x09'+_0x4ab67f(0x234)+_0x4ab67f(0x35c)+'\x09\x09\x09<d'+'iv\x20cl'+'ass=\x22'+'predi'+'ction'+_0x4ab67f(0x218)+_0x4ab67f(0x25f)+_0x4ab67f(0x2f1)+'\x09\x09')+_0x404014['predi'+_0x4ab67f(0x37d)+'s'][_0x4ab67f(0x207)](_0x238c6b=>'\x0a\x09\x09\x09\x09'+_0x4ab67f(0x3d6)+'div\x20c'+_0x4ab67f(0x320)+'\x22pred'+_0x4ab67f(0x376)+_0x4ab67f(0x360)+'>\x0a\x09\x09\x09'+_0x4ab67f(0x342)+'\x09'+('No\x20hi'+_0x4ab67f(0x3b5)+_0x4ab67f(0x2c1)+'ata'===_0x238c6b['bay']?_0x4ab67f(0x271)+_0x4ab67f(0x3b5)+_0x4ab67f(0x2c1)+'ata':_0x4ab67f(0x337)+_0x238c6b[_0x4ab67f(0x3d5)])+('\x0a\x09\x09\x09\x09'+'\x09\x09\x09\x09\x09'+'<span'+_0x4ab67f(0x282)+_0x4ab67f(0x3c0)+_0x4ab67f(0x363)+'lity\x22'+'>')+_0x238c6b['proba'+_0x4ab67f(0x386)+'y']+('%</sp'+'an>\x0a\x09'+'\x09\x09\x09\x09\x09'+'\x09\x09</d'+'iv>\x0a\x09'+'\x09\x09\x09\x09\x09'+'\x09\x09'))[_0x4ab67f(0x26b)]('')+(_0x4ab67f(0x2f1)+_0x4ab67f(0x234)+'v>\x0a\x09\x09'+'\x09\x09'),_0x2649a6[_0x4ab67f(0x34b)+'dChil'+'d'](_0x7baba5),_0x529383['appen'+_0x4ab67f(0x385)+'d'](_0x2649a6);}}(_0x3103f2['predi'+_0x4c917e(0x37d)+'s']);}catch(_0x5e7c4e){_0x337300['error']('Error'+_0x4c917e(0x2b8)+'hing\x20'+'bus\x20p'+'redic'+_0x4c917e(0x311),{'error':_0x5e7c4e[_0x4c917e(0x2c9)+'ge']});}}()),_0x337300['debug']('Bus\x20i'+'nform'+'ation'+'\x20fetc'+'hed\x20s'+'ucces'+'sfull'+'y',{'busCount':Object[_0x2781f3(0x2a8)](_0x1920d3['busDa'+'ta'])['lengt'+'h']});}catch(_0x5b297b){_0x337300['error'](_0x2781f3(0x2db)+'\x20fetc'+_0x2781f3(0x20d)+_0x2781f3(0x29a)+_0x2781f3(0x1fd)+'ation',{'error':_0x5b297b['messa'+'ge']}),_0x3e5b00('Unabl'+_0x2781f3(0x33f)+'fetch'+'\x20bus\x20'+'infor'+'matio'+'n.\x20Pl'+'ease\x20'+_0x2781f3(0x2b0)+'gain.');}finally{_0x2a6bcf(!0x1),_0x337300[_0x2781f3(0x39e)+'rform'+_0x2781f3(0x21c)+_0x2781f3(0x368)]('fetch'+_0x2781f3(0x2bc)+'fo');}}async function _0x4d7284(){const _0x2a218f=_0x5ee613;try{const _0x4aac52=await fetch(_0x368416[_0x2a218f(0x215)+_0x2a218f(0x224)+'S_END'+'POINT']);if(!_0x4aac52['ok'])return;const _0x56d2a4=await _0x4aac52['json']();_0x1920d3['prefe'+_0x2a218f(0x2ef)+'s']={'preferredRoutes':_0x56d2a4[_0x2a218f(0x268)+_0x2a218f(0x295)+_0x2a218f(0x25b)]||[],'showPreferredRoutesFirst':_0x56d2a4[_0x2a218f(0x262)+_0x2a218f(0x29e)+_0x2a218f(0x30d)+_0x2a218f(0x284)+'irst']||!0x0},_0x337300[_0x2a218f(0x200)]('User\x20'+_0x2a218f(0x268)+'rence'+_0x2a218f(0x31e)+'ched\x20'+_0x2a218f(0x281)+'ssful'+'ly',_0x1920d3['prefe'+_0x2a218f(0x2ef)+'s']);}catch(_0x3ad909){_0x337300['error']('Error'+'\x20fetc'+'hing\x20'+'prefe'+'rence'+'s',{'error':_0x3ad909['messa'+'ge']});}}function _0x1add07(){const _0x1d843a=_0x5ee613;_0x337300[_0x1d843a(0x200)]('Displ'+'aying'+'\x20bus\x20'+'infor'+_0x1d843a(0x20e)+'n');const _0x3857f1=Object[_0x1d843a(0x327)+'e'](_0x1920d3[_0x1d843a(0x3c9)+'ta']),_0x2a26aa=Object['freez'+'e'](_0x1920d3['prefe'+_0x1d843a(0x2ef)+'s']);if(_0x1920d3['colla'+_0x1d843a(0x28b)+_0x1d843a(0x221)+'ns']=new Set(_0xb167c()),_0x3857f1&&Object['keys'](_0x3857f1)[_0x1d843a(0x1fe)+'h']>0x0){_0x965783[_0x1d843a(0x2a4)+_0x1d843a(0x3b1)+'t'][_0x1d843a(0x2e6)+'HTML']='';const _0x2cc821=document['creat'+_0x1d843a(0x383)+'mentF'+'ragme'+'nt'](),_0x4b9b40=Object[_0x1d843a(0x279)+'es'](_0x3857f1),_0x45db23=document['creat'+'eElem'+'ent']('div');_0x45db23['class'+_0x1d843a(0x332)]=_0x1d843a(0x370)+_0x1d843a(0x2b2)+'ectio'+'ns';const _0x336644=_0x4b9b40[_0x1d843a(0x316)+'r'](([_0x432f1c])=>_0x2a26aa['prefe'+'rredR'+_0x1d843a(0x25b)]['inclu'+_0x1d843a(0x32c)](_0x432f1c));if(_0x336644[_0x1d843a(0x1fe)+'h']>0x0&&_0x2a26aa[_0x1d843a(0x262)+_0x1d843a(0x29e)+_0x1d843a(0x30d)+_0x1d843a(0x284)+'irst']){const _0xa1eefd=_0x1d843a(0x268)+'rred-'+_0x1d843a(0x20c)+_0x1d843a(0x36b)+_0x1d843a(0x3ab),_0x213d45=document[_0x1d843a(0x27b)+_0x1d843a(0x2c3)+_0x1d843a(0x202)](_0x1d843a(0x378));_0x213d45['id']=_0xa1eefd,_0x213d45['class'+'Name']='bus-s'+_0x1d843a(0x221)+_0x1d843a(0x25d)+'ferre'+'d-sec'+'tion\x20'+(_0x1920d3[_0x1d843a(0x292)+_0x1d843a(0x28b)+_0x1d843a(0x221)+'ns'][_0x1d843a(0x301)](_0xa1eefd)?_0x1d843a(0x292)+'psed':''),_0x213d45[_0x1d843a(0x2e6)+'HTML']=_0x1d843a(0x3ba)+'\x20\x20\x20\x20\x20'+_0x1d843a(0x1f5)+'\x20\x20\x20\x20\x20'+'\x20<div'+'\x20clas'+'s=\x22bu'+'s-sec'+'tion-'+_0x1d843a(0x336)+'r\x22\x20ro'+'le=\x22b'+'utton'+_0x1d843a(0x21b)+_0x1d843a(0x28c)+_0x1d843a(0x219)+'\x0a\x20\x20\x20\x20'+_0x1d843a(0x1f5)+'\x20\x20\x20\x20\x20'+_0x1d843a(0x1f5)+'\x20\x20\x20\x20\x20'+'<div\x20'+_0x1d843a(0x2e7)+_0x1d843a(0x2c2)+'tion-'+'heade'+'r-con'+_0x1d843a(0x233)+_0x1d843a(0x273)+_0x1d843a(0x1f5)+'\x20\x20\x20\x20\x20'+'\x20\x20\x20\x20\x20'+'\x20\x20\x20\x20\x20'+'\x20\x20\x20\x20\x20'+'<h3>P'+'refer'+_0x1d843a(0x2fe)+_0x1d843a(0x25b)+'</h3>'+_0x1d843a(0x3ba)+_0x1d843a(0x1f5)+'\x20\x20\x20\x20\x20'+_0x1d843a(0x1f5)+_0x1d843a(0x1f5)+_0x1d843a(0x349)+'span\x20'+_0x1d843a(0x2e7)+_0x1d843a(0x2ce)+'-coun'+'t\x22>'+_0x336644[_0x1d843a(0x1fe)+'h']+('\x20buse'+_0x1d843a(0x2f3)+'an>\x0a\x20'+_0x1d843a(0x1f5)+_0x1d843a(0x1f5)+_0x1d843a(0x1f5)+_0x1d843a(0x1f5)+'\x20\x20\x20</'+'div>\x0a'+'\x20\x20\x20\x20\x20'+'\x20\x20\x20\x20\x20'+'\x20\x20\x20\x20\x20'+_0x1d843a(0x1f5)+_0x1d843a(0x349)+_0x1d843a(0x3b3)+'n\x20cla'+'ss=\x22s'+'ectio'+_0x1d843a(0x263)+'gle\x22\x20'+'aria-'+'label'+'=\x22Tog'+_0x1d843a(0x364)+_0x1d843a(0x221)+_0x1d843a(0x267)+_0x1d843a(0x1f5)+_0x1d843a(0x1f5)+'\x20\x20\x20\x20\x20'+'\x20\x20\x20\x20\x20'+_0x1d843a(0x1f5)+'\x20\x20<i\x20'+_0x1d843a(0x2e7)+_0x1d843a(0x29b)+'\x20fa-c'+'hevro'+_0x1d843a(0x1da)+'n\x22></'+'i>\x0a\x20\x20'+'\x20\x20\x20\x20\x20'+'\x20\x20\x20\x20\x20'+_0x1d843a(0x1f5)+_0x1d843a(0x1f5)+_0x1d843a(0x372)+_0x1d843a(0x22c)+'>\x0a\x20\x20\x20'+'\x20\x20\x20\x20\x20'+'\x20\x20\x20\x20\x20'+_0x1d843a(0x1f5)+'\x20\x20</d'+_0x1d843a(0x326)+'\x20\x20\x20\x20\x20'+'\x20\x20\x20\x20\x20'+_0x1d843a(0x1f5)+'\x20\x20\x20\x20<'+_0x1d843a(0x38a)+_0x1d843a(0x320)+'\x22bus-'+_0x1d843a(0x3ca)+'on-co'+'ntent'+'\x22>\x0a\x20\x20'+'\x20\x20\x20\x20\x20'+_0x1d843a(0x1f5)+_0x1d843a(0x1f5)+_0x1d843a(0x1f5)+'\x20\x20')+_0x4ba82e(_0x336644,_0x2a26aa)+('\x0a\x20\x20\x20\x20'+'\x20\x20\x20\x20\x20'+'\x20\x20\x20\x20\x20'+_0x1d843a(0x1f5)+'\x20</di'+_0x1d843a(0x225)+_0x1d843a(0x1f5)+_0x1d843a(0x1f5)+'\x20\x20\x20\x20'),_0x213d45[_0x1d843a(0x2a1)+_0x1d843a(0x392)+_0x1d843a(0x2e5)+'l'](_0x1d843a(0x37c)+_0x1d843a(0x275)+'e')['forEa'+'ch'](_0x2ad3b7=>{const _0x5c657e=_0x1d843a;_0x2ad3b7['addEv'+_0x5c657e(0x366)+_0x5c657e(0x345)+'r']('click',_0x985904=>{const _0x234a64=_0x5c657e;!async function(_0x51256d,_0x43ff32){const _0x1456b1=_0x1aee,_0x1637c1=_0x43ff32[_0x1456b1(0x1e1)+'st']('.bus-'+_0x1456b1(0x356)),_0x5f4632=_0x1637c1[_0x1456b1(0x2e7)+_0x1456b1(0x354)][_0x1456b1(0x3a0)+_0x1456b1(0x299)](_0x1456b1(0x268)+'rred')?_0x1920d3['prefe'+'rence'+'s'][_0x1456b1(0x268)+_0x1456b1(0x295)+_0x1456b1(0x25b)][_0x1456b1(0x316)+'r'](_0x3a74ff=>_0x3a74ff!==_0x51256d):[..._0x1920d3['prefe'+_0x1456b1(0x2ef)+'s'][_0x1456b1(0x268)+'rredR'+_0x1456b1(0x25b)],_0x51256d];try{if(!(await fetch(_0x368416['PREFE'+'RENCE'+_0x1456b1(0x1eb)+'POINT'],{'method':_0x1456b1(0x308),'headers':{'Content-Type':_0x1456b1(0x220)+_0x1456b1(0x38d)+'n/jso'+'n','RequestVerificationToken':document[_0x1456b1(0x2a1)+'Selec'+_0x1456b1(0x266)](_0x1456b1(0x3c8)+'[name'+_0x1456b1(0x2b3)+'eques'+'tVeri'+_0x1456b1(0x1ea)+'ionTo'+'ken\x22]')['value']},'body':JSON['strin'+'gify']({..._0x1920d3['prefe'+_0x1456b1(0x2ef)+'s'],'preferredRoutes':_0x5f4632})}))['ok'])throw new Error('Faile'+'d\x20to\x20'+'updat'+'e\x20pre'+_0x1456b1(0x257)+'ces');_0x1920d3[_0x1456b1(0x268)+'rence'+'s']['prefe'+'rredR'+_0x1456b1(0x25b)]=_0x5f4632,_0x1637c1[_0x1456b1(0x2e7)+'List'][_0x1456b1(0x241)+'e']('prefe'+_0x1456b1(0x382)),_0x1920d3[_0x1456b1(0x268)+_0x1456b1(0x2ef)+'s'][_0x1456b1(0x262)+_0x1456b1(0x29e)+_0x1456b1(0x30d)+_0x1456b1(0x284)+_0x1456b1(0x214)]&&_0x1add07();}catch(_0x53b624){_0x337300[_0x1456b1(0x3a4)]('Faile'+_0x1456b1(0x249)+'updat'+'e\x20pre'+_0x1456b1(0x3b2)+'d\x20rou'+'tes',{'error':_0x53b624[_0x1456b1(0x2c9)+'ge']});}}(_0x2ad3b7['close'+'st']('.bus-'+'item')[_0x234a64(0x2a1)+_0x234a64(0x392)+_0x234a64(0x266)](_0x234a64(0x2f6)+'numbe'+'r')[_0x234a64(0x2b7)+'onten'+'t'],_0x2ad3b7);});}),_0x45db23['appen'+_0x1d843a(0x385)+'d'](_0x213d45),_0x5f54e4(_0xa1eefd);}const _0x309a4e=_0x4b9b40[_0x1d843a(0x316)+'r'](([_0x2b5002])=>!_0x2a26aa['prefe'+'rredR'+'outes']['inclu'+_0x1d843a(0x32c)](_0x2b5002)||!_0x2a26aa['showP'+'refer'+_0x1d843a(0x30d)+'utesF'+_0x1d843a(0x214)]);if(_0x309a4e['lengt'+'h']>0x0){const _0x2f3c23='all-r'+'outes'+_0x1d843a(0x2bf)+'ion',_0x1fa84b=document[_0x1d843a(0x27b)+'eElem'+'ent'](_0x1d843a(0x378));_0x1fa84b['id']=_0x2f3c23,_0x1fa84b['class'+_0x1d843a(0x332)]=_0x1d843a(0x285)+_0x1d843a(0x221)+'n\x20'+(_0x1920d3['colla'+_0x1d843a(0x28b)+'ectio'+'ns']['has'](_0x2f3c23)?_0x1d843a(0x292)+'psed':''),_0x1fa84b[_0x1d843a(0x2e6)+'HTML']='\x0a\x20\x20\x20\x20'+'\x20\x20\x20\x20\x20'+'\x20\x20\x20\x20\x20'+_0x1d843a(0x1f5)+'\x20<div'+'\x20clas'+_0x1d843a(0x25a)+_0x1d843a(0x36b)+_0x1d843a(0x230)+_0x1d843a(0x336)+_0x1d843a(0x393)+'le=\x22b'+_0x1d843a(0x22c)+'\x22\x20tab'+_0x1d843a(0x28c)+_0x1d843a(0x219)+_0x1d843a(0x3ba)+'\x20\x20\x20\x20\x20'+'\x20\x20\x20\x20\x20'+_0x1d843a(0x1f5)+'\x20\x20\x20\x20\x20'+'<div\x20'+_0x1d843a(0x2e7)+_0x1d843a(0x2c2)+_0x1d843a(0x230)+_0x1d843a(0x336)+'r-con'+'tent\x22'+'>\x0a\x20\x20\x20'+_0x1d843a(0x1f5)+_0x1d843a(0x1f5)+'\x20\x20\x20\x20\x20'+'\x20\x20\x20\x20\x20'+_0x1d843a(0x1f5)+_0x1d843a(0x203)+_0x1d843a(0x1e5)+'utes<'+_0x1d843a(0x351)+_0x1d843a(0x1f5)+_0x1d843a(0x1f5)+_0x1d843a(0x1f5)+_0x1d843a(0x1f5)+'\x20\x20\x20\x20\x20'+_0x1d843a(0x31b)+'pan\x20c'+'lass='+_0x1d843a(0x2a0)+'count'+'\x22>'+_0x309a4e[_0x1d843a(0x1fe)+'h']+('\x20buse'+_0x1d843a(0x2f3)+'an>\x0a\x20'+'\x20\x20\x20\x20\x20'+'\x20\x20\x20\x20\x20'+_0x1d843a(0x1f5)+'\x20\x20\x20\x20\x20'+_0x1d843a(0x2d0)+_0x1d843a(0x3af)+_0x1d843a(0x1f5)+_0x1d843a(0x1f5)+_0x1d843a(0x1f5)+_0x1d843a(0x1f5)+'\x20\x20\x20\x20<'+_0x1d843a(0x3b3)+_0x1d843a(0x2e8)+'ss=\x22s'+'ectio'+'n-tog'+_0x1d843a(0x286)+'aria-'+_0x1d843a(0x264)+'=\x22Tog'+'gle\x20s'+'ectio'+'n\x22>\x0a\x20'+_0x1d843a(0x1f5)+'\x20\x20\x20\x20\x20'+'\x20\x20\x20\x20\x20'+_0x1d843a(0x1f5)+'\x20\x20\x20\x20\x20'+'\x20\x20<i\x20'+'class'+_0x1d843a(0x29b)+_0x1d843a(0x1ee)+'hevro'+_0x1d843a(0x1da)+'n\x22></'+'i>\x0a\x20\x20'+'\x20\x20\x20\x20\x20'+_0x1d843a(0x1f5)+_0x1d843a(0x1f5)+_0x1d843a(0x1f5)+'\x20\x20</b'+'utton'+_0x1d843a(0x273)+_0x1d843a(0x1f5)+_0x1d843a(0x1f5)+'\x20\x20\x20\x20\x20'+_0x1d843a(0x1dc)+'iv>\x0a\x20'+'\x20\x20\x20\x20\x20'+'\x20\x20\x20\x20\x20'+_0x1d843a(0x1f5)+'\x20\x20\x20\x20<'+_0x1d843a(0x38a)+'lass='+'\x22bus-'+_0x1d843a(0x3ca)+_0x1d843a(0x37e)+'ntent'+'\x22>\x0a\x20\x20'+_0x1d843a(0x1f5)+_0x1d843a(0x1f5)+'\x20\x20\x20\x20\x20'+_0x1d843a(0x1f5)+'\x20\x20')+_0x4ba82e(_0x309a4e,_0x2a26aa)+('\x0a\x20\x20\x20\x20'+_0x1d843a(0x1f5)+'\x20\x20\x20\x20\x20'+_0x1d843a(0x1f5)+'\x20</di'+_0x1d843a(0x225)+'\x20\x20\x20\x20\x20'+_0x1d843a(0x1f5)+'\x20\x20\x20\x20'),_0x45db23[_0x1d843a(0x34b)+_0x1d843a(0x385)+'d'](_0x1fa84b),_0x5f54e4(_0x2f3c23);}_0x2cc821['appen'+_0x1d843a(0x385)+'d'](_0x45db23),_0x965783['busIn'+'foLis'+'t']['appen'+'dChil'+'d'](_0x2cc821),_0x16fa4a();}else _0x337300[_0x1d843a(0x210)]('No\x20bu'+'s\x20dat'+'a\x20to\x20'+_0x1d843a(0x2dd)+'ay'),_0x3e5b00('No\x20bu'+_0x1d843a(0x302)+_0x1d843a(0x2bd)+_0x1d843a(0x30c)+_0x1d843a(0x330)+'ble',!0x0);}function _0x4ba82e(_0xcbb9f4,_0x14f156){const _0x283b9e=_0x5ee613;return _0xcbb9f4['sort']((_0x524c52,_0x209071)=>_0x524c52[0x0][_0x283b9e(0x243)+_0x283b9e(0x244)+_0x283b9e(0x1f0)](_0x209071[0x0]))['map'](([_0x3f45f5,_0x35200e])=>{const _0x1713e2=_0x283b9e,_0x4ebf28=_0x14f156['prefe'+_0x1713e2(0x295)+_0x1713e2(0x25b)][_0x1713e2(0x2d9)+_0x1713e2(0x32c)](_0x3f45f5);return function(_0x48c6e9){const _0x4fb031=_0x1713e2;if(!_0x48c6e9)return'';const _0x45749a=new Date(),_0x518c2f=new Date(_0x45749a[_0x4fb031(0x1db)+'llYea'+'r'](),_0x45749a[_0x4fb031(0x24b)+_0x4fb031(0x238)](),_0x45749a['getDa'+'te']()),_0x21bf3b=new Date(_0x48c6e9);_0x21bf3b>=_0x518c2f&&_0x21bf3b<new Date(_0x518c2f[_0x4fb031(0x22e)+'me']()+0x5265c00)?_0x21bf3b[_0x4fb031(0x3a2)+'aleTi'+_0x4fb031(0x2fd)+'ing']('en-GB',{'hour':'2-dig'+'it','minute':'2-dig'+'it'}):_0x21bf3b['toLoc'+_0x4fb031(0x259)+'ring']('en-GB',{'day':'numer'+'ic','month':_0x4fb031(0x229)+'ic','hour':_0x4fb031(0x1df)+'it','minute':'2-dig'+'it'});}(_0x35200e[_0x1713e2(0x319)+_0x1713e2(0x379)+'l']),_0x1713e2(0x3ba)+_0x1713e2(0x349)+_0x1713e2(0x38a)+_0x1713e2(0x320)+_0x1713e2(0x2a0)+'item\x20'+_0x35200e[_0x1713e2(0x2b6)+'s']['toLow'+_0x1713e2(0x309)+'e']()[_0x1713e2(0x213)+'ce']('\x20','-')+(_0x4ebf28?_0x1713e2(0x2d2)+'erred':'')+(_0x1713e2(0x247)+_0x1713e2(0x1f5)+_0x1713e2(0x2f0)+_0x1713e2(0x23e)+_0x1713e2(0x2da)+'bus-c'+'onten'+'t\x22>\x0a\x20'+_0x1713e2(0x1f5)+_0x1713e2(0x1f5)+_0x1713e2(0x246)+_0x1713e2(0x282)+_0x1713e2(0x32a)+'ar-ba'+_0x1713e2(0x1e4)+'aria-'+'label'+_0x1713e2(0x3a3)+'gle\x20p'+'refer'+_0x1713e2(0x31c)+'oute\x22'+'>\x0a\x20\x20\x20'+_0x1713e2(0x1f5)+'\x20\x20\x20\x20\x20'+_0x1713e2(0x3ac)+'lass='+'\x22fas\x20'+_0x1713e2(0x2fa)+_0x1713e2(0x313)+_0x1713e2(0x310)+_0x1713e2(0x1f5)+_0x1713e2(0x1f5)+_0x1713e2(0x1f2)+'v>\x0a\x20\x20'+_0x1713e2(0x1f5)+'\x20\x20\x20\x20\x20'+'<div\x20'+_0x1713e2(0x2e7)+'=\x22bus'+_0x1713e2(0x2d1)+'er\x22>')+_0x4e130b(_0x3f45f5)+('</div'+'>\x0a\x20\x20\x20'+'\x20\x20\x20\x20\x20'+_0x1713e2(0x349)+'div\x20c'+_0x1713e2(0x320)+'\x22bus-'+'bay\x22>'+_0x1713e2(0x3ba)+'\x20\x20\x20\x20\x20'+_0x1713e2(0x1f5))+(_0x35200e['bay']?'Bay\x20<'+'span\x20'+'class'+'=\x22bus'+'-bay_'+'_numb'+_0x1713e2(0x290)+_0x4e130b(_0x35200e['bay'])+('</spa'+'n>'):_0x1713e2(0x3cd)+'rrive'+'d')+(_0x1713e2(0x3ba)+_0x1713e2(0x1f5)+_0x1713e2(0x2d0)+_0x1713e2(0x3af)+_0x1713e2(0x1f5)+_0x1713e2(0x1f5)+'</div'+_0x1713e2(0x273)+'\x20\x20\x20\x20\x20'+_0x1713e2(0x223)+'>\x0a\x20\x20\x20'+'\x20\x20\x20');})[_0x283b9e(0x26b)]('');}function _0x3e5b00(_0xc491a,_0x58e23e=!0x1){const _0x23fa86=_0x5ee613;_0x337300['warn'](_0xc491a),_0x965783[_0x23fa86(0x3a4)][_0x23fa86(0x2b7)+'onten'+'t']=_0xc491a,_0x965783['error']['style'][_0x23fa86(0x2dd)+'ay']='block',clearTimeout(_0x1920d3['error'+'Timeo'+'ut']),_0x58e23e||(_0x1920d3['error'+_0x23fa86(0x323)+'ut']=setTimeout(()=>_0x16fa4a(),_0x368416['ERROR'+_0x23fa86(0x2df)+'LAY_D'+'URATI'+'ON']));}function _0x16fa4a(){_0x965783['error']['style']['displ'+'ay']='none';}function _0x1370d5(){const _0x3ad27e=_0x5ee613;if(_0x1920d3['lastF'+'etchT'+'ime']){const _0x163b86=Math['round']((new Date()-_0x1920d3[_0x3ad27e(0x26e)+_0x3ad27e(0x2ed)+_0x3ad27e(0x2d5)])/0x3e8);_0x965783[_0x3ad27e(0x3cf)+_0x3ad27e(0x28a)+'d'][_0x3ad27e(0x2b7)+'onten'+'t']='Last\x20'+_0x3ad27e(0x34d)+'ed\x20'+_0x163b86+('\x20seco'+'nds\x20a'+'go');}}function _0x58206f(){const _0x119ff7=_0x5ee613;_0x337300['info'](_0x119ff7(0x2b5)+'ng\x20up'+_0x119ff7(0x36f)+_0x119ff7(0x2f5)+'tener'+'s'),_0x965783[_0x119ff7(0x256)+_0x119ff7(0x1e3)+'t'][_0x119ff7(0x2ec)+_0x119ff7(0x366)+'stene'+'r'](_0x119ff7(0x3c8),function(_0x51762d,_0x1913d5){let _0x19c943;return function(..._0x28da83){clearTimeout(_0x19c943),_0x19c943=setTimeout(()=>_0x51762d['apply'](this,_0x28da83),_0x1913d5);};}(_0x45d432,_0x368416[_0x119ff7(0x205)+_0x119ff7(0x34a)+_0x119ff7(0x226)+_0x119ff7(0x2de)+'Y'])),window['addEv'+_0x119ff7(0x366)+_0x119ff7(0x345)+'r'](_0x119ff7(0x217)+'e',_0x20765d),window[_0x119ff7(0x2ec)+'entLi'+'stene'+'r'](_0x119ff7(0x283)+'ne',()=>_0x3e5b00(_0x119ff7(0x38b)+'terne'+'t\x20con'+_0x119ff7(0x1ed)+'on',!0x0));const _0x152088=document['query'+_0x119ff7(0x392)+_0x119ff7(0x266)](_0x119ff7(0x2c6)+_0x119ff7(0x32b)+_0x119ff7(0x2f9)+_0x119ff7(0x37d)+'\x20.bus'+_0x119ff7(0x2bf)+_0x119ff7(0x25e)+'eader'),_0xc07a5d=document['query'+'Selec'+'tor'](_0x119ff7(0x2c6)+'ictio'+_0x119ff7(0x2f9)+'ction'+_0x119ff7(0x2c5)+_0x119ff7(0x2bf)+'ion-c'+'onten'+'t');_0x152088&&_0xc07a5d&&_0x152088[_0x119ff7(0x2ec)+_0x119ff7(0x366)+'stene'+'r'](_0x119ff7(0x2d7),_0x5aa22e=>{const _0x3e6d84=_0x119ff7;!_0x5aa22e[_0x3e6d84(0x2be)+'t']['close'+'st']('input')&&(_0xc07a5d[_0x3e6d84(0x2e7)+'List']['toggl'+'e'](_0x3e6d84(0x292)+_0x3e6d84(0x371)),_0x152088['query'+_0x3e6d84(0x392)+_0x3e6d84(0x266)]('.sect'+'ion-t'+_0x3e6d84(0x29d))['style']['trans'+_0x3e6d84(0x29f)]=_0xc07a5d[_0x3e6d84(0x2e7)+'List']['conta'+'ins'](_0x3e6d84(0x292)+'psed')?_0x3e6d84(0x260)+'e(0)':_0x3e6d84(0x260)+_0x3e6d84(0x32f)+'deg)',_0x234c40());}),document[_0x119ff7(0x2ec)+'entLi'+_0x119ff7(0x345)+'r'](_0x119ff7(0x2d7),_0x16b4b7=>{const _0x5eaf9f=_0x119ff7,_0x44d64b=_0x16b4b7[_0x5eaf9f(0x2be)+'t'][_0x5eaf9f(0x1e1)+'st']('.bus-'+'secti'+'on-he'+_0x5eaf9f(0x331));if(_0x44d64b){const _0x5808ef=_0x44d64b['close'+'st']('.bus-'+'secti'+'on');_0x5808ef&&_0x36ce04(_0x5808ef['id']);}}),document[_0x119ff7(0x2ec)+_0x119ff7(0x366)+_0x119ff7(0x345)+'r'](_0x119ff7(0x2c0)+'wn',_0x138516=>{const _0x4a9cd2=_0x119ff7;if(_0x4a9cd2(0x33b)===_0x138516['key']||'\x20'===_0x138516['key']){const _0x6891a5=_0x138516[_0x4a9cd2(0x2be)+'t'][_0x4a9cd2(0x1e1)+'st']('.bus-'+'secti'+'on-he'+'ader');if(_0x6891a5){_0x138516['preve'+'ntDef'+'ault']();const _0x426a72=_0x6891a5['close'+'st'](_0x4a9cd2(0x2f6)+'secti'+'on');_0x426a72&&_0x36ce04(_0x426a72['id']);}}});}function _0x45d432(_0x4be5b6){const _0x4597dc=_0x5ee613,_0x4e12aa=_0x4be5b6['targe'+'t']['value']['trim']()['toLow'+'erCas'+'e']();document['query'+'Selec'+_0x4597dc(0x2e5)+'l']('.bus-'+_0x4597dc(0x3ca)+'on')['forEa'+'ch'](_0x60d156=>{const _0x1eccf2=_0x4597dc;_0x60d156[_0x1eccf2(0x2a1)+'Selec'+_0x1eccf2(0x2e5)+'l'](_0x1eccf2(0x2f6)+_0x1eccf2(0x356))['forEa'+'ch'](_0x716d0b=>{const _0x257bc5=_0x1eccf2,_0x2b7314=_0x716d0b['query'+'Selec'+'tor']('.bus-'+_0x257bc5(0x272)+'r')['textC'+_0x257bc5(0x328)+'t']['trim']()['toLow'+'erCas'+'e']();_0x716d0b['style']['displ'+'ay']=_0x2b7314['inclu'+'des'](_0x4e12aa)?'flex':'none';});});}function _0x4e130b(_0xfd36c8){const _0x18eac6=_0x5ee613;return _0xfd36c8['repla'+'ce'](/&/g,_0x18eac6(0x324))[_0x18eac6(0x213)+'ce'](/</g,_0x18eac6(0x2c4))[_0x18eac6(0x213)+'ce'](/>/g,_0x18eac6(0x253))[_0x18eac6(0x213)+'ce'](/"/g,_0x18eac6(0x21e)+';')['repla'+'ce'](/'/g,_0x18eac6(0x339)+';')['repla'+'ce'](/`/g,'&#96;');}function _0xb167c(){const _0x2ecc0b=_0x5ee613;try{const _0x2ee4e3=localStorage[_0x2ecc0b(0x2cd)+'em'](_0x368416['SECTI'+_0x2ecc0b(0x201)+'ORAGE'+'_KEY']);return _0x2ee4e3?JSON['parse'](_0x2ee4e3):[];}catch(_0x5b8d8e){return _0x337300[_0x2ecc0b(0x3a4)]('Faile'+_0x2ecc0b(0x249)+_0x2ecc0b(0x2f7)+'\x20coll'+_0x2ecc0b(0x2d3)+'\x20sect'+_0x2ecc0b(0x30a),{'error':_0x5b8d8e['messa'+'ge']}),[];}}function _0x234c40(){const _0x59911a=_0x5ee613;try{localStorage[_0x59911a(0x2ca)+'em'](_0x368416[_0x59911a(0x32e)+'ON_ST'+_0x59911a(0x344)+'_KEY'],JSON['strin'+'gify'](Array[_0x59911a(0x381)](_0x1920d3['colla'+_0x59911a(0x28b)+_0x59911a(0x221)+'ns'])));}catch(_0x1d7f0e){_0x337300['error']('Faile'+'d\x20to\x20'+'save\x20'+'colla'+'psed\x20'+'secti'+'ons',{'error':_0x1d7f0e[_0x59911a(0x2c9)+'ge']});}}function _0x36ce04(_0x37913a,_0x5e1976=null){const _0x38b451=_0x5ee613,_0xda6acc=document[_0x38b451(0x1ec)+_0x38b451(0x3b0)+'ById'](_0x37913a);if(!_0xda6acc)return;if(_0x5e1976){if(!!_0x5e1976['targe'+'t']['close'+'st']('input'))return;}const _0x3e7cff=_0xda6acc['query'+_0x38b451(0x392)+_0x38b451(0x266)]('.bus-'+'secti'+'on-co'+'ntent'),_0x37f5fb=_0xda6acc['query'+_0x38b451(0x392)+_0x38b451(0x266)](_0x38b451(0x2f6)+'secti'+_0x38b451(0x31d)+'ader');_0x3e7cff[_0x38b451(0x2e7)+_0x38b451(0x354)]['toggl'+'e'](_0x38b451(0x292)+'psed')?(_0x1920d3['colla'+'psedS'+_0x38b451(0x221)+'ns']['delet'+'e'](_0x37913a),_0x3e7cff['style']['maxHe'+'ight']=_0x3e7cff['scrol'+_0x38b451(0x239)+'ht']+'px',_0x37f5fb[_0x38b451(0x2e7)+_0x38b451(0x354)][_0x38b451(0x3aa)+'e']('colla'+'psed')):(_0x1920d3['colla'+_0x38b451(0x28b)+'ectio'+'ns']['add'](_0x37913a),_0x3e7cff[_0x38b451(0x352)]['maxHe'+'ight']=_0x38b451(0x34e),_0x37f5fb['class'+'List']['add'](_0x38b451(0x292)+'psed')),_0x234c40();}function _0x5f54e4(_0x22b8a4){const _0x364c16=_0x5ee613,_0x358547=document[_0x364c16(0x1ec)+'ement'+'ById'](_0x22b8a4);if(!_0x358547)return;const _0xe67a2e=_0x358547[_0x364c16(0x2a1)+_0x364c16(0x392)+_0x364c16(0x266)](_0x364c16(0x2f6)+_0x364c16(0x3ca)+_0x364c16(0x37e)+'ntent'),_0x31d1e2=_0x358547['query'+'Selec'+_0x364c16(0x266)]('.bus-'+'secti'+'on-he'+_0x364c16(0x331));_0x1920d3[_0x364c16(0x292)+'psedS'+_0x364c16(0x221)+'ns']['has'](_0x22b8a4)?(_0xe67a2e[_0x364c16(0x352)][_0x364c16(0x2b4)+'ight']='0px',_0x31d1e2['class'+'List']['add'](_0x364c16(0x292)+'psed')):(_0xe67a2e['style']['maxHe'+_0x364c16(0x3b6)]=_0xe67a2e[_0x364c16(0x2cf)+_0x364c16(0x239)+'ht']+'px',_0x31d1e2['class'+'List'][_0x364c16(0x3aa)+'e'](_0x364c16(0x292)+_0x364c16(0x371)));}return{'init':async function(){const _0x411451=_0x5ee613;if(_0x1920d3[_0x411451(0x31a)+'alize'+'d'])_0x337300[_0x411451(0x210)](_0x411451(0x21f)+_0x411451(0x2bb)+'eady\x20'+_0x411451(0x31a)+'alize'+'d');else{_0x337300[_0x411451(0x252)](_0x411451(0x39d)+_0x411451(0x365)+'ng\x20Bu'+'sInfo'+_0x411451(0x21f)+'e');try{!(function(){const _0x45351e=_0x411451;_0x337300[_0x45351e(0x252)](_0x45351e(0x39d)+_0x45351e(0x365)+'ng\x20Bu'+_0x45351e(0x2ee)+'Modul'+_0x45351e(0x26c)+'ments');for(const _0x10106d in _0x368416['SELEC'+'TORS'])if(Object[_0x45351e(0x312)+'n'](_0x368416['SELEC'+'TORS'],_0x10106d)){const _0x56d455=document[_0x45351e(0x2a1)+'Selec'+_0x45351e(0x266)](_0x368416[_0x45351e(0x289)+'TORS'][_0x10106d]);if(!_0x56d455)throw _0x337300['error']('Eleme'+_0x45351e(0x3c7)+_0x45351e(0x2ae)+'nd\x20'+_0x368416[_0x45351e(0x289)+'TORS'][_0x10106d]),new Error('Eleme'+'nt\x20no'+'t\x20fou'+_0x45351e(0x3cc)+_0x368416['SELEC'+'TORS'][_0x10106d]);_0x965783[_0x10106d]=_0x56d455;}}()),await _0x4d7284(),_0x58206f(),await _0x20765d(),clearInterval(_0x1920d3[_0x411451(0x1f8)+'shInt'+_0x411451(0x3c6)]),clearInterval(_0x1920d3['updat'+'eTime'+_0x411451(0x3bc)+'val']),_0x1920d3[_0x411451(0x1f8)+_0x411451(0x34f)+_0x411451(0x3c6)]=setInterval(_0x20765d,_0x368416['REFRE'+_0x411451(0x235)+'TERVA'+'L']),_0x1920d3[_0x411451(0x34d)+'eTime'+'Inter'+_0x411451(0x36e)]=setInterval(_0x1370d5,0x3e8),_0x1920d3[_0x411451(0x292)+'psedS'+'ectio'+'ns']['forEa'+'ch'](_0xc9bcd6=>_0x5f54e4(_0xc9bcd6)),_0x1920d3['initi'+'alize'+'d']=!0x0,_0x337300[_0x411451(0x252)](_0x411451(0x2bc)+'foMod'+_0x411451(0x298)+_0x411451(0x274)+_0x411451(0x395)+_0x411451(0x2e9)+_0x411451(0x3cb)+'lly');}catch(_0x11e7a0){_0x337300[_0x411451(0x3a4)]('Faile'+_0x411451(0x249)+_0x411451(0x31a)+'alize'+_0x411451(0x2f4)+'nfoMo'+_0x411451(0x237),{'error':_0x11e7a0['messa'+'ge']});}}},'refreshBusInfo':_0x20765d,'refreshPreferences':_0x4d7284,'cleanup':function(){const _0x4b8262=_0x5ee613;clearInterval(_0x1920d3['refre'+_0x4b8262(0x34f)+'erval']),clearInterval(_0x1920d3[_0x4b8262(0x34d)+_0x4b8262(0x318)+'Inter'+_0x4b8262(0x36e)]),_0x1920d3[_0x4b8262(0x31a)+'alize'+'d']=!0x1,_0x337300[_0x4b8262(0x252)]('BusIn'+_0x4b8262(0x291)+_0x4b8262(0x353)+'leane'+'d\x20up');}};})());return document['addEv'+'entLi'+'stene'+'r']('DOMCo'+_0xf48ddb(0x2eb)+'Loade'+'d',_0x50b77e[_0xf48ddb(0x1fc)]),_0x50b77e;}());function _0x3cdd(){const _0x2479ea=['tw9KDwW','yxbWBgK','zwn0Aw8','Aw9UiJ4','pc9KAxy','uKvoq0u','DJ4kica','t1voq0u','su5gtW','BwvUDey','BNvTzxi','sw52ywW','DdOGBM8','Dxr0B24','oIaJmKu','z2v0vgK','zgLJyxq','DgLVBI0','t0DFteu','rvjst1i','DgvUDci','ctWVzgK','u0HFsu4','z2LMEq','zhvSzq','BNrO','BeHLAwC','pgrPDIa','tM8GChi','i2XVywq','rKfuquW','AxyGy2W','zgvUy2u','ide2ChG','Dg9Nz2W','zd0IyNu','Bg9JywW','zunVBxa','l2fWAs8','idXKAxy','iJ4kica','C0XPC3q','zcb0BYa','C2vK','z2v0tw8','BgLUzs0','D2vPz2G','zwrFC2u','zu9IAMu','y3rvuKW','zu1HCMS','Aw5MBW','jMD0oW','l21HCa','zgf0yxm','C2vHCMm','zMvYzw4','CM91BMq','ywXLu3q','CZ0IyNu','B3v0zxm','DhrVBJ4','BIbWCMu','Aw9UlwG','zw50iJ4','CM90yxq','zwDVzsa','C2HVD1a','BI10B2C','BgfIzwW','BI1JB24','Dg9Y','BIi+cIa','ChjLzMu','zw5K','B3zLCMe','AM9PBG','zsbLBgu','lwrVD24','BgfZDey','lwnVBg8','x19WCM8','tM8GAgK','BNvTyMu','pGOGica','BML0Awe','lwjHzgC','Aw5Nsw4','zsGTmtG','igj1CYa','zw50CMK','B2XSyxa','y3jLyxq','lxDLAwC','B24TDg8','y2vUDeu','pgj1Dhq','ndm4mevcvM1Juq','C3vJy2u','ignSyxm','B2zMBgK','DxrLC0y','yNvZlxm','z2XLiIa','CYbUDw0','zM9Fy28','u0vmrum','CgrHDgu','ChnLzfm','Aw5KzxG','uK1btKm','Bd0Ivg8','DMfSDwu','zxiIpG','zM9nB2q','y29SBge','C3LZDgu','Aw5Zzxi','CNjLzfi','psjcDxm','zgL2igK','DwXLigK','Aw5Z','yNvZigK','psjMyxm','AsbJBge','B2DNBgu','CMvMzxi','zM9YBq','iMj1CY0','CxvLCNK','cqK8zgK','Aw9Ulxq','yNvZsw4','zMLKzw4','uevsrK8','ctXKAxy','A2v5CW','pGOjcqK','DefKAMe','y29UC28','CJOGi2u','y29SB3i','DcbMB3u','yNvZtNu','Dhj5ige','oIaJnde','BMzVlxm','psjFx1i','Bwf4sgu','u2v0DgK','C3rHDhu','Dgv4Dem','igzLDgm','DgHLBG','reqVtu0','zsbHBhi','qNvZsw4','B3jTyxq','DgfYz2u','lxnLy3q','A2v5zg8','y2fSigq','psjZzwm','zuvSzw0','jMX0oW','ic5IDxm','lNbYzwq','vfjbq0u','AgLKzgu','BwvZC2e','C2v0sxq','zxvLjYW','yMvYlI4','z2v0sxq','psjIDxm','C2nYB2W','icaGpc8','lw51Bwi','ihbYzwy','yxbZzwq','pJWVzgK','Aw1L','u3rYAw4','y2XPy2S','Aw9U','Aw5JBhu','yxnZpsi','rxjYB3i','mtiZntn4tu5oDMC','zgLZCgW','x0rftee','x0rju1a','z2DSzsi','BsWGqMW','CM1HBMm','zgLUzW','ywnLAg8','Dg9YqwW','Aw5Uzxi','y2XHC3m','BIbJBge','ihn1y2m','oIaJoei','BNrLBNq','ywrKrxy','zxrJAfq','C0LUzM8','CMvUy2u','icaGpgq','cGKjcqK','lNnLy3q','CZWVC3a','iej1C0K','DcbSAxm','lMj1CY0','zMv0y2G','AgvPz2G','BNmTC2u','zMeTC3q','zwrPy3q','mgrLzYK','BwvtDhi','CMvKifi','CJOGiZe','sfrnta','AgfZ','CYbPBMy','nJLfmq','EtOGlwe','CM1HBa','uM9IB3q','DxqGDhK','ufvu','zxjdyxm','Aw9UCW','iNjLDhu','Aw9Uige','CMvKuM8','DhjHBNm','qNLjza','l2K+cIa','DgLVBNm','AgfZt3C','yxiIpJW','jsbJB24','CNvJDg8','zMLSDgu','AwnHie4','zvrPBwu','BgfZDee','Aw5PDgK','icaGphm','CMvKihi','B24TAgu','CYbMzxq','i2j1C0K','BgfZCZ0','ctXPigm','iNnLy3q','vgLTzw8','jMfTCdS','zM9UDc0','Axy+cIa','zNjLzxO','B250zw4','l3a+','CZ0IC3q','Awn0Aw8','zgvZ','oIaJrem','u0vdveK','zsGXoda','DMfPBge','ywrLCG','tMfTzq','DdOGms4','AwnHDg8','DcWGj1m','AgvHzgu','qMf5ia','zwX2zxq','jImWmZK','oemWma','rw50zxi','DgvUDca','ANnVBG','ctXIDxq','zsb0BYa','cGKjcq','v0fstG','cqKjcqK','ntyYnJaYBgLYvuHq','t1jbr0u','C3rLBMu','BI1Ozwe','pgGZpKi','y29UC3q','icaGidW','sf9erui','yxbWzw4','BcWGC2e','DxbKyxq','mhb4','C2HjBNq','l2rPDJ4','l2GZpGO','C3r5Bgu','DwXLigm','tgLZDa','i2vYCM8','AxrLBq','BMuIpJW','Dg9tDhi','zsGWkq','BM9Uzq','nZK2mdqWDufrEKXn','DJ4kcqK','lIi+cGK','vg9Vig0','mdaWmdS','lwjHEsi','ig1HCdW','Dw1Uigm','B2jHyMK','z2XLihm','ywXPEMK','zw50tgK','DxmGAw4','yxjR','yMXVyG','mJy3nty0mhnNvhvmrG','CY1Zzwm','ctXPBNa','z2DSzsa','DMfS','igv2zw4','yNvZlwK','ChnLza','ica8l2i','mJy5mvvyrwX6zq','BMDjBMq','BMC6ide','Awn0zwq','ig1HCci','zgL2','CNjPDMe','DhLWzq','zgvSzxq','lNn0yxi','y3rPB24','B24Ty28','oIaJqtK','ChjLzgK','zNjVBq','CNjLza','zurVy3u','yxnZAwC','zenOAwW','yMLSAxq','yMLUza','rv9mt0C','ywnJB3u','zgL2igm','tM8GAw4','Dg9FxW','y2f0Aw8','teve','yxvSDa','Bg9HzgK','mtiYmta4ouTZAKf5vG','u2vSzwm','CIiGCM8','yNvZig0','BgL6zwq','BYbSB2e','y29UzMK','Aw5N','CZWVAdm','zMXLEa','CM4GDgG','tKrqt0K','sw5PDgK','zw5Kugu','C1rLEhq','y29UDge','CMfNBwu','Dg9mB2m','psjuB2C','zxjYB3i','BMCGAw4','Cci+pc8','zMzMzG','yw55ihi','zgLJDgK','CMvTB3y','DgLVBG','idXPigm','qvbjx0u','BgXHChm','zgL2pGO','zw1LBNq','zM9mAxm','zMvYCMu','yNv0Dg8','BMn0Aw8','C3rVCMK','AwDODa','mtG3mZuZmNvduNflzW','CMvKAwm','lxnLyxi','cIaGica','CNqTBgK','sw50zxi','mJuXotj1yuHitfm','ys1Sywi','nxb4','CZ0IChi','C3m9iNa','zgvY','iIbHCMK','yMfJA2C','cGKjctW','zxj2ywW','BNqGBM8','Aw5WDxq','yNvZrge','C2vJDgK','zxnZzNu','BMqG','tM90ige','n0jqDgvdBW','BgfZDfu','Ahq6igi','C3bSyxK','zMfTAwW','zs1JB2W','BgXdB24','yMf5','cqKjctW','rMfPBgu','BI1KB3C','z2v0rNu','ica8l2q','oIaJrKy','r0LorW','mI1KAwC','C2L6ztO','y2XVC2u','revcvuC','AeLUChu','zgDLiIa','BgWGuM8','ctWVyNu','pgKGy2W','C2HVD24','zwfKzxi','zMLJyxq','u19ftKq','z2v0rwW','BMvJDgK','igzHlwm','DxmGtwe','yxjL','ys1JAge','idWVzgK','C3m9iMy','y2GIpGO','icaGica','x0voqui','iLnLyxi','CMvMCMu','Awq9iNa','y2f0y2G','CMv0Dxi','Aw5PDa','BMzVCM0','BgvUz3q','CdWVAdm','zgvIDwC','t05Fu1q','zw50','pgGZpKe','l2K+cGK','u0vbuKm','Aw9UCY0','BwfW','zxzYB24','oIaJzMy','B3iG','CIi+','CM91Dgu','AgLUzYa','Bwf0Aw8','mtqZqW','D2fYBG','Aw9UCYa','mtbpz2rZvxa','CMvWBge','AxjZDa','ufjfrKu','zM9Yrwe','B25SAw4','lwnVBNq','psiWiJ4','B2jQzwm','iIb0ywi','yw5Jzu0','C2LUz2W','jNf1B3q'];_0x3cdd=function(){return _0x2479ea;};return _0x3cdd();}
+var businfo = (function () {
+	'use strict';
+
+	/**
+	 * @fileoverview JavaScript module for logging messages
+	 * @description This module provides logging functionality with different log levels.
+	 * @version 1.0.0
+	 */
+
+	const Logger = (() => {
+		/**
+		 * @constant {Object} LOG_LEVELS
+		 * @description Enumeration of log levels with corresponding numeric values.
+		 * Higher values indicate higher severity.
+		 */
+		const LOG_LEVELS = Object.freeze({
+			TRACE: 0,
+			DEBUG: 1,
+			INFO: 2,
+			WARN: 3,
+			ERROR: 4,
+			FATAL: 5,
+		});
+
+		/**
+		 * @constant {Object} LOG_COLORS
+		 * @description Mapping of log levels to their respective console color styles.
+		 */
+		const LOG_COLORS = Object.freeze({
+			TRACE: "color: #A9A9A9",
+			DEBUG: "color: #4169E1",
+			INFO: "color: #2E8B57",
+			WARN: "color: #FF8C00",
+			ERROR: "color: #DC143C",
+			FATAL: "color: #8B0000; font-weight: bold",
+		});
+
+		/**
+		 * @typedef {Object} LoggerConfig
+		 * @property {number} MIN_LOG_LEVEL - Minimum log level to be displayed
+		 * @property {number} MAX_CONSOLE_LOGS - Maximum number of logs to keep in console
+		 * @property {boolean} TRACE_ENABLED - Flag to enable TRACE level logging
+		 * @property {boolean} PERFORMANCE_LOGGING - Flag to enable performance logging
+		 * @property {boolean} GROUP_LOGS - Flag to group logs in console
+		 */
+
+		/**
+		 * @type {LoggerConfig}
+		 * @description Default configuration for the Logger
+		 */
+		const CONFIG = {
+			MIN_LOG_LEVEL: LOG_LEVELS.WARN,
+			MAX_CONSOLE_LOGS: 1000,
+			TRACE_ENABLED: false,
+			PERFORMANCE_LOGGING: false,
+			GROUP_LOGS: true,
+		};
+
+		let logCount = 0;
+		const performanceMarks = new Map();
+
+		/**
+		 * Formats the log message with timestamp and context
+		 * @param {string} level - Log level
+		 * @param {string} message - Log message
+		 * @param {Object} [context] - Additional context for the log
+		 * @returns {string} Formatted log message
+		 */
+		function formatMessage(level, message, context) {
+			const timestamp = new Date().toISOString();
+			const formattedContext = context
+				? `\n${JSON.stringify(context, null, 2)}`
+				: "";
+			return `[${timestamp}] [${level}] ${message}${formattedContext}`;
+		}
+
+		/**
+		 * Logs the formatted message to the console if it meets the minimum log level
+		 * @param {number} level - Numeric log level
+		 * @param {string} formattedMessage - Pre-formatted log message
+		 */
+		function logToConsole(level, formattedMessage) {
+			if (level >= CONFIG.MIN_LOG_LEVEL) {
+				const logMethod =
+					level === LOG_LEVELS.TRACE
+						? "trace"
+						: level === LOG_LEVELS.DEBUG
+							? "debug"
+							: level === LOG_LEVELS.INFO
+								? "info"
+								: level === LOG_LEVELS.WARN
+									? "warn"
+									: "error";
+
+				const logColor = LOG_COLORS[Object.keys(LOG_LEVELS)[level]];
+
+				if (CONFIG.GROUP_LOGS) {
+					console.groupCollapsed(`%c${formattedMessage}`, logColor);
+					console.trace("Log location");
+					console.groupEnd();
+				} else {
+					console[logMethod](`%c${formattedMessage}`, logColor);
+				}
+
+				logCount++;
+				if (logCount > CONFIG.MAX_CONSOLE_LOGS) {
+					console.warn(
+						`Maximum log count (${CONFIG.MAX_CONSOLE_LOGS}) exceeded. Oldest logs may be lost in console.`,
+					);
+				}
+			}
+		}
+
+		/**
+		 * Core logging function
+		 * @param {number} level - Numeric log level
+		 * @param {string} message - Log message
+		 * @param {Object} [context] - Additional context for the log
+		 */
+		function log(level, message, context) {
+			const formattedMessage = formatMessage(level, message, context);
+			logToConsole(level, formattedMessage);
+		}
+
+		/**
+		 * Starts a performance mark for timing operations
+		 * @param {string} markName - Unique identifier for the performance mark
+		 */
+		function startPerformanceMark(markName) {
+			if (CONFIG.PERFORMANCE_LOGGING) {
+				const start = performance.now();
+				performanceMarks.set(markName, start);
+			}
+		}
+
+		/**
+		 * Ends a performance mark and logs the duration
+		 * @param {string} markName - Identifier of the performance mark to end
+		 */
+		function endPerformanceMark(markName) {
+			if (CONFIG.PERFORMANCE_LOGGING && performanceMarks.has(markName)) {
+				const end = performance.now();
+				const start = performanceMarks.get(markName);
+				const duration = end - start;
+				performanceMarks.delete(markName);
+				log(
+					LOG_LEVELS.DEBUG,
+					`Performance: ${markName} took ${duration.toFixed(2)}ms`,
+				);
+			}
+		}
+
+		/**
+		 * Displays a large warning message in the console for developers
+		 */
+		function displaySecurityAdvisory() {
+			const baseStyles = [
+				"font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+				"line-height: 1.5",
+				"padding: 15px",
+			].join(";");
+
+			const warningStyles = [
+				"background-color: #e84430",
+				"color: #ffffff",
+				"font-size: 18px",
+				"font-weight: bold",
+				baseStyles,
+			].join(";");
+
+			const headerStyles = [
+				"background-color: #13253c",
+				"color: #ffffff",
+				"font-size: 16px",
+				"font-weight: bold",
+				baseStyles,
+			].join(";");
+
+			const bodyStyles = [
+				"background-color: #13253c",
+				"color: #ffffff",
+				"font-size: 14px",
+				"font-weight: normal",
+				baseStyles,
+			].join(";");
+
+			console.log(
+				"%cWARNING: %cDeveloper Console%c" +
+					"This area is intended for development use only. " +
+					"Do not copy-paste or run code from untrusted sources here. " +
+					"Executing unfamiliar code can compromise your account and system security. " +
+					"Only use this console if you fully understand the implications of your actions. " +
+					"This is a site for bus information, not a site for storing sensitive information. " +
+					"Please do not enter any sensitive information here or interact with any prompts. " +
+					"If you see any unexpected prompts, close this page immediately.",
+				warningStyles,
+				headerStyles,
+				bodyStyles,
+			);
+		}
+
+		// Display security advisory
+		displaySecurityAdvisory();
+
+		// Public API
+		return {
+			/**
+			 * Updates the Logger configuration
+			 * @param {Partial<LoggerConfig>} newConfig - New configuration options
+			 */
+			setConfig: (newConfig) => {
+				Object.assign(CONFIG, newConfig);
+			},
+			/**
+			 * Logs a TRACE level message
+			 * @param {string} message - Log message
+			 * @param {Object} [context] - Additional context
+			 */
+			trace: (message, context) => {
+				if (CONFIG.TRACE_ENABLED) log(LOG_LEVELS.TRACE, message, context);
+			},
+			/**
+			 * Logs a DEBUG level message
+			 * @param {string} message - Log message
+			 * @param {Object} [context] - Additional context
+			 */
+			debug: (message, context) => log(LOG_LEVELS.DEBUG, message, context),
+			/**
+			 * Logs an INFO level message
+			 * @param {string} message - Log message
+			 * @param {Object} [context] - Additional context
+			 */
+			info: (message, context) => log(LOG_LEVELS.INFO, message, context),
+			/**
+			 * Logs a WARN level message
+			 * @param {string} message - Log message
+			 * @param {Object} [context] - Additional context
+			 */
+			warn: (message, context) => log(LOG_LEVELS.WARN, message, context),
+			/**
+			 * Logs an ERROR level message
+			 * @param {string} message - Log message
+			 * @param {Object} [context] - Additional context
+			 */
+			error: (message, context) => log(LOG_LEVELS.ERROR, message, context),
+			/**
+			 * Logs a FATAL level message
+			 * @param {string} message - Log message
+			 * @param {Object} [context] - Additional context
+			 */
+			fatal: (message, context) => log(LOG_LEVELS.FATAL, message, context),
+			/**
+			 * Starts a performance mark
+			 * @param {string} markName - Unique identifier for the performance mark
+			 */
+			startPerformanceMark: startPerformanceMark,
+			/**
+			 * Ends a performance mark and logs the duration
+			 * @param {string} markName - Identifier of the performance mark to end
+			 */
+			endPerformanceMark: endPerformanceMark,
+			/**
+			 * Returns the current log count
+			 * @returns {number} Total number of logs
+			 */
+			getLogCount: () => logCount,
+		};
+	})();
+
+	/**
+	 * @fileoverview JavaScript module for displaying bus information
+	 * @description This module is responsible for fetching bus information from the API and displaying it for a user.
+	 * @version 0.2.0
+	 * @author Jacob Walton
+	 * @requires Logger
+	 * @module BusInfoMod
+	 */
+	const BusInfoModule = (() => {
+		/**
+		 * @constant {Object} CONFIG
+		 * @description Configuration object for the module
+		 */
+		const CONFIG = Object.freeze({
+			API_ENDPOINT: "/api/v2/businfo",
+			REFRESH_INTERVAL: 30000,
+			ERROR_DISPLAY_DURATION: 5000,
+			SEARCH_DEBOUNCE_DELAY: 300,
+			SELECTORS: Object.freeze({
+				busInfoList: "#busInfoList",
+				lastUpdated: "#lastUpdated",
+				error: "#error",
+				loadingIndicator: "#loadingIndicator",
+				searchInput: "#searchInput",
+			}),
+			TIME_FORMAT: {
+				today: "HH:mm",
+				other: "DD/MM HH:mm",
+			},
+			PREFERENCES_ENDPOINT: "/api/accounts/preferences",
+			SECTION_STORAGE_KEY: "businfo_collapsed_sections",
+		});
+
+		/**
+		 * @typedef {Object} BusInfoState
+		 * @property {boolean} isLoading - Flag indicating if data is being fetched
+		 * @property {Date|null} lastFetchTime - Timestamp of the last successful fetch
+		 * @property {number|null} errorTimeout - Timeout ID for error message
+		 * @property {Object|null} busData - Fetched bus data
+		 * @property {Object} preferences - User preferences
+		 * @property {string[]} preferences.preferredRoutes - List of preferred routes
+		 * @property {boolean} preferences.showPreferredRoutesFirst - Whether to show preferred routes first
+		 * @property {number|null} refreshInterval - Interval ID for data refresh
+		 * @property {number|null} updateTimeInterval - Interval ID for updating timestamps
+		 * @property {boolean} initialized - Whether the module has been initialized
+		 * @property {string[]} collapsedSections - List of collapsed sections
+		 * @property {boolean} mapDisplayed - Whether the map is currently displayed
+		 * @property {boolean} predictionsDisplayed - Whether the predictions are currently displayed
+		 */
+		const state = {
+			isLoading: false,
+			lastFetchTime: null,
+			errorTimeout: null,
+			busData: null,
+			preferences: {
+				preferredRoutes: [],
+				showPreferredRoutesFirst: true,
+			},
+			refreshInterval: null,
+			updateTimeInterval: null,
+			initialized: false,
+			collapsedSections: new Set(fetchCollapsedSections() || []),
+			mapDisplayed: false,
+			predictionsDisplayed: false,
+		};
+
+		/** @type {Object.<string, HTMLElement} */
+		const elements = {};
+
+		/**
+		 * Initializes DOM elements used by the module
+		 * @throws {Error} If any required elements are missing
+		 */
+		function initializeElements() {
+			Logger.info("Initializing BusInfoModule elements");
+			for (const key in CONFIG.SELECTORS) {
+				if (Object.hasOwn(CONFIG.SELECTORS, key)) {
+					const element = document.querySelector(CONFIG.SELECTORS[key]);
+					if (!element) {
+						Logger.error(`Element not found ${CONFIG.SELECTORS[key]}`);
+						throw new Error(`Element not found ${CONFIG.SELECTORS[key]}`);
+					}
+					elements[key] = element;
+				}
+			}
+		}
+
+		/**
+		 * Toggles the visibility of the loading indicator
+		 * @param {boolean} show - Whether to show or hide the loading indicator
+		 */
+		function showLoading(show) {
+			state.isLoading = show;
+			elements.loadingIndicator.style.display = show ? "flex" : "none";
+			Logger.debug(`Loading indicator ${show ? "shown" : "hidden"}`);
+		}
+
+		function showLoading(show) {
+			state.isLoading = show;
+			elements.loadingIndicator.style.display = show ? "flex" : "none";
+			Logger.debug(`Loading indicator ${show ? "shown" : "hidden"}`);
+		}
+
+		/**
+		 * Displays the bus map
+		 * @returns {void}
+		 * @throws {Error} If the map is already displayed
+		 */
+		function displayBusMap() {
+			if (state.mapDisplayed) return;
+
+			const mapSection = document.createElement("div");
+			mapSection.className = "bus-section map-section";
+
+			const mapHeader = document.createElement("div");
+			mapHeader.className = "bus-section-header";
+
+			const mapContent = document.createElement("div");
+			mapContent.className = "bus-section-content single-column collapsed";
+
+			mapHeader.innerHTML = `
+			<div class="section-header-content">
+				<h3>Bus Map</h3>
+			</div>
+			<button class="section-toggle" aria-label="Toggle section">
+				<i class="fas fa-chevron-up"></i>
+			</button>
+		`;
+
+			mapContent.innerHTML = `
+			<div id="busMap"></div>
+		`;
+
+			const map = mapContent.querySelector("#busMap");
+
+			fetch(`${CONFIG.API_ENDPOINT}/map`) // Fetch bus map image
+				.then((response) => response.blob()) // Convert response to blob
+				.then((blob) => {
+					const url = URL.createObjectURL(blob); // Create URL for blob
+					map.innerHTML = `<img src="${url}" alt="Bus map" class="bus-map">`; // Display image
+				})
+				.catch((error) => {
+					// Handle errors
+					map.innerHTML = `<p class="error">Failed to load bus map</p>`;
+					Logger.error("Failed to load bus map", error);
+				});
+
+			mapSection.appendChild(mapHeader); // Add header to section
+			mapSection.appendChild(mapContent); // Add content to section
+
+			// Insert map section after bus info list
+			elements.busInfoList.insertAdjacentElement("afterend", mapSection);
+
+			// Add event listener to toggle map section
+			mapHeader.addEventListener("click", () => {
+				mapContent.classList.toggle("collapsed");
+				mapHeader.querySelector(".section-toggle").style.transform =
+					mapContent.classList.contains("collapsed")
+						? "rotate(0)"
+						: "rotate(180deg)";
+
+				saveCollapsedSections();
+			});
+
+			// Add event listener to toggle map section with enter/space key
+			document.addEventListener("keydown", (event) => {
+				if (event.key === "Enter" || event.key === " ") {
+					const header = event.target.closest(".bus-section-header");
+					if (header) {
+						event.preventDefault();
+						const section = header.closest(".bus-section");
+						if (section) {
+							toggleSection(section.id);
+						}
+					}
+				}
+			});
+
+			// Set map displayed flag
+			state.mapDisplayed = true;
+		}
+
+		/**
+		 * Fetches bus information from the API
+		 * @returns {Promise<void>}
+		 */
+		async function fetchBusInfo() {
+			Logger.info("Fetching bus information");
+			Logger.startPerformanceMark("fetchBusInfo");
+			showLoading(true);
+
+			try {
+				// Fetch bus information from the API
+				const response = await fetch(CONFIG.API_ENDPOINT);
+				if (!response.ok)
+					throw new Error(
+						`Failed to fetch bus information: ${response.status} ${response.statusText}`,
+					);
+
+				const data = await response.json();
+
+				if (!data || typeof data !== "object" || !data.busData) {
+					throw new Error("Invalid API response");
+				}
+
+				state.busData = data.busData;
+				displayBusInfo();
+				displayBusMap();
+
+				state.lastFetchTime = new Date();
+				updateLastFetchedTime();
+
+				// Fetch and update predictions from the API
+				fetchAndDisplayPredictions();
+
+				Logger.debug("Bus information fetched successfully", {
+					busCount: Object.keys(state.busData).length,
+				});
+			} catch (error) {
+				Logger.error("Error fetching bus information", { error: error.message });
+				displayError("Unable to fetch bus information. Please try again.");
+			} finally {
+				showLoading(false);
+				Logger.endPerformanceMark("fetchBusInfo");
+			}
+		}
+
+		/**
+		 * Fetches user preferences from the API
+		 * @returns {Promise<void>}
+		 */
+		async function fetchPreferences() {
+			try {
+				const response = await fetch(CONFIG.PREFERENCES_ENDPOINT);
+				if (!response.ok) return;
+
+				const data = await response.json();
+				state.preferences = {
+					preferredRoutes: data.preferredRoutes || [],
+					showPreferredRoutesFirst: data.showPreferredRoutesFirst || true,
+				};
+				Logger.debug("User preferences fetched successfully", state.preferences);
+			} catch (error) {
+				Logger.error("Error fetching preferences", { error: error.message });
+			}
+		}
+
+		/**
+		 * Displays fetched bus information
+		 */
+		function displayBusInfo() {
+			Logger.debug("Displaying bus information");
+			const busData = Object.freeze(state.busData);
+			const preferences = Object.freeze(state.preferences);
+
+			state.collapsedSections = new Set(fetchCollapsedSections());
+
+			if (busData && Object.keys(busData).length > 0) {
+				elements.busInfoList.innerHTML = ""; // Clear existing list
+
+				// Create a document fragment to append list items to
+				const fragment = document.createDocumentFragment();
+				const entries = Object.entries(busData);
+
+				// Create a container for all bus sections
+				const busInfoSections = document.createElement("div");
+				busInfoSections.className = "bus-info-sections";
+
+				// Create preferred section if there are preferred routes
+				const preferredBuses = entries.filter(([number]) =>
+					preferences.preferredRoutes.includes(number),
+				);
+
+				if (preferredBuses.length > 0 && preferences.showPreferredRoutesFirst) {
+					const sectionId = "preferred-routes-section";
+					const preferredSection = document.createElement("div");
+					preferredSection.id = sectionId;
+					preferredSection.className = `bus-section preferred-section ${state.collapsedSections.has(sectionId) ? "collapsed" : ""}`;
+
+					preferredSection.innerHTML = `
+                    <div class="bus-section-header" role="button" tabindex="0">
+                        <div class="section-header-content">
+                            <h3>Preferred Routes</h3>
+                            <span class="bus-count">${preferredBuses.length} buses</span>
+                        </div>
+                        <button class="section-toggle" aria-label="Toggle section">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div class="bus-section-content">
+                        ${renderBusCards(preferredBuses, preferences)}
+                    </div>
+                `;
+
+					preferredSection.querySelectorAll(".star-badge").forEach((star) => {
+						star.addEventListener("click", (event) => {
+							const busNumber = star.closest(".bus-item").querySelector(".bus-number").textContent;
+							togglePreferredRoute(busNumber, star);
+						});
+					});
+
+					busInfoSections.appendChild(preferredSection);
+					applySectionState(sectionId);
+				}
+
+				// Create section for all other buses
+				const otherBuses = entries.filter(
+					([number]) =>
+						!preferences.preferredRoutes.includes(number) ||
+						!preferences.showPreferredRoutesFirst,
+				);
+
+				if (otherBuses.length > 0) {
+					const sectionId = "all-routes-section";
+					const otherSection = document.createElement("div");
+					otherSection.id = sectionId;
+					otherSection.className = `bus-section ${state.collapsedSections.has(sectionId) ? "collapsed" : ""}`;
+
+					otherSection.innerHTML = `
+                    <div class="bus-section-header" role="button" tabindex="0">
+                        <div class="section-header-content">
+                            <h3>All Routes</h3>
+                            <span class="bus-count">${otherBuses.length} buses</span>
+                        </div>
+                        <button class="section-toggle" aria-label="Toggle section">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div class="bus-section-content">
+                        ${renderBusCards(otherBuses, preferences)}
+                    </div>
+                `;
+
+					busInfoSections.appendChild(otherSection);
+					applySectionState(sectionId);
+				}
+
+				fragment.appendChild(busInfoSections);
+				elements.busInfoList.appendChild(fragment);
+				hideError();
+			} else {
+				Logger.warn("No bus data to display");
+				displayError("No bus information available", true);
+			}
+		}
+
+		/**
+		 * Helper function to render bus cards
+		 * @param {Array} buses - Array of bus data entries
+		 * @returns {string} - HTML string of bus cards
+		 */
+		function renderBusCards(buses, preferences) {
+			return buses
+				.sort((a, b) => a[0].localeCompare(b[0]))
+				.map(([number, info]) => {
+					const isPreferred = preferences.preferredRoutes.includes(number);
+					const arrivalTime = info.lastArrival;
+					formatArrivalTime(arrivalTime);
+
+					return `
+        <div class="bus-item ${info.status.toLowerCase().replace(" ", "-")}${isPreferred ? " preferred" : ""}">
+          <div class="bus-content">
+            <div class="star-badge" aria-label="Toggle preferred route">
+              <i class="fas fa-star"></i>
+            </div>
+            <div class="bus-number">${escapeHTML(number)}</div>
+            <div class="bus-bay">
+              ${info.bay ? `Bay <span class="bus-bay__number">${escapeHTML(info.bay)}</span>` : "Not arrived"}
+            </div>
+          </div>
+        </div>
+      `;
+				})
+				.join("");
+		}
+
+		/**
+		 * Toggles the preferred status of a bus route
+		 * @param {string} route - Bus route number
+		 * @param {HTMLElement} element - Element that triggered the event
+		 */
+		async function togglePreferredRoute(route, element) {
+			const busItem = element.closest(".bus-item");
+			const isPreferred = busItem.classList.contains("preferred");
+			const updatedRoutes = isPreferred
+				? state.preferences.preferredRoutes.filter((r) => r !== route)
+				: [...state.preferences.preferredRoutes, route];
+
+			try {
+				const response = await fetch(CONFIG.PREFERENCES_ENDPOINT, {
+					method: "PUT",
+					headers: {
+						"Content-Type": "application/json",
+						RequestVerificationToken: document.querySelector('input[name="__RequestVerificationToken"]').value,
+					},
+					body: JSON.stringify({
+						...state.preferences,
+						preferredRoutes: updatedRoutes,
+					}),
+				});
+
+				if (!response.ok) throw new Error("Failed to update preferences");
+
+				state.preferences.preferredRoutes = updatedRoutes;
+				busItem.classList.toggle("preferred");
+
+				if (state.preferences.showPreferredRoutesFirst) {
+					displayBusInfo();
+				}
+			} catch (error) {
+				Logger.error("Failed to update preferred routes", { error: error.message });
+			}
+		}
+
+		function formatArrivalTime(date) {
+			if (!date) return "";
+
+			const now = new Date();
+			const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+			const dateToFormat = new Date(date);
+
+			const isToday =
+				dateToFormat >= today &&
+				dateToFormat < new Date(today.getTime() + 24 * 60 * 60 * 1000);
+
+			return isToday
+				? dateToFormat.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })
+				: dateToFormat.toLocaleString("en-GB", { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" });
+		}
+
+		/**
+		 * Displays an error message
+		 * @param {string} message - Error message to display
+		 * @param {boolean} critical - Whether the error is critical
+		 */
+		function displayError(message, critical = false) {
+			Logger.warn(message);
+			elements.error.textContent = message;
+			elements.error.style.display = "block";
+			clearTimeout(state.errorTimeout);
+			if (critical) return;
+			state.errorTimeout = setTimeout(() => hideError(), CONFIG.ERROR_DISPLAY_DURATION);
+		}
+
+		/**
+		 * Hides the error message
+		 */
+		function hideError() {
+			elements.error.style.display = "none";
+		}
+
+		/**
+		 * Updates the last fetched time display
+		 */
+		function updateLastFetchedTime() {
+			if (state.lastFetchTime) {
+				const timeDiff = Math.round((new Date() - state.lastFetchTime) / 1000);
+				elements.lastUpdated.textContent = `Last updated ${timeDiff} seconds ago`;
+			}
+		}
+
+		/**
+		 * Sets up event listeners for the module
+		 */
+		function setupEventListeners() {
+			Logger.info("Setting up event listeners");
+			elements.searchInput.addEventListener(
+				"input",
+				debounce(handleSearchInput, CONFIG.SEARCH_DEBOUNCE_DELAY),
+			);
+
+			window.addEventListener("online", fetchBusInfo);
+			window.addEventListener("offline", () => displayError("No internet connection", true));
+
+			const predictionsheader = document.querySelector(
+				".predictions-section .bus-section-header",
+			);
+
+			const predictionsContent = document.querySelector(
+				".predictions-section .bus-section-content",
+			);
+
+			if (predictionsheader && predictionsContent) {
+				predictionsheader.addEventListener("click", (event) => {
+					const notClickingInInput = !event.target.closest("input");
+					if (!notClickingInInput) return;
+
+					predictionsContent.classList.toggle("collapsed");
+					predictionsheader.querySelector(".section-toggle").style.transform =
+						predictionsContent.classList.contains("collapsed")
+							? "rotate(0)"
+							: "rotate(180deg)";
+
+					saveCollapsedSections();
+				});
+			}
+
+			// Add event delegation for section toggling
+			document.addEventListener("click", (event) => {
+				const header = event.target.closest(".bus-section-header");
+				if (header) {
+					const section = header.closest(".bus-section");
+					if (section) {
+						toggleSection(section.id);
+					}
+				}
+			});
+
+			// Add event listener to toggle sections with enter/space key
+			document.addEventListener("keydown", (event) => {
+				if (event.key === "Enter" || event.key === " ") {
+					const header = event.target.closest(".bus-section-header");
+					if (header) {
+						event.preventDefault();
+						const section = header.closest(".bus-section");
+						if (section) {
+							toggleSection(section.id);
+						}
+					}
+				}
+			});
+		}
+
+		/**
+		 * Handles the search input event
+		 * @param {Event} event - Input event
+		 */
+		function handleSearchInput(event) {
+			const query = event.target.value.trim().toLowerCase();
+			const sections = document.querySelectorAll(".bus-section");
+
+			sections.forEach((section) => {
+				const buses = section.querySelectorAll(".bus-item");
+				buses.forEach((bus) => {
+					const number = bus.querySelector(".bus-number").textContent.trim().toLowerCase();
+					bus.style.display = number.includes(query) ? "flex" : "none";
+				});
+			});
+		}
+
+		/**
+		 * Creates a debounced function
+		 * @param {Function} func - Function to debounce
+		 * @param {number} delay - Debounce delay
+		 * @returns {Function} - Debounced function
+		 */
+		function debounce(func, delay) {
+			let timeout;
+			return function (...args) {
+				clearTimeout(timeout);
+				timeout = setTimeout(() => func.apply(this, args), delay);
+			};
+		}
+
+		/**
+		 * Escapes HTML special characters
+		 * @param {string} str - String to escape
+		 * @returns {string} - Escaped string
+		 */
+		function escapeHTML(unsafe) {
+			return unsafe
+				.replace(/&/g, "&amp;")
+				.replace(/</g, "&lt;")
+				.replace(/>/g, "&gt;")
+				.replace(/"/g, "&quot;")
+				.replace(/'/g, "&#039;")
+				.replace(/`/g, "&#96;");
+		}
+
+		/**
+		 * Fetches collapsed sections from local storage
+		 * @returns {string[]} - List of collapsed section IDs
+		 */
+		function fetchCollapsedSections() {
+			try {
+				const sections = localStorage.getItem(CONFIG.SECTION_STORAGE_KEY);
+				return sections ? JSON.parse(sections) : [];
+			} catch (error) {
+				Logger.error("Failed to fetch collapsed sections", { error: error.message });
+				return [];
+			}
+		}
+
+		/**
+		 * Saves collapsed sections to local storage
+		 */
+		function saveCollapsedSections() {
+			try {
+				localStorage.setItem(CONFIG.SECTION_STORAGE_KEY, JSON.stringify(Array.from(state.collapsedSections)));
+			} catch (error) {
+				Logger.error("Failed to save collapsed sections", { error: error.message });
+			}
+		}
+
+		/**
+		 * Toggles the visibility of a section
+		 * @param {string} sectionId - ID of the section to toggle
+		 */
+		function toggleSection(sectionId, event = null) {
+			const section = document.getElementById(sectionId);
+			if (!section) return;
+
+			if (event) {
+				// Check it's not an input element
+				const notClickingInInput = !event.target.closest("input");
+				if (!notClickingInInput) return;
+			}
+
+			const content = section.querySelector(".bus-section-content");
+			const header = section.querySelector(".bus-section-header");
+			const isCollapsed = content.classList.toggle("collapsed");
+
+			if (isCollapsed) {
+				state.collapsedSections.delete(sectionId);
+				content.style.maxHeight = `${content.scrollHeight}px`;
+				header.classList.remove("collapsed");
+			} else {
+				state.collapsedSections.add(sectionId);
+				content.style.maxHeight = "0px";
+				header.classList.add("collapsed");
+			}
+
+			saveCollapsedSections();
+		}
+
+		/**
+		 * Applies the collapsed state to a section
+		 * @param {string} sectionId - ID of the section to apply the state to
+		 */
+		function applySectionState(sectionId) {
+			const section = document.getElementById(sectionId);
+			if (!section) return;
+
+			const content = section.querySelector(".bus-section-content");
+			const header = section.querySelector(".bus-section-header");
+
+			if (state.collapsedSections.has(sectionId)) {
+				content.style.maxHeight = "0px";
+				header.classList.add("collapsed");
+			} else {
+				content.style.maxHeight = `${content.scrollHeight}px`;
+				header.classList.remove("collapsed");
+			}
+		}
+
+		/**
+		 * Intializes the module
+		 */
+		async function init() {
+			// Prevent multiple initializations
+			if (state.initialized) {
+				Logger.warn("Module already initialized");
+				return;
+			}
+
+			Logger.info("Initializing BusInfoModule");
+			try {
+				initializeElements();
+				await fetchPreferences();
+				setupEventListeners();
+				await fetchBusInfo();
+
+				// Clear any existing intervals
+				clearInterval(state.refreshInterval);
+				clearInterval(state.updateTimeInterval);
+
+				state.refreshInterval = setInterval(fetchBusInfo, CONFIG.REFRESH_INTERVAL);
+				state.updateTimeInterval = setInterval(updateLastFetchedTime, 1000);
+
+				state.collapsedSections.forEach((sectionId) => applySectionState(sectionId));
+
+				state.initialized = true;
+				Logger.info("BusInfoModule initialized successfully");
+			} catch (error) {
+				Logger.error("Failed to initialize BusInfoModule", { error: error.message });
+			}
+		}
+
+		/**
+		 * Cleans up the module and clears intervals
+		 */
+		function cleanup() {
+			clearInterval(state.refreshInterval);
+			clearInterval(state.updateTimeInterval);
+			state.initialized = false;
+			Logger.info("BusInfoModule cleaned up");
+		}
+
+		/**
+		 * Fetch and display bus predictions
+		 * @returns {Promise<void>}
+		 */
+		async function fetchAndDisplayPredictions() {
+			try {
+				const response = await fetch(`${CONFIG.API_ENDPOINT}/predictions`);
+				if (response.status === 429) {
+					Logger.warn("Too many requests for predictions");
+					return;
+				}
+
+				if (!response.ok) {
+					throw new Error(
+						`Failed to fetch bus predictions: ${response.status} ${response.statusText}`,
+					);
+				}
+
+				const predictions = await response.json();
+				if (!predictions || typeof predictions !== "object" || !predictions.predictions) {
+					throw new Error("Invalid API response");
+				}
+
+				updatePredictionsDisplay(predictions.predictions);
+			} catch (error) {
+				Logger.error("Error fetching bus predictions", { error: error.message });
+			}
+		}
+
+		/**
+		 * Creates the predictions section
+		 * @returns {HTMLElement} - Predictions section element
+		 */
+		function createPredictionsSection() {
+			const predictionsSection = document.createElement("div");
+			if (predictionsSection) return;
+
+			predictionsSection = document.createElement("div");
+			predictionsSection.className =
+				"bus-section map-section predictions-section";
+
+			const predictionsHeader = document.createElement("div");
+			predictionsHeader.className = "bus-section-header";
+
+			const predictionsContent = document.createElement("div");
+			predictionsContent.className =
+				"bus-section-content single-column collapsed";
+
+			predictionsHeader.innerHTML = `
+				<div class="section-header-content">
+					<h3>Bay Predictions</h3>
+					<div class="predictions-search">
+						<input type="text" id="predictionsSearch" placeholder="Search bus number...">
+					</div>
+				</div>
+				<button class="section-toggle" aria-label="Toggle section">
+					<i class="fas fa-chevron-down"></i>
+				</button>
+			`;
+
+			predictionsContent.innerHTML = `
+				<div id="predictionsList" class="predictions-list"></div>
+			`;
+
+			predictionsSection.appendChild(predictionsHeader);
+			predictionsSection.appendChild(predictionsContent);
+
+			const mapSection = document.querySelector(".map-section");
+			if (mapSection) {
+				mapSection.insertAdjacentElement("afterend", predictionsSection);
+			} else {
+				elements.busInfoList.insertAdjacentElement(
+					"afterend",
+					predictionsSection,
+				);
+			}
+
+			predictionsHeader.addEventListener("click", (event) => {
+				// Don't toggle if clicking in the search input
+				if (event.target.closest(".predictions-search")) return;
+
+				predictionsContent.classList.toggle("collapsed");
+				predictionsHeader.querySelector(".section-toggle").style.transform =
+					predictionsContent.classList.contains("collapsed")
+						? "rotate(-180deg)"
+						: "rotate(0)";
+
+				saveCollapsedSections();
+			});
+
+			setupPredictionsSearch();
+		}
+
+		/**
+		 * Sets up the predictions search input
+		 * @returns {void}
+		 */
+		function setupPredictionsSearch() {
+			const searchInput = document.getElementById("predictionsSearch");
+			if (!searchInput) return;
+
+			searchInput.addEventListener("input", (e) => {
+				const searchTerm = e.target.value.toLowerCase();
+				const cards = document.querySelectorAll(".prediction-card");
+
+				cards.forEach((card) => {
+					const busNumber = card.dataset.busNumber;
+					card.classList.toggle("hidden", !busNumber.includes(searchTerm));
+				});
+			});
+		}
+
+		/**
+		 * Updates the bus predictions display
+		 * @param {Object} predictions - Bus predictions data
+		 */
+		function updatePredictionsDisplay(predictions) {
+			if (!predictions || typeof predictions !== "object" || !predictions.predictions) {
+				Logger.warn("No predictions to display");
+				return;
+			}
+
+			const predictionsSection = document.querySelector(".predictions-section");
+			if (!predictionsSection) {
+				createPredictionsSection();
+			}
+
+			const predictionsList = document.getElementById("predictionsList");
+			if (!predictionsList) return;
+			predictionsList.innerHTML = "";
+
+			const fragment = document.createDocumentFragment();
+			const entries = Object.entries(predictions);
+
+			for (const [busNumber, info] of entries) {
+				if (info.predictions && info.predictions.length > 0) {
+					const card = document.createElement("div");
+					card.className = "prediction-card";
+					card.dataset.busNumber = busNumber.toLowerCase();
+
+					card.innerHTML = `
+					<div class="prediction-header">
+						<div class="bus-number">${escapeHTML(busNumber)}</div>
+						<div class="confidence">
+							<i class="fas fa-chart-line"></i>
+							${info.overallConfidence}% confidence
+						</div>
+					</div>
+					<div class="prediction-content">
+						${info.predictions
+						.map(
+							(pred) => `
+								<div class="predicted-bay">
+									${pred.bay === "No historical data" ? "No historical data" : `Bay ${pred.bay}`}
+									<span class="probability">${pred.probability}%</span>
+								</div>
+								`
+						).join("")}
+					</div>
+				`;
+
+					fragment.appendChild(card);
+
+					predictionsList.appendChild(fragment);
+				}
+			}
+		}
+
+		/**
+		 * Public API
+		 */
+		return {
+			init: init,
+			refreshBusInfo: fetchBusInfo,
+			refreshPreferences: fetchPreferences,
+			cleanup: cleanup,
+		}
+
+	})();
+
+	document.addEventListener("DOMContentLoaded", BusInfoModule.init);
+
+	return BusInfoModule;
+
+})();
+//# sourceMappingURL=businfo.js.map
