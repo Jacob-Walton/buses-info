@@ -82,6 +82,13 @@ namespace BusInfo
 
                 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
+                // Add this before any other configuration
+                builder.WebHost.ConfigureKestrel(serverOptions =>
+                {
+                    string port = Environment.GetEnvironmentVariable("PORT") ?? "3001";
+                    serverOptions.ListenAnyIP(int.Parse(port, CultureInfo.InvariantCulture));
+                });
+
                 ConfigureConfiguration(builder);
                 ConfigureSerilog(builder);
 

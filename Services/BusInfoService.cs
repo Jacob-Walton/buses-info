@@ -46,7 +46,7 @@ namespace BusInfo.Services
         // Add circuit breaker fields
         private static readonly SemaphoreSlim _circuitBreakerLock = new(1, 1);
         private static DateTime _lastFailure = DateTime.MinValue;
-        private static int _failureCount = 0;
+        private static int _failureCount;
         private const int FAILURE_THRESHOLD = 3;
         private static readonly TimeSpan CIRCUIT_RESET_TIME = TimeSpan.FromMinutes(5);
 
@@ -232,12 +232,12 @@ namespace BusInfo.Services
                     response.EnsureSuccessStatusCode();
                     string content = await response.Content.ReadAsStringAsync(cts.Token);
 
-                    var result = await ParseBusInfoContent(content);
+                    BusInfoResponse result = await ParseBusInfoContent(content);
                     await ResetCircuitBreakerAsync(); // Success, reset circuit breaker
                     return result;
                 }
-                catch (Exception ex) when (ex is HttpRequestException 
-                                         or TaskCanceledException 
+                catch (Exception ex) when (ex is HttpRequestException
+                                         or TaskCanceledException
                                          or OperationCanceledException)
                 {
                     retryCount++;
@@ -300,7 +300,7 @@ namespace BusInfo.Services
             }
         }
 
-        private static async Task<BusInfoResponse> ParseBusInfoContent(string content)
+        private static Task<BusInfoResponse> ParseBusInfoContent(string content)
         {
             try
             {
@@ -329,12 +329,12 @@ namespace BusInfo.Services
                     }
                 }
 
-                return new BusInfoResponse
+                return Task.FromResult(new BusInfoResponse
                 {
                     BusData = new Dictionary<string, BusStatus>(busData),
                     LastUpdated = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture),
                     Status = "OK"
-                };
+                });
             }
             catch (Exception ex)
             {
