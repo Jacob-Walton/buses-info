@@ -32,8 +32,8 @@ namespace BusInfo.Services
         private const string CACHE_KEY_LEGACY = "BusInfoCacheLegacy";
         private const string BUS_INFO_CACHE_KEY = "CurrentBusInfo";
         private const string PREDICTION_CACHE_KEY = "BusPrediction_";
-        private static readonly TimeSpan CACHE_EXPIRATION = TimeSpan.FromSeconds(30);
-        private static readonly TimeSpan REQUEST_TIMEOUT = TimeSpan.FromSeconds(10);
+        private static readonly TimeSpan CACHE_EXPIRATION = TimeSpan.FromMinutes(2); // Increased from 30s
+        private static readonly TimeSpan REQUEST_TIMEOUT = TimeSpan.FromSeconds(20); // Increased from 10s
         private readonly IHttpClientFactory _clientFactory = clientFactory ?? throw new ArgumentNullException(nameof(clientFactory));
         private readonly IDistributedCache _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         private readonly ApplicationDbContext _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
@@ -42,6 +42,13 @@ namespace BusInfo.Services
         private static readonly MemoryCache _memoryCache = new(new MemoryCacheOptions());
         private static readonly SemaphoreSlim _cacheLock = new(1, 1);
         private const int MEMORY_CACHE_MINUTES = 1;
+
+        // Add circuit breaker fields
+        private static readonly SemaphoreSlim _circuitBreakerLock = new(1, 1);
+        private static DateTime _lastFailure = DateTime.MinValue;
+        private static int _failureCount = 0;
+        private const int FAILURE_THRESHOLD = 3;
+        private static readonly TimeSpan CIRCUIT_RESET_TIME = TimeSpan.FromMinutes(5);
 
         private static string Escape(string input)
         {
@@ -198,6 +205,17 @@ namespace BusInfo.Services
         /// </summary>
         private async Task<BusInfoResponse> FetchBusInfoAsync()
         {
+            // Check circuit breaker
+            if (IsCircuitOpen())
+            {
+                return new BusInfoResponse
+                {
+                    BusData = new Dictionary<string, BusStatus>(),
+                    LastUpdated = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture),
+                    Status = "Service temporarily unavailable"
+                };
+            }
+
             using HttpClient client = _clientFactory.CreateClient();
             client.Timeout = REQUEST_TIMEOUT;
 
@@ -214,49 +232,114 @@ namespace BusInfo.Services
                     response.EnsureSuccessStatusCode();
                     string content = await response.Content.ReadAsStringAsync(cts.Token);
 
-                    HtmlDocument doc = new();
-                    doc.LoadHtml(content);
-
-                    ConcurrentDictionary<string, BusStatus> busData = new();
-                    HtmlNodeCollection nodes = doc.DocumentNode.SelectNodes("//table[@id='grdAll']//tr[td]");
-
-                    if (nodes != null)
-                    {
-                        foreach (HtmlNode row in nodes)
-                        {
-                            HtmlNodeCollection cells = row.SelectNodes("td");
-                            if (cells != null && cells.Count >= 3)
-                            {
-                                string service = cells[0].InnerText.Trim();
-                                string bay = Escape(cells[2].InnerText).Trim();
-
-                                busData.TryAdd(service, new BusStatus
-                                {
-                                    Status = string.IsNullOrWhiteSpace(bay) ? "Not arrived" : "Arrived",
-                                    Bay = string.IsNullOrWhiteSpace(bay) ? default : bay
-                                });
-                            }
-                        }
-                    }
-
-                    return new BusInfoResponse
-                    {
-                        BusData = new Dictionary<string, BusStatus>(busData),
-                        LastUpdated = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture)
-                    };
+                    var result = await ParseBusInfoContent(content);
+                    await ResetCircuitBreakerAsync(); // Success, reset circuit breaker
+                    return result;
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (ex is HttpRequestException 
+                                         or TaskCanceledException 
+                                         or OperationCanceledException)
                 {
                     retryCount++;
                     lastException = ex;
-                    if (retryCount == maxRetries)
-                        throw new InvalidOperationException($"Failed to fetch bus info after {maxRetries} attempts", ex);
 
-                    await Task.Delay(1000 * retryCount);
+                    if (retryCount == maxRetries)
+                    {
+                        await IncrementFailureCountAsync();
+                        throw new InvalidOperationException($"Failed to fetch bus info after {maxRetries} attempts", ex);
+                    }
+
+                    // Exponential backoff
+                    await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, retryCount)));
                 }
             }
 
             throw new InvalidOperationException("Failed to fetch bus info", lastException);
+        }
+
+        private static bool IsCircuitOpen()
+        {
+            if (_failureCount >= FAILURE_THRESHOLD)
+            {
+                // Check if enough time has passed to try again
+                if (DateTime.UtcNow - _lastFailure < CIRCUIT_RESET_TIME)
+                {
+                    return true;
+                }
+                // Allow one request through to test the service
+                _failureCount = FAILURE_THRESHOLD - 1;
+            }
+            return false;
+        }
+
+        private static async Task IncrementFailureCountAsync()
+        {
+            await _circuitBreakerLock.WaitAsync();
+            try
+            {
+                _failureCount++;
+                _lastFailure = DateTime.UtcNow;
+            }
+            finally
+            {
+                _circuitBreakerLock.Release();
+            }
+        }
+
+        private static async Task ResetCircuitBreakerAsync()
+        {
+            await _circuitBreakerLock.WaitAsync();
+            try
+            {
+                _failureCount = 0;
+                _lastFailure = DateTime.MinValue;
+            }
+            finally
+            {
+                _circuitBreakerLock.Release();
+            }
+        }
+
+        private static async Task<BusInfoResponse> ParseBusInfoContent(string content)
+        {
+            try
+            {
+                HtmlDocument doc = new();
+                doc.LoadHtml(content);
+
+                ConcurrentDictionary<string, BusStatus> busData = new();
+                HtmlNodeCollection nodes = doc.DocumentNode.SelectNodes("//table[@id='grdAll']//tr[td]");
+
+                if (nodes != null)
+                {
+                    foreach (HtmlNode row in nodes)
+                    {
+                        HtmlNodeCollection cells = row.SelectNodes("td");
+                        if (cells != null && cells.Count >= 3)
+                        {
+                            string service = cells[0].InnerText.Trim();
+                            string bay = Escape(cells[2].InnerText).Trim();
+
+                            busData.TryAdd(service, new BusStatus
+                            {
+                                Status = string.IsNullOrWhiteSpace(bay) ? "Not arrived" : "Arrived",
+                                Bay = string.IsNullOrWhiteSpace(bay) ? default : bay
+                            });
+                        }
+                    }
+                }
+
+                return new BusInfoResponse
+                {
+                    BusData = new Dictionary<string, BusStatus>(busData),
+                    LastUpdated = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture),
+                    Status = "OK"
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Failed to parse bus info content", ex);
+            }
         }
 
         /// <summary>

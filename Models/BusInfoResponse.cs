@@ -10,5 +10,7 @@ namespace BusInfo.Models
 
         [JsonProperty("lastUpdated")]
         public string LastUpdated { get; set; } = string.Empty;
+
+        public string Status { get; set; } = "OK";
     }
 }
