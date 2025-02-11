@@ -117,7 +117,7 @@ namespace BusInfo.Services
                     Status = "OK"
                 };
             }
-            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or OperationCanceledException)
+            catch (Exception ex)
             {
                 throw new InvalidOperationException("Failed to fetch bus info", ex);
             }
@@ -184,7 +184,7 @@ namespace BusInfo.Services
                     LastUpdated = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture)
                 };
             }
-            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or OperationCanceledException)
+            catch (Exception ex)
             {
                 throw new InvalidOperationException("Failed to fetch legacy bus info", ex);
             }
