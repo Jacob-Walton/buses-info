@@ -204,15 +204,6 @@ namespace BusInfo
 
             X509Certificate2 serverCertificate = LoadCertificateFromKeyVault(keyVaultUri);
 
-            // Configure Kestrel with the certificate
-            builder.WebHost.ConfigureKestrel(serverOptions =>
-            {
-                serverOptions.ConfigureHttpsDefaults(httpsOptions =>
-                {
-                    httpsOptions.ServerCertificate = serverCertificate;
-                });
-            });
-
             // Configure SMTP settings
             builder.Services.Configure<SmtpSettings>(config.GetSection("Smtp"));
             builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
@@ -377,8 +368,6 @@ namespace BusInfo
                 app.UseExceptionHandler("/error");
                 app.UseHsts();
             }
-
-            app.UseHttpsRedirection();
 
             app.UseStaticFiles();
             app.UseRouting();
