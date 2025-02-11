@@ -172,12 +172,13 @@ namespace BusInfo.Services
             using HttpClient client = _clientFactory.CreateClient();
             client.Timeout = REQUEST_TIMEOUT;
 
-            using CancellationTokenSource cts = new(REQUEST_TIMEOUT);
             int retryCount = 0;
             const int maxRetries = 3;
+            Exception? lastException = null;
 
             while (retryCount < maxRetries)
             {
+                using CancellationTokenSource cts = new(REQUEST_TIMEOUT);
                 try
                 {
                     using HttpResponseMessage response = await client.GetAsync(new Uri(BUS_INFO_URL), cts.Token);
@@ -218,14 +219,15 @@ namespace BusInfo.Services
                 catch (Exception ex)
                 {
                     retryCount++;
+                    lastException = ex;
                     if (retryCount == maxRetries)
                         throw new InvalidOperationException($"Failed to fetch bus info after {maxRetries} attempts", ex);
 
-                    await Task.Delay(1000 * retryCount, cts.Token);
+                    await Task.Delay(1000 * retryCount);
                 }
             }
 
-            throw new InvalidOperationException("Failed to fetch bus info");
+            throw new InvalidOperationException("Failed to fetch bus info", lastException);
         }
 
         /// <summary>
