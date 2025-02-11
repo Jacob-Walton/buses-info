@@ -30,97 +30,150 @@ namespace BusInfo.Services
     {
         private const string BUS_INFO_URL = "https://webservices.runshaw.ac.uk/bus/BusDepartures.aspx";
         private const string CACHE_KEY_LEGACY = "BusInfoCacheLegacy";
-        private const string BUS_INFO_CACHE_KEY = "CurrentBusInfo";
+        private const string CACHE_KEY = "BusInfoCache";
         private const string PREDICTION_CACHE_KEY = "BusPrediction_";
-        private static readonly TimeSpan CACHE_EXPIRATION = TimeSpan.FromMinutes(2); // Increased from 30s
-        private static readonly TimeSpan REQUEST_TIMEOUT = TimeSpan.FromSeconds(20); // Increased from 10s
+        private static readonly TimeSpan CACHE_EXPIRATION = TimeSpan.FromSeconds(30);
+        private static readonly TimeSpan REQUEST_TIMEOUT = TimeSpan.FromSeconds(10);
+
         private readonly IHttpClientFactory _clientFactory = clientFactory ?? throw new ArgumentNullException(nameof(clientFactory));
         private readonly IDistributedCache _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         private readonly ApplicationDbContext _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         private bool _disposed;
 
-        private static readonly MemoryCache _memoryCache = new(new MemoryCacheOptions());
-        private static readonly SemaphoreSlim _cacheLock = new(1, 1);
-        private const int MEMORY_CACHE_MINUTES = 1;
-
-        // Add circuit breaker fields
-        private static readonly SemaphoreSlim _circuitBreakerLock = new(1, 1);
-        private static DateTime _lastFailure = DateTime.MinValue;
-        private static int _failureCount;
-        private const int FAILURE_THRESHOLD = 3;
-        private static readonly TimeSpan CIRCUIT_RESET_TIME = TimeSpan.FromMinutes(5);
-
         private static string Escape(string input)
         {
-            return input.AsSpan().Trim().ToString().Replace("&nbsp;", " ", StringComparison.OrdinalIgnoreCase);
+            return input.Replace("&nbsp;", " ", StringComparison.OrdinalIgnoreCase);
         }
 
-        /// <summary>
-        /// Gets bus information in the legacy format from the web service.
-        /// </summary>
-        /// <returns>A task containing bus information in the legacy response format.</returns>
-        /// <exception cref="InvalidOperationException">Thrown when the request times out or parsing fails.</exception>
+        public async Task<BusInfoResponse> GetBusInfoAsync()
+        {
+            string? cachedData = await _cache.GetStringAsync(CACHE_KEY);
+            if (!string.IsNullOrEmpty(cachedData))
+            {
+                return JsonSerializer.Deserialize<BusInfoResponse>(cachedData) ?? await FetchBusInfoAsync();
+            }
+
+            BusInfoResponse busInfo = await FetchBusInfoAsync();
+
+            await _cache.SetStringAsync(
+                CACHE_KEY,
+                JsonSerializer.Serialize(busInfo),
+                new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = CACHE_EXPIRATION
+                });
+
+            return busInfo;
+        }
+
+        private async Task<BusInfoResponse> FetchBusInfoAsync()
+        {
+            using HttpClient client = _clientFactory.CreateClient();
+            using CancellationTokenSource cts = new(REQUEST_TIMEOUT);
+
+            if (IsWeekend())
+            {
+                return new BusInfoResponse
+                {
+                    BusData = [],
+                    LastUpdated = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture),
+                    Status = "No weekend service"
+                };
+            }
+
+            try
+            {
+                string response = await client.GetStringAsync(new Uri(BUS_INFO_URL), cts.Token);
+
+                HtmlDocument doc = new();
+                doc.LoadHtml(response);
+
+                Dictionary<string, BusStatus> busData = [];
+
+                HtmlNodeCollection rows = doc.DocumentNode.SelectNodes("//table[@id='grdAll']//tr");
+                if (rows != null)
+                {
+                    foreach (HtmlNode? row in rows)
+                    {
+                        HtmlNodeCollection cells = row.SelectNodes("td");
+                        if (cells != null && cells.Count >= 3)
+                        {
+                            string service = cells[0].InnerText.Trim();
+                            string bay = Escape(cells[2].InnerText.Trim()).Trim();
+
+                            busData[service] = new BusStatus
+                            {
+                                Status = string.IsNullOrWhiteSpace(bay) ? "Not arrived" : "Arrived",
+                                Bay = string.IsNullOrWhiteSpace(bay) ? null : bay
+                            };
+                        }
+                    }
+                }
+
+                return new BusInfoResponse
+                {
+                    BusData = busData,
+                    LastUpdated = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture),
+                    Status = "OK"
+                };
+            }
+            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or OperationCanceledException)
+            {
+                throw new InvalidOperationException("Failed to fetch bus info", ex);
+            }
+        }
+
         public async Task<BusInfoLegacyResponse> GetLegacyBusInfoAsync()
         {
             string? cachedData = await _cache.GetStringAsync(CACHE_KEY_LEGACY);
-            if (cachedData != null)
+            if (!string.IsNullOrEmpty(cachedData))
             {
-                return JsonSerializer.Deserialize<BusInfoLegacyResponse>(cachedData)
-                    ?? await FetchLegacyBusInfoAsync();
+                return JsonSerializer.Deserialize<BusInfoLegacyResponse>(cachedData) ?? await FetchLegacyBusInfoAsync();
             }
 
-            using CancellationTokenSource cts = new(REQUEST_TIMEOUT);
-            BusInfoLegacyResponse response = await FetchLegacyBusInfoAsync();
+            BusInfoLegacyResponse busInfo = await FetchLegacyBusInfoAsync();
 
-            DistributedCacheEntryOptions cacheOptions = new()
-            {
-                AbsoluteExpirationRelativeToNow = CACHE_EXPIRATION
-            };
+            await _cache.SetStringAsync(
+                CACHE_KEY_LEGACY,
+                JsonSerializer.Serialize(busInfo),
+                new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = CACHE_EXPIRATION
+                });
 
-            string serializedData = JsonSerializer.Serialize(response);
-            await _cache.SetStringAsync(CACHE_KEY_LEGACY, serializedData, cacheOptions, cts.Token);
-
-            return response;
+            return busInfo;
         }
 
-        /// <summary>
-        /// Fetches bus information in legacy format directly from the web service.
-        /// </summary>
         private async Task<BusInfoLegacyResponse> FetchLegacyBusInfoAsync()
         {
             using HttpClient client = _clientFactory.CreateClient();
             using CancellationTokenSource cts = new(REQUEST_TIMEOUT);
-            client.DefaultRequestHeaders.ConnectionClose = true;  // Force connection to close
 
             try
             {
-                using HttpResponseMessage response = await client.GetAsync(new Uri(BUS_INFO_URL), cts.Token);
-                response.EnsureSuccessStatusCode();
-
-                // Read content as string and dispose response immediately
-                string content = await response.Content.ReadAsStringAsync(cts.Token);
+                string response = await client.GetStringAsync(new Uri(BUS_INFO_URL), cts.Token);
 
                 HtmlDocument doc = new();
-                doc.LoadHtml(content);
+                doc.LoadHtml(response);
 
                 Dictionary<string, string> busData = [];
 
-                HtmlNodeCollection rows = doc.DocumentNode.SelectNodes("//table[@id='grdAll']//tr"); // Get table rows
-                if (rows != null) // Check if table rows exist
+                HtmlNodeCollection rows = doc.DocumentNode.SelectNodes("//table[@id='grdAll']//tr");
+                if (rows != null)
                 {
-                    foreach (HtmlNode? row in rows) // Iterate over table rows
+                    foreach (HtmlNode? row in rows)
                     {
-                        HtmlNodeCollection cells = row.SelectNodes("td"); // Get table cells
+                        HtmlNodeCollection cells = row.SelectNodes("td");
                         if (cells != null && cells.Count >= 3)
                         {
-                            string service = cells[0].InnerText.Trim(); // Service number
-                            string status = Escape(cells[2].InnerText.Trim()).Trim(); // Bay information
+                            string service = cells[0].InnerText.Trim();
+                            string status = Escape(cells[2].InnerText.Trim()).Trim();
 
-                            if (string.IsNullOrWhiteSpace(status)) // Set status to "Not arrived" if bay is empty
+                            if (string.IsNullOrWhiteSpace(status))
                             {
                                 status = "Not arrived";
                             }
-                            busData[service] = status; // Add to dictionary
+                            busData[service] = status;
                         }
                     }
                 }
@@ -131,214 +184,9 @@ namespace BusInfo.Services
                     LastUpdated = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture)
                 };
             }
-            catch (OperationCanceledException ex)
+            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or OperationCanceledException)
             {
-                throw new InvalidOperationException("Request timed out", ex);
-            }
-            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
-            {
-                throw new InvalidOperationException("Failed to parse bus info", ex);
-            }
-        }
-
-        /// <summary>
-        /// Gets current bus information from the web service.
-        /// </summary>
-        /// <returns>A task containing the current bus information.</returns>
-        /// <exception cref="InvalidOperationException">Thrown when the request fails after retries.</exception>
-        public async Task<BusInfoResponse> GetBusInfoAsync()
-        {
-            // Try memory cache first
-            if (_memoryCache.TryGetValue(BUS_INFO_CACHE_KEY, out BusInfoResponse? cachedResponse))
-            {
-                return cachedResponse;
-            }
-
-            // Then try distributed cache
-            string? cachedData = await _cache.GetStringAsync(BUS_INFO_CACHE_KEY);
-            if (cachedData != null)
-            {
-                BusInfoResponse? response = JsonSerializer.Deserialize<BusInfoResponse>(cachedData);
-                if (response != null)
-                {
-                    _memoryCache.Set(BUS_INFO_CACHE_KEY, response, TimeSpan.FromMinutes(MEMORY_CACHE_MINUTES));
-                    return response;
-                }
-            }
-
-            return await FetchAndCacheBusInfoAsync();
-        }
-
-        /// <summary>
-        /// Fetches and caches current bus information.
-        /// </summary>
-        private async Task<BusInfoResponse> FetchAndCacheBusInfoAsync()
-        {
-            // Use lock to prevent multiple simultaneous fetches
-            await _cacheLock.WaitAsync();
-            try
-            {
-                BusInfoResponse busInfo = await FetchBusInfoAsync();
-
-                // Cache in both memory and distributed cache
-                _memoryCache.Set(BUS_INFO_CACHE_KEY, busInfo, TimeSpan.FromMinutes(MEMORY_CACHE_MINUTES));
-
-                await _cache.SetStringAsync(
-                    BUS_INFO_CACHE_KEY,
-                    JsonSerializer.Serialize(busInfo),
-                    new DistributedCacheEntryOptions
-                    {
-                        AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(30),
-                        SlidingExpiration = TimeSpan.FromSeconds(10)
-                    });
-
-                return busInfo;
-            }
-            finally
-            {
-                _cacheLock.Release();
-            }
-        }
-
-        /// <summary>
-        /// Fetches current bus information from the web service with retry logic.
-        /// </summary>
-        private async Task<BusInfoResponse> FetchBusInfoAsync()
-        {
-            // Check circuit breaker
-            if (IsCircuitOpen())
-            {
-                return new BusInfoResponse
-                {
-                    BusData = new Dictionary<string, BusStatus>(),
-                    LastUpdated = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture),
-                    Status = "Service temporarily unavailable"
-                };
-            }
-
-            using HttpClient client = _clientFactory.CreateClient();
-            client.Timeout = REQUEST_TIMEOUT;
-
-            int retryCount = 0;
-            const int maxRetries = 3;
-            Exception? lastException = null;
-
-            while (retryCount < maxRetries)
-            {
-                using CancellationTokenSource cts = new(REQUEST_TIMEOUT);
-                try
-                {
-                    using HttpResponseMessage response = await client.GetAsync(new Uri(BUS_INFO_URL), cts.Token);
-                    response.EnsureSuccessStatusCode();
-                    string content = await response.Content.ReadAsStringAsync(cts.Token);
-
-                    BusInfoResponse result = await ParseBusInfoContent(content);
-                    await ResetCircuitBreakerAsync(); // Success, reset circuit breaker
-                    return result;
-                }
-                catch (Exception ex) when (ex is HttpRequestException
-                                         or TaskCanceledException
-                                         or OperationCanceledException)
-                {
-                    retryCount++;
-                    lastException = ex;
-
-                    if (retryCount == maxRetries)
-                    {
-                        await IncrementFailureCountAsync();
-                        throw new InvalidOperationException($"Failed to fetch bus info after {maxRetries} attempts", ex);
-                    }
-
-                    // Exponential backoff
-                    await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, retryCount)));
-                }
-            }
-
-            throw new InvalidOperationException("Failed to fetch bus info", lastException);
-        }
-
-        private static bool IsCircuitOpen()
-        {
-            if (_failureCount >= FAILURE_THRESHOLD)
-            {
-                // Check if enough time has passed to try again
-                if (DateTime.UtcNow - _lastFailure < CIRCUIT_RESET_TIME)
-                {
-                    return true;
-                }
-                // Allow one request through to test the service
-                _failureCount = FAILURE_THRESHOLD - 1;
-            }
-            return false;
-        }
-
-        private static async Task IncrementFailureCountAsync()
-        {
-            await _circuitBreakerLock.WaitAsync();
-            try
-            {
-                _failureCount++;
-                _lastFailure = DateTime.UtcNow;
-            }
-            finally
-            {
-                _circuitBreakerLock.Release();
-            }
-        }
-
-        private static async Task ResetCircuitBreakerAsync()
-        {
-            await _circuitBreakerLock.WaitAsync();
-            try
-            {
-                _failureCount = 0;
-                _lastFailure = DateTime.MinValue;
-            }
-            finally
-            {
-                _circuitBreakerLock.Release();
-            }
-        }
-
-        private static Task<BusInfoResponse> ParseBusInfoContent(string content)
-        {
-            try
-            {
-                HtmlDocument doc = new();
-                doc.LoadHtml(content);
-
-                ConcurrentDictionary<string, BusStatus> busData = new();
-                HtmlNodeCollection nodes = doc.DocumentNode.SelectNodes("//table[@id='grdAll']//tr[td]");
-
-                if (nodes != null)
-                {
-                    foreach (HtmlNode row in nodes)
-                    {
-                        HtmlNodeCollection cells = row.SelectNodes("td");
-                        if (cells != null && cells.Count >= 3)
-                        {
-                            string service = cells[0].InnerText.Trim();
-                            string bay = Escape(cells[2].InnerText).Trim();
-
-                            busData.TryAdd(service, new BusStatus
-                            {
-                                Status = string.IsNullOrWhiteSpace(bay) ? "Not arrived" : "Arrived",
-                                Bay = string.IsNullOrWhiteSpace(bay) ? default : bay
-                            });
-                        }
-                    }
-                }
-
-                return Task.FromResult(new BusInfoResponse
-                {
-                    BusData = new Dictionary<string, BusStatus>(busData),
-                    LastUpdated = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture),
-                    Status = "OK"
-                });
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException("Failed to parse bus info content", ex);
+                throw new InvalidOperationException("Failed to fetch legacy bus info", ex);
             }
         }
 
@@ -379,7 +227,7 @@ namespace BusInfo.Services
         {
             BusPredictionResponse response = new()
             {
-                Predictions = [] // Initialize dictionary
+                Predictions = []
             };
 
             if (services.Count == 0 || IsWeekend())
@@ -388,7 +236,6 @@ namespace BusInfo.Services
             DateTime now = DateTime.UtcNow;
             int currentDayOfWeek = (int)now.DayOfWeek;
 
-            // Optimize query with includes and indexing
             var historicalData = await _dbContext.BusArrivals
                 .AsNoTracking()
                 .Where(ba => services.Contains(ba.Service) &&
@@ -412,22 +259,23 @@ namespace BusInfo.Services
             if (historicalData.Count == 0)
                 return HandleSpecialCases(services, response);
 
-            // Process services in parallel
-            (string service, PredictionInfo?)[] predictions = await Task.WhenAll(services.Select(async service =>
+            // Process services sequentially
+            foreach (string service in services)
             {
-                if (string.IsNullOrEmpty(service)) return (service, default(PredictionInfo));
+                if (string.IsNullOrEmpty(service)) continue;
 
                 var serviceData = historicalData.Where(h => h.Service == service).ToList();
                 if (serviceData.Count == 0)
                 {
-                    return (service, new PredictionInfo
+                    response.Predictions[service] = new PredictionInfo
                     {
                         Predictions = [new() { Bay = "No historical data", Probability = 0 }]
-                    });
+                    };
+                    continue;
                 }
 
-                List<BayPrediction> bayGroups = serviceData
-                    .AsParallel()
+                // Group and calculate probabilities
+                List<BayPrediction> bayGroups = [.. serviceData
                     .GroupBy(x => x.Bay)
                     .Select(g =>
                     {
@@ -442,21 +290,13 @@ namespace BusInfo.Services
                         };
                     })
                     .OrderByDescending(x => x.Probability)
-                    .Take(3)
-                    .ToList();
+                    .Take(3)];
 
-                return (service, new PredictionInfo
+                response.Predictions[service] = new PredictionInfo
                 {
                     Predictions = bayGroups,
                     OverallConfidence = CalculateOverallConfidence(bayGroups)
-                });
-            }));
-
-            // Combine results
-            foreach ((string service, PredictionInfo prediction) in predictions.Where(p => p.service != null))
-            {
-                if (prediction != null)
-                    response.Predictions[service] = prediction;
+                };
             }
 
             return response;
