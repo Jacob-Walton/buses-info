@@ -1,0 +1,16 @@
+services:
+  bus-info:
+    build: .
+    ports:
+      - "${PORT:-3001}:80"
+    environment:
+      - AZURE_CLIENT_ID=${AZURE_CLIENT_ID}
+      - AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}
+      - AZURE_TENANT_ID=${AZURE_TENANT_ID}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+    networks:
+      - bus-info
+
+networks:
+  bus-info:
+    driver: bridge

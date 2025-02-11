@@ -161,7 +161,7 @@ namespace BusInfo
                     credential,
                     new AzureKeyVaultConfigurationOptions
                     {
-                        ReloadInterval = TimeSpan.FromMinutes(5),
+                        ReloadInterval = TimeSpan.FromMinutes(30),
                         Manager = new KeyVaultSecretNameFormatter()
                     });
 
@@ -187,13 +187,15 @@ namespace BusInfo
                 .WriteTo.Console(
                     outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}",
                     formatProvider: CultureInfo.InvariantCulture,
-                    theme: AnsiConsoleTheme.Code)
+                    theme: AnsiConsoleTheme.Code,
+                    restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning)
                 .WriteTo.File(new CompactJsonFormatter(),
                               Path.Combine("logs", "log-.ndjson"),
                               fileSizeLimitBytes: 10_000_000,
                               rollingInterval: RollingInterval.Day,
                               rollOnFileSizeLimit: true,
-                              retainedFileCountLimit: 7)
+                              retainedFileCountLimit: 7,
+                              flushToDiskInterval: TimeSpan.FromSeconds(2))
             );
         }
 
@@ -239,6 +241,14 @@ namespace BusInfo
             // Configure Razor Pages
             builder.Services.AddRazorPages();
 
+            // Configure Compression
+            builder.Services.AddResponseCompression(options =>
+            {
+                options.EnableForHttps = true;
+                options.Providers.Add<BrotliCompressionProvider>();
+                options.Providers.Add<GzipCompressionProvider>();
+            });
+
             // Configure DB Context
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(config.GetConnectionString("DefaultConnection")));
@@ -249,7 +259,7 @@ namespace BusInfo
             builder.Services.AddHttpClient();
 
             // Configure Authentication
-            builder.Services.AddScoped<ClaimsRefreshService>();
+            // builder.Services.AddScoped<ClaimsRefreshService>();
 
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
@@ -266,18 +276,18 @@ namespace BusInfo
 
                     options.Events = new CookieAuthenticationEvents
                     {
-                        OnValidatePrincipal = async context =>
-                        {
-                            ClaimsRefreshService claimsRefreshService = context.HttpContext.RequestServices
-                                .GetRequiredService<ClaimsRefreshService>();
+                        // OnValidatePrincipal = async context =>
+                        // {
+                        //     ClaimsRefreshService claimsRefreshService = context.HttpContext.RequestServices
+                        //         .GetRequiredService<ClaimsRefreshService>();
 
-                            if (context.Principal != null && claimsRefreshService.ShouldRefreshClaims(context.Principal))
-                            {
-                                ClaimsPrincipal newPrincipal = await claimsRefreshService.RefreshClaimsAsync(context.Principal);
-                                context.ReplacePrincipal(newPrincipal);
-                                context.ShouldRenew = true;
-                            }
-                        },
+                        //     if (context.Principal != null && claimsRefreshService.ShouldRefreshClaims(context.Principal))
+                        //     {
+                        //         ClaimsPrincipal newPrincipal = await claimsRefreshService.RefreshClaimsAsync(context.Principal);
+                        //         context.ReplacePrincipal(newPrincipal);
+                        //         context.ShouldRenew = true;
+                        //     }
+                        // },
                         OnSigningIn = async context =>
                         {
                             if (context.Principal?.Identity is ClaimsIdentity claimsIdentity)
@@ -286,6 +296,16 @@ namespace BusInfo
                                 await userService.GetOrCreateUserAsync(context.Principal);
                                 claimsIdentity.AddClaim(new Claim("claims_last_refresh", System.DateTimeOffset.UtcNow.ToString("o")));
                             }
+                        },
+                        OnRedirectToLogin = context =>
+                        {
+                            if (context.Request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase))
+                            {
+                                context.Response.StatusCode = 401;
+                                return Task.CompletedTask;
+                            }
+                            context.Response.Redirect(context.RedirectUri);
+                            return Task.CompletedTask;
                         }
                     };
                 });
@@ -321,32 +341,40 @@ namespace BusInfo
             // Configure CORS
             builder.Services.AddCors(options =>
             {
-                options.AddDefaultPolicy(builder =>
-                    builder.SetIsOriginAllowed(origin =>
-                    {
-                        string[] allowedOrigins = (config["Cors:AllowedOrigins"] ?? "").Split(",");
-                        return allowedOrigins.Contains(origin, StringComparer.OrdinalIgnoreCase);
-                    })
-                    .AllowAnyMethod()
-                    .AllowAnyHeader()
-                    .AllowCredentials());
+                options.AddDefaultPolicy(policy =>
+                {
+                    string? allowedOriginsEnv = Environment.GetEnvironmentVariable("ALLOWED_ORIGINS");
+                    string[] envOrigins = !string.IsNullOrWhiteSpace(allowedOriginsEnv)
+                                        ? allowedOriginsEnv.Split(";", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                                        : [];
+
+                    string[] configOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+
+                    string[] combinedOrigins = [.. envOrigins.Union(configOrigins)];
+
+                    policy.WithOrigins(combinedOrigins)
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .AllowCredentials();
+                });
             });
 
             // Configure Rate Limiting
             builder.Services.AddMemoryCache();
-            builder.Services.Configure<ClientRateLimitOptions>(config.GetSection("ClientRateLimiting"));
-            builder.Services.Configure<IpRateLimitOptions>(opt => { });
-            builder.Services.AddSingleton<IClientPolicyStore, RedisClientPolicyStore>();
-            builder.Services.AddSingleton<IRateLimitCounterStore, RedisRateLimitCounterStore>();
-            builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
-            builder.Services.AddSingleton<IProcessingStrategy, RedisProcessingStrategy>();
+            // builder.Services.Configure<ClientRateLimitOptions>(config.GetSection("ClientRateLimiting"));
+            // builder.Services.Configure<IpRateLimitOptions>(opt => { });
+            // builder.Services.AddSingleton<IClientPolicyStore, RedisClientPolicyStore>();
+            // builder.Services.AddSingleton<IRateLimitCounterStore, RedisRateLimitCounterStore>();
+            // builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+            // builder.Services.AddSingleton<IProcessingStrategy, RedisProcessingStrategy>();
 
             // Add rate limit resolver
-            builder.Services.AddScoped<IClientResolveContributor, UserIdRateLimitContributor>();
-            builder.Services.AddScoped<IRequestTrackingService, RequestTrackingService>();
+            // builder.Services.AddScoped<IClientResolveContributor, UserIdRateLimitContributor>();
+            // builder.Services.AddScoped<IRequestTrackingService, RequestTrackingService>();
 
             // Add background services
             builder.Services.AddHostedService<BusInfoBackgroundService>();
+            builder.Services.AddHostedService<BusMapGeneratorService>();
             // builder.Services.AddHostedService<BusInfoMaintenanceService>();
 
             // Add ConfigCat service registration
@@ -389,27 +417,27 @@ namespace BusInfo
                 };
             });
 
-            app.UseClientRateLimiting();
+            // app.UseClientRateLimiting();
 
-            app.Use(async (context, next) =>
-            {
-                if (context.Request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase))
-                {
-                    IRequestTrackingService tracker = context.RequestServices.GetRequiredService<IRequestTrackingService>();
-                    System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
+            // app.Use(async (context, next) =>
+            // {
+            //     if (context.Request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase))
+            //     {
+            //         IRequestTrackingService tracker = context.RequestServices.GetRequiredService<IRequestTrackingService>();
+            //         System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
 
-                    await tracker.IncrementApiRequestCountAsync();
+            //         await tracker.IncrementApiRequestCountAsync();
 
-                    await next();
+            //         await next();
 
-                    sw.Stop();
-                    await tracker.RecordResponseTimeAsync(sw.Elapsed.TotalMilliseconds);
-                }
-                else
-                {
-                    await next();
-                }
-            });
+            //         sw.Stop();
+            //         await tracker.RecordResponseTimeAsync(sw.Elapsed.TotalMilliseconds);
+            //     }
+            //     else
+            //     {
+            //         await next();
+            //     }
+            // });
 
             app.MapControllers().RequireAuthorization("ApiPolicy");
             app.MapRazorPages();

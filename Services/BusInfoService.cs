@@ -192,10 +192,10 @@ namespace BusInfo.Services
 
                     if (nodes != null)
                     {
-                        Parallel.ForEach(nodes, row =>
+                        foreach (HtmlNode row in nodes)
                         {
                             HtmlNodeCollection cells = row.SelectNodes("td");
-                            if (cells?.Count >= 3)
+                            if (cells != null && cells.Count >= 3)
                             {
                                 string service = cells[0].InnerText.Trim();
                                 string bay = Escape(cells[2].InnerText).Trim();
@@ -206,7 +206,7 @@ namespace BusInfo.Services
                                     Bay = string.IsNullOrWhiteSpace(bay) ? default : bay
                                 });
                             }
-                        });
+                        }
                     }
 
                     return new BusInfoResponse

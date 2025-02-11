@@ -22,16 +22,13 @@ namespace BusInfo.Controllers.Api.V2
     public class BusInfoController(
         ILogger<BusInfoController> logger,
         IBusInfoService busInfoService,
-        IBusLaneService busLaneService,
         IMemoryCache cache,
         IConfigCatService configCatService) : ControllerBase
     {
         private readonly IBusInfoService _busInfoService = busInfoService;
-        private readonly IBusLaneService _busLaneService = busLaneService;
         private readonly ILogger<BusInfoController> _logger = logger;
         private readonly IMemoryCache _cache = cache;
         private readonly IConfigCatService _configCatService = configCatService;
-        private const int MapCacheDurationMinutes = 5;
         private const string MapCacheKeyPrefix = "BusLaneMap_";
 
         private static readonly Action<ILogger, DateTime, string?, Exception?> _logRequestReceived =
@@ -85,76 +82,36 @@ namespace BusInfo.Controllers.Api.V2
         [Produces("image/png")]
         [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetBusLaneMapAsync()
         {
             try
             {
                 BusInfoResponse busInfo = await _busInfoService.GetBusInfoAsync();
-
-                // Use the new extension method to handle duplicate bays
                 Dictionary<string, string> bayServiceMap = busInfo.BusData.ToDictionaryWithFirstValue(
                     x => x.Value.Bay ?? string.Empty,
                     x => x.Key);
 
-                string cacheKey = MapCacheKeyPrefix + string.Join("_", bayServiceMap.Select(kvp => $"{kvp.Key}:{kvp.Value}"));
+                string requestedCacheKey = MapCacheKeyPrefix + string.Join("_", bayServiceMap.Select(kvp => $"{kvp.Key}:{kvp.Value}"));
 
-                if (!_cache.TryGetValue(cacheKey, out byte[]? imageData))
+                // Try to get the exact match first
+                if (_cache.TryGetValue(requestedCacheKey, out byte[]? imageData))
                 {
-                    imageData = await _busLaneService.GenerateBusLaneMapAsync(bayServiceMap);
-                    MemoryCacheEntryOptions cacheOptions = new MemoryCacheEntryOptions()
-                        .SetAbsoluteExpiration(TimeSpan.FromMinutes(MapCacheDurationMinutes));
-                    _cache.Set(cacheKey, imageData, cacheOptions);
+                    return File(imageData, "image/png");
                 }
 
-                return imageData == null
-                    ? StatusCode(StatusCodes.Status500InternalServerError, "Failed to generate map image.")
-                    : File(imageData, "image/png");
-            }
-            catch (ApiException ex)
-            {
-                _logError(_logger, DateTime.UtcNow, "API Exception while generating map", ex);
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while generating the bus lane map.");
-            }
-            catch (InvalidOperationException ex)
-            {
-                _logError(_logger, DateTime.UtcNow, "Invalid operation while generating map", ex);
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while generating the bus lane map.");
-            }
-        }
-
-        [HttpPost("map")]
-        [Produces("image/png")]
-        [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GenerateBusLaneMapAsync([FromBody] Dictionary<string, string> bayServiceMap)
-        {
-            try
-            {
-                string cacheKey = MapCacheKeyPrefix + string.Join("_", bayServiceMap.Select(kvp => $"{kvp.Key}:{kvp.Value}"));
-
-                if (!_cache.TryGetValue(cacheKey, out byte[]? imageData))
+                // Fall back to latest generated map
+                if (_cache.TryGetValue(MapCacheKeyPrefix + "latest", out (string key, byte[] data) latest))
                 {
-                    imageData = await _busLaneService.GenerateBusLaneMapAsync(bayServiceMap);
-                    MemoryCacheEntryOptions cacheOptions = new MemoryCacheEntryOptions()
-                        .SetAbsoluteExpiration(TimeSpan.FromMinutes(MapCacheDurationMinutes));
-                    _cache.Set(cacheKey, imageData, cacheOptions);
+                    return File(latest.data, "image/png");
                 }
 
-                return imageData == null
-                    ? StatusCode(StatusCodes.Status500InternalServerError, "Failed to generate map image.")
-                    : File(imageData, "image/png");
+                return NotFound("No map is currently available. Please try again in a few minutes.");
             }
-            catch (ApiException ex)
+            catch (Exception ex)
             {
-                _logError(_logger, DateTime.UtcNow, "API Exception while generating map", ex);
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while generating the bus lane map.");
-            }
-            catch (InvalidOperationException ex)
-            {
-                _logError(_logger, DateTime.UtcNow, "Invalid operation while generating map", ex);
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while generating the bus lane map.");
+                _logError(_logger, DateTime.UtcNow, "Error retrieving map", ex);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving the bus lane map.");
             }
         }
 

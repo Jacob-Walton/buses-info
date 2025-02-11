@@ -13,3 +13,4 @@ secrets.json
 logs/
 Migrations/
 package-lock.json
+*.old
