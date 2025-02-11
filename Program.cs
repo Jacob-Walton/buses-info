@@ -39,6 +39,7 @@ using Microsoft.AspNetCore.ResponseCompression;
 using System.Linq;
 using BusInfo.Services.BackgroundServices;
 using BusInfo.Authentication.Authorization;
+using Azure.Core;
 
 namespace BusInfo
 {
@@ -57,7 +58,7 @@ namespace BusInfo
         private static X509Certificate2 LoadCertificateFromKeyVault(string keyVaultUri)
         {
             SecretClient keyVaultClient = new(new Uri(keyVaultUri), new DefaultAzureCredential());
-            string certificateBase64 = keyVaultClient.GetSecret("Main").Value?.Value
+            string certificateBase64 = keyVaultClient.GetSecret("Main2").Value?.Value
                 ?? throw new InvalidOperationException("Certificate not found in Key Vault");
             byte[] certificateBytes = Convert.FromBase64String(certificateBase64);
 
@@ -84,7 +85,7 @@ namespace BusInfo
                 ConfigureConfiguration(builder);
                 ConfigureSerilog(builder);
 
-                var port = Environment.GetEnvironmentVariable("PORT");
+                string? port = Environment.GetEnvironmentVariable("PORT");
                 if (!string.IsNullOrEmpty(port))
                 {
                     builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
@@ -110,6 +111,36 @@ namespace BusInfo
             }
         }
 
+        private static TokenCredential CreateAzureCredential(IWebHostEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                return new DefaultAzureCredential(new DefaultAzureCredentialOptions
+                {
+                    Retry = { MaxRetries = 3, NetworkTimeout = TimeSpan.FromSeconds(5) }
+                });
+            }
+
+            // For non-development environments, use client secret credentials
+            string? clientId = Environment.GetEnvironmentVariable("AZURE_CLIENT_ID");
+            string? clientSecret = Environment.GetEnvironmentVariable("AZURE_CLIENT_SECRET");
+            string? tenantId = Environment.GetEnvironmentVariable("AZURE_TENANT_ID");
+
+            if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret) || string.IsNullOrEmpty(tenantId))
+            {
+                throw new InvalidOperationException("Azure credentials not properly configured. Ensure AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, and AZURE_TENANT_ID environment variables are set.");
+            }
+
+            return new ClientSecretCredential(
+                tenantId,
+                clientId,
+                clientSecret,
+                new ClientSecretCredentialOptions
+                {
+                    Retry = { MaxRetries = 3, NetworkTimeout = TimeSpan.FromSeconds(5) }
+                });
+        }
+
         private static void ConfigureConfiguration(WebApplicationBuilder builder)
         {
             ConfigurationManager config = builder.Configuration;
@@ -117,15 +148,13 @@ namespace BusInfo
             // Base configuration
             config.SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
+                .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables();
 
             try
             {
                 string keyVaultUri = config["KeyVault:Uri"] ?? throw new InvalidOperationException("KeyVault URI is not configured");
-                DefaultAzureCredential credential = new(new DefaultAzureCredentialOptions
-                {
-                    Retry = { MaxRetries = 3, NetworkTimeout = TimeSpan.FromSeconds(5) }
-                });
+                TokenCredential credential = CreateAzureCredential(builder.Environment);
 
                 config.AddAzureKeyVault(
                     new Uri(keyVaultUri),
