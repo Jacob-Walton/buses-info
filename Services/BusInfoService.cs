@@ -388,17 +388,5 @@ namespace BusInfo.Services
     /// <param name="Service">The bus service identifier.</param>
     /// <param name="ArrivalTime">The time the bus arrived.</param>
     /// <param name="Date">The date of the arrival.</param>
-    internal record ArrivalRecord(string Service, DateTime ArrivalTime, DateTime Date);
-
-    /// <summary>
-    /// Maintains arrival statistics for a specific bus service.
-    /// </summary>
-    /// <param name="name">The name of the bus service.</param>
-    internal class ServiceArrivalProfile(string name)
-    {
-        public string Name { get; } = name;
-        public int TotalAppearances { get; set; }
-        public Dictionary<string, int> BeforeCounts { get; } = [];
-        public Dictionary<string, double> ArrivalProbabilities { get; } = [];
-    }
+    internal sealed record ArrivalRecord(string Service, DateTime ArrivalTime, DateTime Date);
 }

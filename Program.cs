@@ -55,9 +55,11 @@ namespace BusInfo
 
     public static class Program
     {
-        private static X509Certificate2 LoadCertificateFromKeyVault(string keyVaultUri)
+        private static X509Certificate2 LoadCertificateFromKeyVault(string keyVaultUri, ConfigurationManager config)
         {
-            SecretClient keyVaultClient = new(new Uri(keyVaultUri), new DefaultAzureCredential());
+            TokenCredential credential = CreateAzureCredential(config);
+            SecretClient keyVaultClient = new(new Uri(keyVaultUri), credential);
+
             string certificateBase64 = keyVaultClient.GetSecret("Main2").Value?.Value
                 ?? throw new InvalidOperationException("Certificate not found in Key Vault");
             byte[] certificateBytes = Convert.FromBase64String(certificateBase64);
@@ -105,24 +107,16 @@ namespace BusInfo
             }
         }
 
-        private static TokenCredential CreateAzureCredential(ConfigurationManager config, IWebHostEnvironment env)
+        private static ClientSecretCredential CreateAzureCredential(ConfigurationManager config)
         {
-            if (env.IsDevelopment())
-            {
-                return new DefaultAzureCredential(new DefaultAzureCredentialOptions
-                {
-                    Retry = { MaxRetries = 3, NetworkTimeout = TimeSpan.FromSeconds(5) }
-                });
-            }
-
-            // For non-development environments, use client secret credentials
+            // Get credentials from configuration
             string? clientId = config["KeyVault:ClientId"];
             string? clientSecret = config["KeyVault:ClientSecret"];
             string? tenantId = config["KeyVault:TenantId"];
 
             if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret) || string.IsNullOrEmpty(tenantId))
             {
-                throw new InvalidOperationException("Azure credentials not properly configured, ensure that your config contains correct values.");
+                throw new InvalidOperationException("Azure credentials not properly configured. Ensure KeyVault:ClientId, KeyVault:ClientSecret, and KeyVault:TenantId are set.");
             }
 
             return new ClientSecretCredential(
@@ -148,7 +142,7 @@ namespace BusInfo
             try
             {
                 string keyVaultUri = config["KeyVault:Uri"] ?? throw new InvalidOperationException("KeyVault URI is not configured");
-                TokenCredential credential = CreateAzureCredential(builder.Configuration, builder.Environment);
+                TokenCredential credential = CreateAzureCredential(config);
 
                 config.AddAzureKeyVault(
                     new Uri(keyVaultUri),
@@ -197,7 +191,7 @@ namespace BusInfo
             ConfigurationManager config = builder.Configuration;
             string keyVaultUri = config["KeyVault:Uri"] ?? throw new InvalidOperationException("KeyVault URI is not configured");
 
-            X509Certificate2 serverCertificate = LoadCertificateFromKeyVault(keyVaultUri);
+            X509Certificate2 serverCertificate = LoadCertificateFromKeyVault(keyVaultUri, config);
 
             // Configure SMTP settings
             builder.Services.Configure<SmtpSettings>(config.GetSection("Smtp"));

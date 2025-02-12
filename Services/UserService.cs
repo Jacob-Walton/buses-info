@@ -4,13 +4,12 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using BusInfo.Data;
 using BusInfo.Models;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 namespace BusInfo.Services
 {
-    public class UserService(ApplicationDbContext context, IEmailService emailService, IConfiguration configuration) : IUserService
+    internal sealed class UserService(ApplicationDbContext context, IEmailService emailService, IConfiguration configuration) : IUserService
     {
         private readonly ApplicationDbContext _context = context;
         private readonly IEmailService _emailService = emailService;
