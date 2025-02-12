@@ -82,13 +82,6 @@ namespace BusInfo
 
                 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-                // Add this before any other configuration
-                builder.WebHost.ConfigureKestrel(serverOptions =>
-                {
-                    string port = Environment.GetEnvironmentVariable("PORT") ?? "3001";
-                    serverOptions.ListenAnyIP(int.Parse(port, CultureInfo.InvariantCulture));
-                });
-
                 ConfigureConfiguration(builder);
                 ConfigureSerilog(builder);
 
@@ -343,16 +336,9 @@ namespace BusInfo
             {
                 options.AddDefaultPolicy(policy =>
                 {
-                    string? allowedOriginsEnv = Environment.GetEnvironmentVariable("ALLOWED_ORIGINS");
-                    string[] envOrigins = !string.IsNullOrWhiteSpace(allowedOriginsEnv)
-                                        ? allowedOriginsEnv.Split(";", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                                        : [];
+                    string[] AllowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
 
-                    string[] configOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
-
-                    string[] combinedOrigins = [.. envOrigins.Union(configOrigins)];
-
-                    policy.WithOrigins(combinedOrigins)
+                    policy.WithOrigins(AllowedOrigins)
                           .AllowAnyMethod()
                           .AllowAnyHeader()
                           .AllowCredentials();
