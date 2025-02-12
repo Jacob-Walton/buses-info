@@ -12,12 +12,12 @@
 
         <div id="error" class="error" style="display: none;"></div>
 
-        <div id="busInfoList" class="bus-info-list">
-            @* Bus infomration will be populated here *@
-        </div>
-
         <div id="loadingIndicator" class="loading" style="display:block none;">
             <div class="spinner"></div>
+        </div>
+        
+        <div id="busInfoList" class="bus-info-list">
+            @* Bus infomration will be populated here *@
         </div>
     </div>
 
@@ -30,6 +30,8 @@
         </div>
     </div>
 </div>
+
+@Html.AntiForgeryToken()
 
 @section Scripts {
     <script src="~/js/businfo.js" defer asp-append-version="true"></script>

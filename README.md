@@ -85,7 +85,27 @@ The application utilises a layered approach:
    $ dotnet restore
    ```
 
-4. **Run the Application**
+4. **Database Setup**
+
+   ```shell
+   # Create the database
+   $ dotnet ef database update
+   ```
+
+5. **Static Files**
+
+   ```shell
+   # Move to watcher directory
+   $ cd watcher
+
+   # Install dependencies
+   $ npm install
+
+   # Build the files
+   $ npm run build
+   ```
+
+6. **Run the Application**
 
    ```shell
    # Start the application

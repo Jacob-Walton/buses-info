@@ -6,7 +6,7 @@ import Logger from "./modules/logging.js";
  * @version 0.2.0
  * @author Jacob Walton
  * @requires Logger
- * @module BusInfoMod
+ * @module BusInfoModule
  */
 const BusInfoModule = (() => {
 	/**
@@ -112,6 +112,7 @@ const BusInfoModule = (() => {
 		if (state.mapDisplayed) return;
 
 		const mapSection = document.createElement("div");
+		mapSection.id = "bus-map-section"; // Add ID for state management
 		mapSection.className = "bus-section map-section";
 
 		const mapHeader = document.createElement("div");
@@ -119,6 +120,10 @@ const BusInfoModule = (() => {
 
 		const mapContent = document.createElement("div");
 		mapContent.className = "bus-section-content single-column collapsed";
+		// Set initial max-height to 0 for collapsed state
+		mapContent.style.maxHeight = "0px";
+		// Add transition for smooth toggling
+		mapContent.style.transition = "max-height 0.3s ease-in-out";
 
 		mapHeader.innerHTML = `
 			<div class="section-header-content">
@@ -153,16 +158,12 @@ const BusInfoModule = (() => {
 		// Insert map section after bus info list
 		elements.busInfoList.insertAdjacentElement("afterend", mapSection);
 
-		// Add event listener to toggle map section
-		mapHeader.addEventListener("click", () => {
-			mapContent.classList.toggle("collapsed");
-			mapHeader.querySelector(".section-toggle").style.transform =
-				mapContent.classList.contains("collapsed")
-					? "rotate(0)"
-					: "rotate(180deg)";
-
-			saveCollapsedSections();
-		});
+			// Set initial collapsed state from saved state
+		const isCollapsed = state.collapsedSections.has("bus-map-section");
+		mapContent.classList.toggle("collapsed", isCollapsed);
+		mapContent.style.maxHeight = isCollapsed ? "0px" : "500px";
+		mapHeader.querySelector(".section-toggle").style.transform =
+			isCollapsed ? "rotate(0)" : "rotate(180deg)";
 
 		// Add event listener to toggle map section with enter/space key
 		document.addEventListener("keydown", (event) => {
@@ -255,12 +256,9 @@ const BusInfoModule = (() => {
 		const busData = Object.freeze(state.busData);
 		const preferences = Object.freeze(state.preferences);
 
-		state.collapsedSections = new Set(fetchCollapsedSections());
-
 		if (busData && Object.keys(busData).length > 0) {
 			elements.busInfoList.innerHTML = ""; // Clear existing list
 
-			// Create a document fragment to append list items to
 			const fragment = document.createDocumentFragment();
 			const entries = Object.entries(busData);
 
@@ -277,32 +275,26 @@ const BusInfoModule = (() => {
 				const sectionId = "preferred-routes-section";
 				const preferredSection = document.createElement("div");
 				preferredSection.id = sectionId;
-				preferredSection.className = `bus-section preferred-section ${state.collapsedSections.has(sectionId) ? "collapsed" : ""}`;
+				preferredSection.className = "bus-section preferred-section";
 
+				const isCollapsed = state.collapsedSections.has(sectionId);
+				
 				preferredSection.innerHTML = `
-                    <div class="bus-section-header" role="button" tabindex="0">
-                        <div class="section-header-content">
-                            <h3>Preferred Routes</h3>
-                            <span class="bus-count">${preferredBuses.length} buses</span>
-                        </div>
-                        <button class="section-toggle" aria-label="Toggle section">
-                            <i class="fas fa-chevron-down"></i>
-                        </button>
-                    </div>
-                    <div class="bus-section-content">
-                        ${renderBusCards(preferredBuses, preferences)}
-                    </div>
-                `;
-
-				preferredSection.querySelectorAll(".star-badge").forEach((star) => {
-					star.addEventListener("click", (event) => {
-						const busNumber = star.closest(".bus-item").querySelector(".bus-number").textContent;
-						togglePreferredRoute(busNumber, star);
-					});
-				});
+					<div class="bus-section-header" role="button" tabindex="0">
+						<div class="section-header-content">
+							<h3>Preferred Routes</h3>
+							<span class="bus-count">${preferredBuses.length} buses</span>
+						</div>
+						<button class="section-toggle" aria-label="Toggle section" style="transform: ${isCollapsed ? 'rotate(0)' : 'rotate(180deg)'}">
+							<i class="fas fa-chevron-up"></i>
+						</button>
+					</div>
+					<div class="bus-section-content ${isCollapsed ? 'collapsed' : ''}" style="max-height: ${isCollapsed ? '0px' : 'none'}">
+						${renderBusCards(preferredBuses, preferences)}
+					</div>
+				`;
 
 				busInfoSections.appendChild(preferredSection);
-				applySectionState(sectionId);
 			}
 
 			// Create section for all other buses
@@ -316,25 +308,26 @@ const BusInfoModule = (() => {
 				const sectionId = "all-routes-section";
 				const otherSection = document.createElement("div");
 				otherSection.id = sectionId;
-				otherSection.className = `bus-section ${state.collapsedSections.has(sectionId) ? "collapsed" : ""}`;
+				otherSection.className = "bus-section";
+
+				const isCollapsed = state.collapsedSections.has(sectionId);
 
 				otherSection.innerHTML = `
-                    <div class="bus-section-header" role="button" tabindex="0">
-                        <div class="section-header-content">
-                            <h3>All Routes</h3>
-                            <span class="bus-count">${otherBuses.length} buses</span>
-                        </div>
-                        <button class="section-toggle" aria-label="Toggle section">
-                            <i class="fas fa-chevron-down"></i>
-                        </button>
-                    </div>
-                    <div class="bus-section-content">
-                        ${renderBusCards(otherBuses, preferences)}
-                    </div>
-                `;
+					<div class="bus-section-header" role="button" tabindex="0">
+						<div class="section-header-content">
+							<h3>All Routes</h3>
+							<span class="bus-count">${otherBuses.length} buses</span>
+						</div>
+						<button class="section-toggle" aria-label="Toggle section" style="transform: ${isCollapsed ? 'rotate(0deg)' : 'rotate(180deg)'}">
+							<i class="fas fa-chevron-up"></i>
+						</button>
+					</div>
+					<div class="bus-section-content ${isCollapsed ? 'collapsed' : ''}" style="max-height: ${isCollapsed ? '0px' : 'none'}">
+						${renderBusCards(otherBuses, preferences)}
+					</div>
+				`;
 
 				busInfoSections.appendChild(otherSection);
-				applySectionState(sectionId);
 			}
 
 			fragment.appendChild(busInfoSections);
@@ -362,8 +355,12 @@ const BusInfoModule = (() => {
 				return `
         <div class="bus-item ${info.status.toLowerCase().replace(" ", "-")}${isPreferred ? " preferred" : ""}">
           <div class="bus-content">
-            <div class="star-badge" aria-label="Toggle preferred route">
-              <i class="fas fa-star"></i>
+            <div class="star-badge" 
+                 role="button"
+                 tabindex="0"
+                 aria-label="${isPreferred ? 'Remove from' : 'Add to'} preferred routes"
+                 aria-pressed="${isPreferred}">
+              <i class="fas fa-star" aria-hidden="true"></i>
             </div>
             <div class="bus-number">${escapeHTML(number)}</div>
             <div class="bus-bay">
@@ -383,6 +380,8 @@ const BusInfoModule = (() => {
 	 */
 	async function togglePreferredRoute(route, element) {
 		const busItem = element.closest(".bus-item");
+		if (!busItem) return;
+
 		const isPreferred = busItem.classList.contains("preferred");
 		const updatedRoutes = isPreferred
 			? state.preferences.preferredRoutes.filter((r) => r !== route)
@@ -404,13 +403,14 @@ const BusInfoModule = (() => {
 			if (!response.ok) throw new Error("Failed to update preferences");
 
 			state.preferences.preferredRoutes = updatedRoutes;
-			busItem.classList.toggle("preferred");
+			
+			await fetchPreferences();
+			displayBusInfo();
 
-			if (state.preferences.showPreferredRoutesFirst) {
-				displayBusInfo();
-			}
+			Logger.debug(`Route ${route} ${isPreferred ? "removed from" : "added to"} preferred routes`);
 		} catch (error) {
 			Logger.error("Failed to update preferred routes", { error: error.message });
+			displayError("Failed to update preferred routes. Please try again.");
 		}
 	}
 
@@ -469,46 +469,28 @@ const BusInfoModule = (() => {
 		elements.searchInput.addEventListener(
 			"input",
 			debounce(handleSearchInput, CONFIG.SEARCH_DEBOUNCE_DELAY),
-		)
+		);
 
 		window.addEventListener("online", fetchBusInfo);
 		window.addEventListener("offline", () => displayError("No internet connection", true));
 
-		const predictionsheader = document.querySelector(
-			".predictions-section .bus-section-header",
-		);
-
-		const predictionsContent = document.querySelector(
-			".predictions-section .bus-section-content",
-		);
-
-		if (predictionsheader && predictionsContent) {
-			predictionsheader.addEventListener("click", (event) => {
-				const notClickingInInput = !event.target.closest("input");
-				if (!notClickingInInput) return;
-
-				predictionsContent.classList.toggle("collapsed");
-				predictionsheader.querySelector(".section-toggle").style.transform =
-					predictionsContent.classList.contains("collapsed")
-						? "rotate(0)"
-						: "rotate(180deg)";
-
-				saveCollapsedSections();
-			});
-		}
-
-		// Add event delegation for section toggling
+		// Remove all other section toggle handlers - we'll use one central handler
 		document.addEventListener("click", (event) => {
+			// Don't handle if clicking an input
+			if (event.target.tagName === 'INPUT') return;
+
+			// Find the closest header that was clicked
 			const header = event.target.closest(".bus-section-header");
-			if (header) {
-				const section = header.closest(".bus-section");
-				if (section) {
-					toggleSection(section.id);
-				}
+			if (!header) return;
+
+			// Find the section and toggle it
+			const section = header.closest(".bus-section");
+			if (section && section.id) {
+				toggleSection(section.id);
 			}
 		});
 
-		// Add event listener to toggle sections with enter/space key
+		// Keep keyboard navigation
 		document.addEventListener("keydown", (event) => {
 			if (event.key === "Enter" || event.key === " ") {
 				const header = event.target.closest(".bus-section-header");
@@ -518,6 +500,31 @@ const BusInfoModule = (() => {
 					if (section) {
 						toggleSection(section.id);
 					}
+				}
+			}
+		});
+
+		// Star badge event delegation
+		elements.busInfoList.addEventListener("click", (event) => {
+			const starBadge = event.target.closest(".star-badge");
+			if (!starBadge) return;
+			
+			const busItem = starBadge.closest(".bus-item");
+			if (!busItem) return;
+			
+			const busNumber = busItem.querySelector(".bus-number").textContent.trim();
+			togglePreferredRoute(busNumber, starBadge);
+		});
+
+		// Keyboard support for star badges
+		elements.busInfoList.addEventListener("keydown", (event) => {
+			if (event.key === "Enter" || event.key === " ") {
+				const starBadge = event.target.closest(".star-badge");
+				if (starBadge) {
+					event.preventDefault();
+					const busItem = starBadge.closest(".bus-item");
+					const busNumber = busItem.querySelector(".bus-number").textContent.trim();
+					togglePreferredRoute(busNumber, starBadge);
 				}
 			}
 		});
@@ -598,28 +605,30 @@ const BusInfoModule = (() => {
 	 * Toggles the visibility of a section
 	 * @param {string} sectionId - ID of the section to toggle
 	 */
-	function toggleSection(sectionId, event = null) {
+	function toggleSection(sectionId) {
+		if (!sectionId) {
+			Logger.warn("No section ID provided");
+			return;
+		}
+		
 		const section = document.getElementById(sectionId);
 		if (!section) return;
 
-		if (event) {
-			// Check it's not an input element
-			const notClickingInInput = !event.target.closest("input");
-			if (!notClickingInInput) return;
-		}
-
 		const content = section.querySelector(".bus-section-content");
-		const header = section.querySelector(".bus-section-header");
-		const isCollapsed = content.classList.toggle("collapsed");
+		const toggle = section.querySelector(".section-toggle");
+		const isCollapsed = !content.classList.contains("collapsed");
+		const isSpecialSection = sectionId === "bus-map-section" || sectionId === "predictions-section";
 
 		if (isCollapsed) {
-			state.collapsedSections.delete(sectionId);
-			content.style.maxHeight = `${content.scrollHeight}px`;
-			header.classList.remove("collapsed");
-		} else {
 			state.collapsedSections.add(sectionId);
+			content.classList.add("collapsed");
 			content.style.maxHeight = "0px";
-			header.classList.add("collapsed");
+			toggle.style.transform = "rotate(0deg)";
+		} else {
+			state.collapsedSections.delete(sectionId);
+			content.classList.remove("collapsed");
+			content.style.maxHeight = isSpecialSection ? "500px" : `${content.scrollHeight}px`;
+			toggle.style.transform = "rotate(180deg)";
 		}
 
 		saveCollapsedSections();
@@ -711,7 +720,7 @@ const BusInfoModule = (() => {
 				throw new Error("Invalid API response");
 			}
 
-			updatePredictionsDisplay(predictions.predictions);
+			updatePredictionsDisplay(predictions);
 		} catch (error) {
 			Logger.error("Error fetching bus predictions", { error: error.message });
 		}
@@ -722,12 +731,11 @@ const BusInfoModule = (() => {
 	 * @returns {HTMLElement} - Predictions section element
 	 */
 	function createPredictionsSection() {
+		if (document.querySelector(".predictions-section")) return;
+		
 		const predictionsSection = document.createElement("div");
-		if (predictionsSection) return;
-
-		predictionsSection = document.createElement("div");
-		predictionsSection.className =
-			"bus-section map-section predictions-section";
+		predictionsSection.id = "predictions-section"; // Add ID for state management
+		predictionsSection.className = "bus-section map-section predictions-section";
 
 		const predictionsHeader = document.createElement("div");
 		predictionsHeader.className = "bus-section-header";
@@ -735,6 +743,10 @@ const BusInfoModule = (() => {
 		const predictionsContent = document.createElement("div");
 		predictionsContent.className =
 			"bus-section-content single-column collapsed";
+		// Set initial max-height to 0 for collapsed state
+		predictionsContent.style.maxHeight = "0px";
+		// Add transition for smooth toggling
+		predictionsContent.style.transition = "max-height 0.3s ease-in-out";
 
 		predictionsHeader.innerHTML = `
 				<div class="section-header-content">
@@ -744,7 +756,7 @@ const BusInfoModule = (() => {
 					</div>
 				</div>
 				<button class="section-toggle" aria-label="Toggle section">
-					<i class="fas fa-chevron-down"></i>
+					<i class="fas fa-chevron-up"></i>
 				</button>
 			`;
 
@@ -763,20 +775,14 @@ const BusInfoModule = (() => {
 				"afterend",
 				predictionsSection,
 			);
-		}
+				}
 
-		predictionsHeader.addEventListener("click", (event) => {
-			// Don't toggle if clicking in the search input
-			if (event.target.closest(".predictions-search")) return;
-
-			predictionsContent.classList.toggle("collapsed");
-			predictionsHeader.querySelector(".section-toggle").style.transform =
-				predictionsContent.classList.contains("collapsed")
-					? "rotate(-180deg)"
-					: "rotate(0)";
-
-			saveCollapsedSections();
-		});
+			// Set initial collapsed state from saved state
+		const isCollapsed = state.collapsedSections.has("predictions-section");
+		predictionsContent.classList.toggle("collapsed", isCollapsed);
+		predictionsContent.style.maxHeight = isCollapsed ? "0px" : "500px";
+		predictionsHeader.querySelector(".section-toggle").style.transform =
+			isCollapsed ? "rotate(0)" : "rotate(180deg)";
 
 		setupPredictionsSearch();
 	}
@@ -820,7 +826,7 @@ const BusInfoModule = (() => {
 		predictionsList.innerHTML = "";
 
 		const fragment = document.createDocumentFragment();
-		const entries = Object.entries(predictions);
+		const entries = Object.entries(predictions.predictions);
 
 		for (const [busNumber, info] of entries) {
 			if (info.predictions && info.predictions.length > 0) {

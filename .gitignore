@@ -10,8 +10,9 @@ secrets.json
 .env.*
 !.env.example
 logs/
-Migrations/
 package-lock.json
 *.old
 appsettings*.json
 !appsettings.example.json
+wwwroot/js/*.js
+wwwroot/css/*.css
