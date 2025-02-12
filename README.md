@@ -7,7 +7,7 @@
 
 ## Overview
 
-This repository documents the development of BusInfo, a transit information system developed to analyse and present real-time transport data.
+This repository contains the source code for my Bus Info project. It provides almost real-time information about bus arrivals at Runshaw College.
 
 ## Technical Framework
 
@@ -31,7 +31,7 @@ The application utilises a layered approach:
 
 #### Data Management
 
-- PostgreSQL 16.2 with index optimisation
+- PostgreSQL 17.2 with index optimisation
 - Redis-based caching
 - Serilog with PostgreSQL integration
 
@@ -53,7 +53,7 @@ The application utilises a layered approach:
 
 ```plaintext
 - .NET 9.0 SDK
-- PostgreSQL 16.2
+- PostgreSQL 17.2
 - Redis Stack
 - Node.js
 ```
@@ -158,7 +158,8 @@ Response format:
       "bay": "A1"
     }
   },
-  "lastUpdated": "2025-02-03T12:00:00Z"
+  "lastUpdated": "2025-02-03T12:00:00Z",
+  "status": "OK"
 }
 ```
 
@@ -176,21 +177,31 @@ Response format:
     "102": {
       "predictions": [
         {
-          "bay": "A13",
-          "probability": 52
-        },
+          "bay": "A14",
+          "probability": 100
+        }
+      ],
+      "overallConfidence": 100
+    },
+    "103": {
+      "predictions": [
+        {
+          "bay": "A9",
+          "probability": 100
+        }
+      ],
+      "overallConfidence": 100
+    },
+    "115": {
+      "predictions": [
         {
           "bay": "C13",
-          "probability": 37
-        },
-        {
-          "bay": "B8",
-          "probability": 37
+          "probability": 100
         }
-      ]
+      ],
+      "overallConfidence": 100
     }
-  },
-  "lastUpdated": "2025-02-03T12:00:00Z"
+  }
 }
 ```
 
@@ -205,41 +216,24 @@ Response format:
 
 ```json
 {
-  "predictions": {
-    "809": {
-      "predictions": [
-        {
-          "bay": "A13",
-          "probability": 52
-        },
-        {
-          "bay": "C13",
-          "probability": 37
-        },
-        {
-          "bay": "B8",
-          "probability": 37
-        }
-      ]
-    },
-    "819": {
-      "predictions": [
-        {
-          "bay": "A13",
-          "probability": 52
-        },
-        {
-          "bay": "C13",
-          "probability": 37
-        },
-        {
-          "bay": "B8",
-          "probability": 37
-        }
-      ]
-    }
+  "809": {
+    "predictions": [
+      {
+        "bay": "B2",
+        "probability": 100
+      }
+    ],
+    "overallConfidence": 100
   },
-  "lastUpdated": "2025-02-03T12:00:00Z"
+  "819": {
+    "predictions": [
+      {
+        "bay": "B3",
+        "probability": 100
+      }
+    ],
+    "overallConfidence": 100
+  }
 }
 ```
 
@@ -260,10 +254,10 @@ This project is under active development. Contributions must follow established 
 
 ## Legal Statement
 
-This project is an independent research initiative with no affiliation to Runshaw College.
+This project is an independent project and is not affiliated with any external organisations.
 
 ## Contact
 
-For technical enquiries:
+For any enquiries:
 
 - Email: [jacob-walton@konpeki.co.uk](mailto:jacob-walton@konpeki.co.uk)
