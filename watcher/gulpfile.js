@@ -6,6 +6,7 @@
 
 // Import core Gulp functions and plugins
 const { src, dest, watch, series, parallel } = require("gulp");
+const merge = require("merge-stream");
 const sass = require("gulp-sass")(require("sass"));
 const autoprefixer = require("autoprefixer");
 const postcss = require("gulp-postcss");
@@ -18,6 +19,7 @@ const rollup = require("rollup");
 const { nodeResolve } = require("@rollup/plugin-node-resolve");
 const source = require("vinyl-source-stream");
 const buffer = require("vinyl-buffer");
+const { rimraf } = require('rimraf');
 
 /**
  * Environment configuration flag
@@ -37,8 +39,50 @@ const isProd = process.env.NODE_ENV === "production";
 const config = {
 	entryPoints: ["js/site.js", "js/businfo.js", "js/settings.js"],
 	modulesDir: "js/modules",
-	outputDir: "../wwwroot/js",
+	outputDir: "dist",
+	devOutputDirs: {
+		js: "../wwwroot/js",
+		css: "../wwwroot/css"
+	},
+	s3: {
+		bucket: process.env.BUCKET, // e.g. "my-bucket-name"
+		region: process.env.REGION // e.g. "uk-west-1"
+	}
 };
+
+const s3 = require("gulp-s3-upload")({
+	accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+	secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+});
+
+/**
+ * Uploads files to an S3 bucket
+ */
+function uploadToS3() {
+	// Upload JS files
+	const jsUpload = src(`${config.outputDir}/js/**/*.js`)
+		.pipe(s3({
+			Bucket: config.s3.bucket,
+			ACL: "public-read",
+			keyTransform: function (relative_filename) {
+				return `js/${relative_filename}`;
+			},
+			uploadNewFilesOnly: true
+		}));
+
+	// Upload CSS files
+	const cssUpload = src(`${config.outputDir}/css/**/*.css`)
+		.pipe(s3({
+			Bucket: config.s3.bucket,
+			ACL: "public-read",
+			keyTransform: function (relative_filename) {
+				return `css/${relative_filename}`;
+			},
+			uploadNewFilesOnly: true
+		}));
+
+	return merge(jsUpload, cssUpload);
+}
 
 /**
  * Processes SCSS files into optimized CSS
@@ -73,12 +117,11 @@ function buildStyles() {
 	// Strip sourcemaps in production mode
 	if (isProd) {
 		stream = stream.pipe(removeSourcemaps());
+		return stream.pipe(dest(config.outputDir + "/css", { sourcemaps: false }));
 	}
 
 	// Output to destination
-	return stream.pipe(
-		dest("../wwwroot/css/", { sourcemaps: isProd ? false : "." }),
-	);
+	return stream.pipe(dest(config.devOutputDirs.css, { sourcemaps: "." }));
 }
 
 /**
@@ -90,68 +133,67 @@ function buildStyles() {
  * @returns {Promise<void[]>} Promise that resolves when all files are processed
  */
 async function minifyJs() {
-	const tasks = config.entryPoints.map(async (entry) => {
-		// Bundle using Rollup
-		const bundle = await rollup.rollup({
-			input: entry,
-			plugins: [nodeResolve()],
-		});
+    const tasks = config.entryPoints.map(async (entry) => {
+        // Bundle using Rollup
+        const bundle = await rollup.rollup({
+            input: entry,
+            plugins: [nodeResolve()],
+        });
 
-		// Extract filename from entry path
-		const filename = entry.split("/").pop();
+        // Extract filename from entry path
+        const filename = entry.split("/").pop();
+        const outputPath = isProd 
+            ? `${config.outputDir}/js/${filename}`
+            : `${config.devOutputDirs.js}/${filename}`;
 
-		// Generate bundle in IIFE format
-		await bundle.write({
-			file: `${config.outputDir}/${filename}`,
-			format: "iife",
-			name: filename.replace(".js", ""),
-			sourcemap: !isProd,
-		});
+        // Generate bundle in IIFE format
+        await bundle.write({
+            file: outputPath,
+            format: "iife",
+            name: filename.replace(".js", ""),
+            sourcemap: !isProd,
+        });
 
-		if (isProd) {
-			return (
-				src(`${config.outputDir}/${filename}`)
-					.pipe(buffer())
-					// Remove console logs and debugger statements
-					.pipe(
-						terser({
-							compress: {
-								drop_console: true,
-								drop_debugger: true,
-							},
-						}),
-					)
-					// Apply obfuscation
-					.pipe(
-						javascriptObfuscator({
-							compact: true,
-							controlFlowFlattening: false,
-							deadCodeInjection: false,
-							debugProtection: false,
-							disableConsoleOutput: true,
-							identifierNamesGenerator: "hexadecimal",
-							renameGlobals: false,
-							rotateStringArray: true,
-							selfDefending: false,
-							shuffleStringArray: true,
-							splitStrings: true,
-							splitStringsChunkLength: 5,
-							stringArray: true,
-							stringArrayEncoding: ["base64"],
-							stringArrayThreshold: 0.5,
-							transformObjectKeys: false,
-							unicodeEscapeSequence: false,
-						}),
-					)
-					.pipe(removeSourcemaps())
-					.pipe(dest(config.outputDir))
-			);
-		}
+        if (isProd) {
+            return src(outputPath)
+                .pipe(buffer())
+                .pipe(
+                    terser({
+                        compress: {
+                            drop_console: true,
+                            drop_debugger: true,
+                        },
+                    })
+                )
+                .pipe(
+                    javascriptObfuscator({
+                        compact: true,
+                        controlFlowFlattening: false,
+                        deadCodeInjection: false,
+                        debugProtection: false,
+                        disableConsoleOutput: true,
+                        identifierNamesGenerator: "hexadecimal",
+                        renameGlobals: false,
+                        rotateStringArray: true,
+                        selfDefending: false,
+                        shuffleStringArray: true,
+                        splitStrings: true,
+                        splitStringsChunkLength: 5,
+                        stringArray: true,
+                        stringArrayEncoding: ["base64"],
+                        stringArrayThreshold: 0.5,
+                        transformObjectKeys: false,
+                        unicodeEscapeSequence: false,
+                    })
+                )
+                .pipe(removeSourcemaps())
+                .pipe(dest(config.outputDir + "/js"));
+        }
 
-		return Promise.resolve();
-	});
+        return Promise.resolve();
+    });
 
-	return Promise.all(tasks);
+    return Promise.all(tasks);
 }
 
 /**
@@ -173,6 +215,17 @@ function watchTask() {
 }
 
 /**
+ * Cleans up the output directory in production
+ * @returns {Promise<void>}
+ */
+async function cleanup() {
+    if (isProd) {
+        return rimraf(config.outputDir);
+    }
+    return Promise.resolve();
+}
+
+/**
  * Export build tasks
  * @property {Function} styles - Builds CSS files
  * @property {Function} scripts - Builds JavaScript files
@@ -183,5 +236,7 @@ function watchTask() {
 exports.styles = buildStyles;
 exports.scripts = minifyJs;
 exports.watch = watchTask;
-exports.build = parallel(buildStyles, minifyJs);
+exports.build = isProd 
+    ? series(parallel(buildStyles, minifyJs), uploadToS3, cleanup)
+    : parallel(buildStyles, minifyJs);
 exports.default = series(parallel(buildStyles, minifyJs), watchTask);

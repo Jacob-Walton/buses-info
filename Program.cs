@@ -226,7 +226,11 @@ namespace BusInfo
             });
 
             // Configure Razor Pages
-            builder.Services.AddRazorPages();
+            builder.Services.AddRazorPages()
+                .AddRazorPagesOptions(options =>
+                {
+                    // existing options...
+                });
 
             // Configure Compression
             builder.Services.AddResponseCompression(options =>

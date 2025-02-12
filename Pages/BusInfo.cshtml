@@ -1,5 +1,7 @@
 @page "/buses"
 @model BusInfoModel
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
 @{
     ViewData["Title"] = "Buses";
 }
@@ -34,5 +36,5 @@
 @Html.AntiForgeryToken()
 
 @section Scripts {
-    <script src="~/js/businfo.js" defer asp-append-version="true"></script>
+    <script cdn src="/js/businfo.js" defer></script>
 }

@@ -28,6 +28,10 @@
 		"vinyl-source-stream": "^2.0.0"
 	},
 	"devDependencies": {
-		"cross-env": "^7.0.3"
+		"aws-sdk": "^2.1692.0",
+		"cross-env": "^7.0.3",
+		"gulp-s3-upload": "^1.7.3",
+		"merge-stream": "^2.0.0",
+		"rimraf": "^6.0.1"
 	}
 }

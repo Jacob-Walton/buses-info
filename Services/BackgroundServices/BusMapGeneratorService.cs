@@ -6,19 +6,23 @@ using System.Threading.Tasks;
 using BusInfo.Extensions;
 using BusInfo.Models;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace BusInfo.Services.BackgroundServices
 {
     public class BusMapGeneratorService(
-        IBusInfoService busInfoService,
-        IBusLaneService busLaneService,
+        IServiceScopeFactory scopeFactory,
         IMemoryCache cache,
         ILogger<BusMapGeneratorService> logger) : BackgroundService
     {
-        private readonly IBusInfoService _busInfoService = busInfoService;
-        private readonly IBusLaneService _busLaneService = busLaneService;
+        private static readonly Action<ILogger, Exception> _logGenerateError =
+            LoggerMessage.Define(LogLevel.Error,
+                               new EventId(1, nameof(ExecuteAsync)),
+                               "Error generating bus lane map");
+
+        private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
         private readonly IMemoryCache _cache = cache;
         private readonly ILogger<BusMapGeneratorService> _logger = logger;
         private const string MAP_CACHE_KEY_PREFIX = "BusLaneMap_";
@@ -34,7 +38,7 @@ namespace BusInfo.Services.BackgroundServices
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error generating bus lane map");
+                    _logGenerateError(_logger, ex);
                 }
 
                 await Task.Delay(TimeSpan.FromMinutes(UPDATE_INTERVAL_MINUTES), stoppingToken);
@@ -43,13 +47,17 @@ namespace BusInfo.Services.BackgroundServices
 
         private async Task GenerateAndCacheMapAsync()
         {
-            BusInfoResponse busInfo = await _busInfoService.GetBusInfoAsync();
+            using IServiceScope scope = _scopeFactory.CreateScope();
+            IBusInfoService busInfoService = scope.ServiceProvider.GetRequiredService<IBusInfoService>();
+            IBusLaneService busLaneService = scope.ServiceProvider.GetRequiredService<IBusLaneService>();
+
+            BusInfoResponse busInfo = await busInfoService.GetBusInfoAsync();
             Dictionary<string, string> bayServiceMap = busInfo.BusData.ToDictionaryWithFirstValue(
                 x => x.Value.Bay ?? string.Empty,
                 x => x.Key);
 
             string cacheKey = MAP_CACHE_KEY_PREFIX + string.Join("_", bayServiceMap.Select(kvp => $"{kvp.Key}:{kvp.Value}"));
-            byte[] imageData = await _busLaneService.GenerateBusLaneMapAsync(bayServiceMap);
+            byte[] imageData = await busLaneService.GenerateBusLaneMapAsync(bayServiceMap);
 
             MemoryCacheEntryOptions cacheOptions = new MemoryCacheEntryOptions()
                 .SetAbsoluteExpiration(TimeSpan.FromMinutes(UPDATE_INTERVAL_MINUTES + 1));

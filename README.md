@@ -108,8 +108,11 @@ The application utilises a layered approach:
 6. **Run the Application**
 
    ```shell
+   # Move back to the root directory
+   $ cd ..
+
    # Start the application
-   $ dotnet run
+   $ dotnet run --environment Development
    
    # The application will be available at:
    # http://localhost:{port}

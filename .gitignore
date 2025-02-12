@@ -15,4 +15,5 @@ package-lock.json
 appsettings*.json
 !appsettings.example.json
 wwwroot/js/*.js
+wwwroot/**/*.map
 wwwroot/css/*.css
