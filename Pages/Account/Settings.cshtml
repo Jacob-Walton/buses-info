@@ -125,44 +125,40 @@
                     </div>
                     <!-- Change Password -->
                     <div class="settings-row">
-                        <div class="settings-field">
-                            <h3>Change Password</h3>
-                            <div class="password-form">
-                                <div class="form-group">
-                                    <label for="currentPassword">Current Password</label>
-                                    <input type="password" id="currentPassword" name="currentPassword" required
-                                        minlength="8" autocomplete="current-password" />
+                        <div class="settings-row">
+                            <div class="settings-field">
+                                <h3>Change Password</h3>
+                                <div class="password-form">
+                                    <div class="form-group">
+                                        <label for="currentPassword">Current Password</label>
+                                        <input type="password" id="currentPassword" name="currentPassword" required />
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="newPassword">New Password</label>
+                                        <input type="password" id="newPassword" name="newPassword" required />
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="confirmPassword">Confirm New Password</label>
+                                        <input type="password" id="confirmPassword" name="confirmPassword" required />
+                                    </div>
+                                    <button type="button" class="btn-primary">
+                                        <i class="fas fa-key"></i> Change Password
+                                    </button>
                                 </div>
-                                <div class="form-group">
-                                    <label for="newPassword">New Password</label>
-                                    <input type="password" id="newPassword" name="newPassword" required minlength="8"
-                                        autocomplete="new-password"
-                                        pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@@$!%*?&])[A-Za-z\d@@$!%*?&]{8,}"
-                                        title="Must contain at least 8 characters, one uppercase, one lowercase, one number and one special character" />
-                                </div>
-                                <div class="form-group">
-                                    <label for="confirmPassword">Confirm New Password</label>
-                                    <input type="password" id="confirmPassword" name="confirmPassword" required
-                                        minlength="8" autocomplete="new-password" />
-                                </div>
-                                <button type="button" class="btn-primary change-password-btn">
-                                    <i class="fas fa-key"></i> Change Password
-                                </button>
                             </div>
                         </div>
-                    </div>
-                    <div class="settings-field">
-                        <h3>Export Data</h3>
-                        <button type="button" class="btn-secondary">
-                            <i class="fas fa-download"></i> Export Account Data
-                        </button>
-                    </div>
-                    <div class="settings-field">
-                        <h3>Delete Account</h3>
-                        <button type="button" class="btn-danger">
-                            <i class="fas fa-trash"></i> Delete Account
-                        </button>
-                    </div>
+                        <div class="settings-field">
+                            <h3>Export Data</h3>
+                            <button type="button" class="btn-secondary">
+                                <i class="fas fa-download"></i> Export Account Data
+                            </button>
+                        </div>
+                        <div class="settings-field">
+                            <h3>Delete Account</h3>
+                            <button type="button" class="btn-danger">
+                                <i class="fas fa-trash"></i> Delete Account
+                            </button>
+                        </div>
                 </section>
 
                 <div class="settings-save-bar">

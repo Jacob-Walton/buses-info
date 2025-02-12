@@ -18,6 +18,14 @@ namespace BusInfo.Data
             modelBuilder?.Entity<ApplicationUser>(entity =>
                     {
                         entity.HasIndex(u => u.Email).IsUnique();
+                        // Add index for preferences columns
+                        entity.HasIndex(u => new
+                        {
+                            u.PreferredRoutes,
+                            u.ShowPreferredRoutesFirst,
+                            u.EnableEmailNotifications
+                        }).HasDatabaseName("IX_User_Preferences");
+
                         // Basic columns
                         entity.Property(u => u.Email).IsRequired().HasMaxLength(256);
                         entity.Property(u => u.PasswordHash).IsRequired();
@@ -52,11 +60,18 @@ namespace BusInfo.Data
                             .HasColumnType("timestamp with time zone");
                     });
 
-            modelBuilder?.Entity<ApiKeyRequest>()
-                .HasOne(r => r.User)
-                .WithMany()
-                .HasForeignKey(r => r.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder?.Entity<ApiKeyRequest>(entity =>
+            {
+                entity.HasOne(r => r.User)
+                    .WithMany()
+                    .HasForeignKey(r => r.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // Add index for UserId foreign key
+                entity.HasIndex(r => r.UserId);
+                // Add index for common query patterns
+                entity.HasIndex(r => new { r.Status, r.RequestedAt });
+            });
 
             modelBuilder?.Entity<AdminSettings>(entity =>
                 {
@@ -66,6 +81,9 @@ namespace BusInfo.Data
                     entity.Property(e => e.ArchivedDataRetentionDays).IsRequired();
                     entity.Property(e => e.MaintenanceWindow).IsRequired();
                     entity.Property(e => e.ModifiedBy).IsRequired();
+
+                    // Add index for common query pattern
+                    entity.HasIndex(e => e.ModifiedBy);
                 });
 
             modelBuilder?.Entity<BusArrival>(entity =>
@@ -78,6 +96,12 @@ namespace BusInfo.Data
                     entity.Property(e => e.ArrivalTime).HasColumnType("timestamp with time zone");
 
                     entity.HasIndex(e => new { e.Service, e.ArrivalTime });
+
+                    // Add comprehensive index for common query patterns
+                    entity.HasIndex(e => new { e.Service, e.Status, e.ArrivalTime })
+                        .HasDatabaseName("IX_BusArrival_ServiceStatusTime");
+                    // Add index for weather-based queries
+                    entity.HasIndex(e => new { e.Weather, e.ArrivalTime });
                 });
 
             modelBuilder?.Entity<ApiKey>(entity =>
@@ -90,6 +114,9 @@ namespace BusInfo.Data
                     .WithMany()
                     .HasForeignKey(e => e.UserId)
                     .OnDelete(DeleteBehavior.SetNull);
+
+                // Add index for user lookups
+                entity.HasIndex(e => e.UserId);
             });
         }
     }

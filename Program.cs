@@ -39,6 +39,7 @@ using Microsoft.AspNetCore.ResponseCompression;
 using System.Linq;
 using BusInfo.Services.BackgroundServices;
 using BusInfo.Authentication.Authorization;
+using Azure.Core;
 
 namespace BusInfo
 {
@@ -57,7 +58,7 @@ namespace BusInfo
         private static X509Certificate2 LoadCertificateFromKeyVault(string keyVaultUri)
         {
             SecretClient keyVaultClient = new(new Uri(keyVaultUri), new DefaultAzureCredential());
-            string certificateBase64 = keyVaultClient.GetSecret("Main").Value?.Value
+            string certificateBase64 = keyVaultClient.GetSecret("Main2").Value?.Value
                 ?? throw new InvalidOperationException("Certificate not found in Key Vault");
             byte[] certificateBytes = Convert.FromBase64String(certificateBase64);
 
@@ -104,6 +105,36 @@ namespace BusInfo
             }
         }
 
+        private static TokenCredential CreateAzureCredential(ConfigurationManager config, IWebHostEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                return new DefaultAzureCredential(new DefaultAzureCredentialOptions
+                {
+                    Retry = { MaxRetries = 3, NetworkTimeout = TimeSpan.FromSeconds(5) }
+                });
+            }
+
+            // For non-development environments, use client secret credentials
+            string? clientId = config["KeyVault:ClientId"];
+            string? clientSecret = config["KeyVault:ClientSecret"];
+            string? tenantId = config["KeyVault:TenantId"];
+
+            if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret) || string.IsNullOrEmpty(tenantId))
+            {
+                throw new InvalidOperationException("Azure credentials not properly configured, ensure that your config contains correct values.");
+            }
+
+            return new ClientSecretCredential(
+                tenantId,
+                clientId,
+                clientSecret,
+                new ClientSecretCredentialOptions
+                {
+                    Retry = { MaxRetries = 3, NetworkTimeout = TimeSpan.FromSeconds(5) }
+                });
+        }
+
         private static void ConfigureConfiguration(WebApplicationBuilder builder)
         {
             ConfigurationManager config = builder.Configuration;
@@ -111,22 +142,20 @@ namespace BusInfo
             // Base configuration
             config.SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
+                .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables();
 
             try
             {
                 string keyVaultUri = config["KeyVault:Uri"] ?? throw new InvalidOperationException("KeyVault URI is not configured");
-                DefaultAzureCredential credential = new(new DefaultAzureCredentialOptions
-                {
-                    Retry = { MaxRetries = 3, NetworkTimeout = TimeSpan.FromSeconds(5) }
-                });
+                TokenCredential credential = CreateAzureCredential(builder.Configuration, builder.Environment);
 
                 config.AddAzureKeyVault(
                     new Uri(keyVaultUri),
                     credential,
                     new AzureKeyVaultConfigurationOptions
                     {
-                        ReloadInterval = TimeSpan.FromMinutes(5),
+                        ReloadInterval = TimeSpan.FromMinutes(30),
                         Manager = new KeyVaultSecretNameFormatter()
                     });
 
@@ -158,7 +187,8 @@ namespace BusInfo
                               fileSizeLimitBytes: 10_000_000,
                               rollingInterval: RollingInterval.Day,
                               rollOnFileSizeLimit: true,
-                              retainedFileCountLimit: 7)
+                              retainedFileCountLimit: 7,
+                              flushToDiskInterval: TimeSpan.FromSeconds(2))
             );
         }
 
@@ -168,15 +198,6 @@ namespace BusInfo
             string keyVaultUri = config["KeyVault:Uri"] ?? throw new InvalidOperationException("KeyVault URI is not configured");
 
             X509Certificate2 serverCertificate = LoadCertificateFromKeyVault(keyVaultUri);
-
-            // Configure Kestrel with the certificate
-            builder.WebHost.ConfigureKestrel(serverOptions =>
-            {
-                serverOptions.ConfigureHttpsDefaults(httpsOptions =>
-                {
-                    httpsOptions.ServerCertificate = serverCertificate;
-                });
-            });
 
             // Configure SMTP settings
             builder.Services.Configure<SmtpSettings>(config.GetSection("Smtp"));
@@ -212,6 +233,14 @@ namespace BusInfo
 
             // Configure Razor Pages
             builder.Services.AddRazorPages();
+
+            // Configure Compression
+            builder.Services.AddResponseCompression(options =>
+            {
+                options.EnableForHttps = true;
+                options.Providers.Add<BrotliCompressionProvider>();
+                options.Providers.Add<GzipCompressionProvider>();
+            });
 
             // Configure DB Context
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -260,6 +289,16 @@ namespace BusInfo
                                 await userService.GetOrCreateUserAsync(context.Principal);
                                 claimsIdentity.AddClaim(new Claim("claims_last_refresh", System.DateTimeOffset.UtcNow.ToString("o")));
                             }
+                        },
+                        OnRedirectToLogin = context =>
+                        {
+                            if (context.Request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase))
+                            {
+                                context.Response.StatusCode = 401;
+                                return Task.CompletedTask;
+                            }
+                            context.Response.Redirect(context.RedirectUri);
+                            return Task.CompletedTask;
                         }
                     };
                 });
@@ -295,15 +334,15 @@ namespace BusInfo
             // Configure CORS
             builder.Services.AddCors(options =>
             {
-                options.AddDefaultPolicy(builder =>
-                    builder.SetIsOriginAllowed(origin =>
-                    {
-                        string[] allowedOrigins = (config["Cors:AllowedOrigins"] ?? "").Split(",");
-                        return allowedOrigins.Contains(origin, StringComparer.OrdinalIgnoreCase);
-                    })
-                    .AllowAnyMethod()
-                    .AllowAnyHeader()
-                    .AllowCredentials());
+                options.AddDefaultPolicy(policy =>
+                {
+                    string[] AllowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+
+                    policy.WithOrigins(AllowedOrigins)
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .AllowCredentials();
+                });
             });
 
             // Configure Rate Limiting
@@ -321,6 +360,7 @@ namespace BusInfo
 
             // Add background services
             builder.Services.AddHostedService<BusInfoBackgroundService>();
+            builder.Services.AddHostedService<BusMapGeneratorService>();
             // builder.Services.AddHostedService<BusInfoMaintenanceService>();
 
             // Add ConfigCat service registration
@@ -342,8 +382,6 @@ namespace BusInfo
                 app.UseExceptionHandler("/error");
                 app.UseHsts();
             }
-
-            app.UseHttpsRedirection();
 
             app.UseStaticFiles();
             app.UseRouting();

@@ -73,15 +73,18 @@ namespace BusInfo.Controllers
             string? userId = GetCurrentUserId();
             if (userId == null) return Unauthorized();
 
-            ApplicationUser? user = await _userService.GetUserByIdAsync(userId);
-            return user == null
-                ? NotFound()
-                : Ok(new UserPreferences
+            UserPreferences? preferences = await _context.Users
+                .AsNoTracking()
+                .Where(u => u.Id == userId)
+                .Select(u => new UserPreferences
                 {
-                    PreferredRoutes = user.PreferredRoutes ?? new(),
-                    ShowPreferredRoutesFirst = user.ShowPreferredRoutesFirst,
-                    EnableEmailNotifications = user.EnableEmailNotifications
-                });
+                    PreferredRoutes = u.PreferredRoutes ?? new(),
+                    ShowPreferredRoutesFirst = u.ShowPreferredRoutesFirst,
+                    EnableEmailNotifications = u.EnableEmailNotifications
+                })
+                .FirstOrDefaultAsync();
+
+            return preferences == null ? NotFound() : Ok(preferences);
         }
 
         [HttpPut("preferences")]
@@ -197,10 +200,14 @@ namespace BusInfo.Controllers
             ApiKey? activeKey = await _context.ApiKeys
                 .FirstOrDefaultAsync(k => k.UserId == userId && k.IsActive);
 
+            bool hasPendingRequest = await _context.ApiKeyRequests
+                .AnyAsync(r => r.UserId == userId && r.Status == "Pending");
+
             return Ok(new
             {
                 hasApiKey = activeKey != null,
-                key = activeKey?.Key
+                key = activeKey?.Key,
+                pendingRequest = hasPendingRequest
             });
         }
 

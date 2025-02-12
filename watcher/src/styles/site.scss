@@ -4921,3 +4921,33 @@ body {
     margin-left: calc(#{$spacing-unit} + 20px);
   }
 }
+
+.map-section, .predictions-section {
+    .bus-section-content {
+        transition: max-height 0.3s ease-in-out;
+        overflow: hidden;
+
+        &.collapsed {
+            max-height: 0 !important;
+        }
+
+        &:not(.collapsed) {
+            max-height: 500px !important;
+            overflow-y: auto;
+        }
+
+        // Hide scrollbar in WebKit browsers
+        &::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+    }
+
+    .bus-map {
+        width: 100%;
+        height: auto;
+        max-height: 500px;
+        object-fit: contain;
+        display: block;
+    }
+}

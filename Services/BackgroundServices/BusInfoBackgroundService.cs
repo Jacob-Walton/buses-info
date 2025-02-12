@@ -29,7 +29,7 @@ namespace BusInfo.Services.BackgroundServices
             return now.DayOfWeek != DayOfWeek.Saturday
                 && now.DayOfWeek != DayOfWeek.Sunday
                 && now.Hour >= 14
-                && now.Hour < 17;
+                && now.Hour < 19;
         }
 
         private static readonly Action<ILogger, DateTime, Exception?> LogRequestReceived =

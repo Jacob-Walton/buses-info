@@ -23,6 +23,11 @@ namespace BusInfo.Authentication
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
+            if (Request.Cookies.ContainsKey("BusInfo.Auth"))
+            {
+                return AuthenticateResult.NoResult();
+            }
+
             if (!Request.Headers.TryGetValue(API_KEY_HEADER, out StringValues apiKeyHeaderValues))
             {
                 return AuthenticateResult.Fail("Missing API key");
@@ -45,8 +50,8 @@ namespace BusInfo.Authentication
 
             Claim[] claims =
             [
-                new Claim(ClaimTypes.Name, user.Email),
-                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new(ClaimTypes.Name, user.Email),
+                new(ClaimTypes.NameIdentifier, user.Id),
             ];
 
             ClaimsIdentity identity = new(claims, Scheme.Name);
