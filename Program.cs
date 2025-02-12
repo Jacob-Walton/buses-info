@@ -105,7 +105,7 @@ namespace BusInfo
             }
         }
 
-        private static TokenCredential CreateAzureCredential(IWebHostEnvironment env)
+        private static TokenCredential CreateAzureCredential(ConfigurationManager config, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -116,13 +116,13 @@ namespace BusInfo
             }
 
             // For non-development environments, use client secret credentials
-            string? clientId = Environment.GetEnvironmentVariable("AZURE_CLIENT_ID");
-            string? clientSecret = Environment.GetEnvironmentVariable("AZURE_CLIENT_SECRET");
-            string? tenantId = Environment.GetEnvironmentVariable("AZURE_TENANT_ID");
+            string? clientId = config["KeyVault:ClientId"];
+            string? clientSecret = config["KeyVault:ClientSecret"];
+            string? tenantId = config["KeyVault:TenantId"];
 
             if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret) || string.IsNullOrEmpty(tenantId))
             {
-                throw new InvalidOperationException("Azure credentials not properly configured. Ensure AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, and AZURE_TENANT_ID environment variables are set.");
+                throw new InvalidOperationException("Azure credentials not properly configured, ensure that your config contains correct values.");
             }
 
             return new ClientSecretCredential(
@@ -148,7 +148,7 @@ namespace BusInfo
             try
             {
                 string keyVaultUri = config["KeyVault:Uri"] ?? throw new InvalidOperationException("KeyVault URI is not configured");
-                TokenCredential credential = CreateAzureCredential(builder.Environment);
+                TokenCredential credential = CreateAzureCredential(builder.Configuration, builder.Environment);
 
                 config.AddAzureKeyVault(
                     new Uri(keyVaultUri),
