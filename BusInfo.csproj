@@ -59,10 +59,6 @@
     <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.4.0" />
     <PackageReference Include="Microsoft.Identity.Web" Version="3.6.2" />
     <PackageReference Include="Microsoft.Identity.Web.UI" Version="3.6.2" />
-  </ItemGroup>
-
-  <!-- Platform Specific -->
-  <ItemGroup Condition="'$(OS)' == 'Linux'">
     <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.116.1" />
   </ItemGroup>
 
