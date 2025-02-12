@@ -25,7 +25,6 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
     <PackageReference Include="SkiaSharp" Version="3.116.1" />
-    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.116.1" />
     <PackageReference Include="StackExchange.Redis" Version="2.8.24" />
     <PackageReference Include="System.Drawing.Common" Version="9.0.1" />
     <PackageReference Include="System.IO.Hashing" Version="9.0.1" />
@@ -57,6 +56,11 @@
     <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.4.0" />
     <PackageReference Include="Microsoft.Identity.Web" Version="3.6.2" />
     <PackageReference Include="Microsoft.Identity.Web.UI" Version="3.6.2" />
+  </ItemGroup>
+
+  <!-- Platform Specific -->
+  <ItemGroup Condition="'$(OS)' == 'Linux'">
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.116.1" />
   </ItemGroup>
 
   <ItemGroup>
