@@ -8,6 +8,13 @@
     <div class="login-container">
         <h1 class="login-title">Welcome Back</h1>
 
+        @if (TempData["StatusMessage"] != null)
+        {
+            <div class="alert alert-success" role="alert">
+                @TempData["StatusMessage"]
+            </div>
+        }
+
         <div asp-validation-summary="ModelOnly" class="error-summary" role="alert"></div>
 
         <form method="post" class="login-form" id="loginForm">
@@ -55,7 +62,7 @@
         <div class="custom-modal-content">
             <h2>Account Pending Deletion</h2>
             <p>Your account is currently scheduled for deletion. Would you like to reactivate it?</p>
-            <form method="post" asp-page-handler="ReactivateAccount" id="reactivateForm">
+            <form method="post" asp-page-handler="ReactiveAccount">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="email" value="@Model.PendingReactivationEmail" />
                 <div class="modal-actions">
