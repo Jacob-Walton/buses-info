@@ -101,7 +101,7 @@ namespace BusInfo.Pages
             }
         }
 
-        public async Task<IActionResult> OnPostReactiveAccountAsync(string email)
+        public async Task<IActionResult> OnPostReactiveAccountAsync([FromForm] string email)
         {
             if (IsSubmitting)
                 return RedirectToPage();
@@ -117,33 +117,9 @@ namespace BusInfo.Pages
                     return Page();
                 }
 
-                ApplicationUser? user = await _userService.AuthenticateAsync(email, LoginInput.Password);
-                if (user == null)
-                {
-                    ModelState.AddModelError(string.Empty, "Invalid username or password.");
-                    return Page();
-                }
-
-                List<Claim> claims = [
-                    new(ClaimTypes.Email, user.Email),
-                    new(ClaimTypes.NameIdentifier, user.Id)
-                ];
-
-                if (user.IsAdmin)
-                    claims.Add(new(ClaimTypes.Role, "Admin"));
-
-                ClaimsIdentity identity = new(claims, "local");
-                ClaimsPrincipal principal = new(identity);
-
-                AuthenticationProperties authProperties = new()
-                {
-                    IsPersistent = LoginInput.RememberMe,
-                    RedirectUri = "/"
-                };
-
-                await HttpContext.SignInAsync(principal, authProperties);
-
-                return Redirect(authProperties.RedirectUri);
+                // Set success message and redirect to login page
+                TempData["StatusMessage"] = "Your account has been reactivated. Please login to continue.";
+                return RedirectToPage("/Login");
             }
             catch (Exception)
             {

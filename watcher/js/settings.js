@@ -336,8 +336,9 @@ class SettingsManager {
 	}
 
 	setupPasswordForm() {
-		if (this.passwordForm) {
-			this.passwordForm.addEventListener("submit", async (e) => {
+		const form = document.getElementById('passwordForm');
+		if (form) {
+			form.addEventListener('submit', async (e) => {
 				e.preventDefault();
 				await this.changePassword();
 			});
@@ -345,41 +346,42 @@ class SettingsManager {
 	}
 
 	async changePassword() {
-		const currentPassword = document.getElementById("currentPassword").value;
-		const newPassword = document.getElementById("newPassword").value;
-		const confirmPassword = document.getElementById("confirmPassword").value;
+		const currentPassword = document.getElementById('currentPassword').value;
+		const newPassword = document.getElementById('newPassword').value;
+		const confirmPassword = document.getElementById('confirmPassword').value;
 
 		if (!currentPassword || !newPassword || !confirmPassword) {
-			this.toast.show("Please fill in all password fields", "error");
+			this.toast.show('Please fill in all password fields', 'error');
 			return;
 		}
 
 		if (newPassword !== confirmPassword) {
-			this.toast.show("New passwords do not match", "error");
+			this.toast.show('New passwords do not match', 'error');
 			return;
 		}
 
 		try {
-			const response = await fetch("/api/accounts/password", {
-				method: "PUT",
+			const response = await fetch('/api/accounts/password', {
+				method: 'PUT',
 				headers: {
-					"Content-Type": "application/json",
+					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify({
 					currentPassword,
 					newPassword,
+					confirmPassword
 				}),
 			});
 
 			if (!response.ok) {
 				const error = await response.json();
-				throw new Error(error.message || "Failed to change password");
+				throw new Error(error.message || 'Failed to change password');
 			}
 
-			this.toast.show("Password changed successfully", "success");
-			this.passwordForm.reset();
+			this.toast.show('Password changed successfully', 'success');
+			document.getElementById('passwordForm').reset();
 		} catch (error) {
-			this.toast.show(error.message || "Error changing password", "error");
+			this.toast.show(error.message || 'Error changing password', 'error');
 		}
 	}
 
@@ -435,44 +437,67 @@ class SettingsManager {
 	}
 
 	async confirmDeleteAccount() {
-		const confirmed = await this.showConfirmDialog(
-			"Delete Account",
-			"This action cannot be undone. Please enter your password to confirm.",
-			"password",
+		const password = await this.showConfirmDialog(
+			'Delete Account',
+			'This action cannot be undone. Please enter your password to confirm.',
+			'password'
 		);
 
-		if (confirmed) {
-			await this.deleteAccount(confirmed);
+		if (password) {
+			try {
+				const response = await fetch('/api/accounts', {
+					method: 'DELETE',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({ password }),
+				});
+
+				if (!response.ok) {
+					const error = await response.json();
+					throw new Error(error.message || 'Failed to delete account');
+				}
+
+				// Log out and redirect to home page
+				await fetch('/api/accounts/logout', { method: 'POST' });
+				window.location.href = '/';
+			} catch (error) {
+				this.toast.show(error.message || 'Error deleting account', 'error');
+			}
 		}
 	}
 
-	showConfirmDialog(title, message, inputType = "text") {
+	async showConfirmDialog(title, message, inputType = "text") {
+		// Create modal dialog
+		const modal = document.createElement('div');
+		modal.className = 'custom-modal';
+		modal.innerHTML = `
+			<div class="custom-modal-content">
+				<h2>${title}</h2>
+				<p>${message}</p>
+				<input type="${inputType}" class="modal-input" placeholder="Enter your password" />
+				<div class="modal-actions">
+					<button type="button" class="btn-secondary" data-action="cancel">Cancel</button>
+					<button type="button" class="btn-danger" data-action="confirm">Confirm</button>
+				</div>
+			</div>
+		`;
+
+		// Add to document
+		document.body.appendChild(modal);
+
+		// Handle confirmation
 		return new Promise((resolve) => {
-			const dialog = document.createElement("div");
-			dialog.className = "confirm-dialog";
-			dialog.innerHTML = `
-                <div class="dialog-content">
-                    <h3>${title}</h3>
-                    <p>${message}</p>
-                    <input type="${inputType}" placeholder="Enter your password" />
-                    <div class="dialog-actions">
-                        <button type="button" class="btn-secondary" data-action="cancel">Cancel</button>
-                        <button type="button" class="btn-danger" data-action="confirm">Confirm</button>
-                    </div>
-                </div>`;
-
-			document.body.appendChild(dialog);
-
-			dialog.querySelector('[data-action="confirm"]').onclick = () => {
-				const value = dialog.querySelector("input").value;
-				dialog.remove();
+			modal.querySelector('[data-action="confirm"]').addEventListener('click', () => {
+				const value = modal.querySelector('input').value;
+				document.body.removeChild(modal);
 				resolve(value);
-			};
+			});
 
-			dialog.querySelector('[data-action="cancel"]').onclick = () => {
-				dialog.remove();
+			modal.querySelector('[data-action="cancel"]').addEventListener('click', () => {
+				document.body.removeChild(modal);
 				resolve(null);
-			};
+			});
 		});
 	}
 

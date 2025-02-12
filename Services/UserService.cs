@@ -24,6 +24,10 @@ namespace BusInfo.Services
             if (user == null)
                 return null;
 
+            // Only block authentication if account is permanently deleted
+            if (user.DeletionConfirmedAt.HasValue)
+                return null;
+
             if (!VerifyPassword(password, user.PasswordHash, user.Salt))
                 return null;
 

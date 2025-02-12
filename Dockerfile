@@ -14,4 +14,9 @@ COPY --from=build /out ./
 ENV ASPNETCORE_URLS=http://*:80
 EXPOSE 80
 
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="${PATH}:/root/.dotnet/tools"
+
+RUN dotnet ef database update
+
 ENTRYPOINT ["dotnet", "BusInfo.dll"]

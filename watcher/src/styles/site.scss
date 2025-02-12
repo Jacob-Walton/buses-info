@@ -854,6 +854,8 @@ body.nav-open {
       background-color: $background;
       font-size: 1rem;
       transition: border-color 0.3s ease;
+      @include box-shadow(none);
+      @include alternating-border-radius(0);
 
       &:focus {
         outline: none;
@@ -2429,16 +2431,9 @@ pre[class*="language-"] {
 }
 
 .settings-field {
-  label {
-    display: block;
-    margin-bottom: calc($spacing-unit / 2);
-    font-weight: 500;
-    font-size: 0.875rem;
-    color: $dark-grey;
-  }
-
-  input[type="text"],
-  input[type="email"] {
+  input {
+    font-family: inherit;
+    border-radius: 0;
     width: 100%;
     padding: 0.75rem 1rem;
     border: 1px solid $border;
@@ -2447,22 +2442,30 @@ pre[class*="language-"] {
     font-size: 0.9375rem;
     @include alternating-border-radius($button-border-radius);
     @include transition(all, 0.2s);
-
+  
     &:hover:not([readonly]) {
       border-color: darken($border, 10%);
     }
-
+  
     &:focus {
       outline: none;
       border-color: $primary;
       @include box-shadow(0 0 0 3px rgba($primary, 0.1));
     }
-
+  
     &[readonly] {
       background-color: $light-grey;
       color: $dark-grey;
       cursor: not-allowed;
     }
+  }
+  
+  label {
+    display: block;
+    margin-bottom: calc($spacing-unit / 2);
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: $dark-grey;
   }
 
   &.full-width {
@@ -4246,6 +4249,11 @@ body {
         @include box-shadow(0 0 0 3px rgba($primary, 0.1));
       }
     }
+  }
+
+  button[type="submit"] {
+    width: 100%;
+    margin-top: $spacing-unit;
   }
 }
 

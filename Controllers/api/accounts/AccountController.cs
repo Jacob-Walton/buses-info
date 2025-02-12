@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BusInfo.Models.Accounts;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace BusInfo.Controllers
 {
@@ -52,11 +53,11 @@ namespace BusInfo.Controllers
             string? userId = GetCurrentUserId();
             if (userId == null) return Unauthorized();
 
-            bool result = await _userService.DeleteAccountAsync(userId, model.Password);
+            bool result = await _userService.InitiateAccountDeletionAsync(userId, model.Password, model.Reason);
             if (!result) return BadRequest(new { message = "Invalid password" });
 
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return Ok(new { message = "Account deleted successfully" });
+            return Ok(new { message = "Account deletion initiated. You have 30 days to reactivate your account." });
         }
 
         [HttpPost("logout")]
@@ -321,5 +322,13 @@ namespace BusInfo.Controllers
 
             return email == null ? null : (_context.Users.FirstOrDefault(u => u.Email == email)?.Id);
         }
+    }
+
+    public class DeleteAccountModel
+    {
+        [Required]
+        public string Password { get; set; } = string.Empty;
+
+        public string? Reason { get; set; }
     }
 }
