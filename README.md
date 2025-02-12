@@ -256,6 +256,10 @@ This project is under active development. Contributions must follow established 
 
 This project is an independent project and is not affiliated with any external organisations.
 
+## License
+
+This project is licensed under the MIT licence. For more information, see the [LICENCE](LICENSE) file.
+
 ## Contact
 
 For any enquiries:
