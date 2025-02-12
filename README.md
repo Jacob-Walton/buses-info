@@ -60,30 +60,42 @@ The application utilises a layered approach:
 
 ### Installation Steps
 
-**Ensure that you have setup your keyvault and appsettings beforehand.**
+1. **Clone and Setup**
 
-```shell
-# Clone the repository
-$ git clone https://github.com/Jacob-Walton/buses-info.git
+   ```shell
+   # Clone the repository
+   git clone https://github.com/Jacob-Walton/buses-info.git
+   cd buses-info
+   ```
 
-# Navigate to project directory
-$ cd businfo
+2. **Configure Settings**
 
-# Restore .NET dependencies
-$ dotnet restore
+   ```shell
+   # Rename the settings file
+   $ mv appsettings.example.json appsettings.json
+   
+   # Edit the settings file with your values
+   $ nano appsettings.json
+   ```
 
-# Build frontend assets
-$ cd watcher
-$ npm install
-$ gulp buildStyles
+3. **Install Dependencies**
 
-# Return to root and build project
-$ cd ..
-$ dotnet build
+   ```shell
+   # Restore .NET packages
+   $ dotnet restore
+   ```
 
-# Apply database migrations
-$ dotnet ef database update
-```
+4. **Run the Application**
+
+   ```shell
+   # Start the application
+   $ dotnet run
+   
+   # The application will be available at:
+   # http://localhost:{port}
+   ```
+
+> **Note:** Ensure you have configured your keyvault and filled in all required values in appsettings.json before starting the application.
 
 ## API Documentation
 
