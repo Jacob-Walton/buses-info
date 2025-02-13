@@ -11,7 +11,6 @@ const sass = require("gulp-sass")(require("sass"));
 const autoprefixer = require("autoprefixer");
 const postcss = require("gulp-postcss");
 const terser = require("gulp-terser");
-const cleancss = require("gulp-clean-css");
 const javascriptObfuscator = require("gulp-javascript-obfuscator");
 const plumber = require("gulp-plumber");
 const removeSourcemaps = require("gulp-remove-sourcemaps");
@@ -20,6 +19,7 @@ const { nodeResolve } = require("@rollup/plugin-node-resolve");
 const source = require("vinyl-source-stream");
 const buffer = require("vinyl-buffer");
 const { rimraf } = require('rimraf');
+const { CloudFront } = require("@aws-sdk/client-cloudfront");
 
 /**
  * Environment configuration flag
@@ -47,6 +47,9 @@ const config = {
 	s3: {
 		bucket: process.env.BUCKET, // e.g. "my-bucket-name"
 		region: process.env.REGION // e.g. "uk-west-1"
+	},
+	cloudfront: {
+		distributionId: 'EPH6L1KTA2E87'
 	}
 };
 
@@ -80,6 +83,37 @@ function uploadToS3() {
 		}));
 
 	return merge(jsUpload, cssUpload);
+}
+
+/**
+ * Invalidates CloudFront cache
+ */
+async function invalidateCache() {
+	const cloudfront = new CloudFront({
+		region: config.s3.region,
+		credentials: {
+			accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+			secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+		}
+	});
+
+	const params = {
+		DistributionId: config.cloudfront.distributionId,
+		InvalidationBatch: {
+			CallerReference: Date.now().toString(),
+			Paths: {
+				Quantity: 2,
+				Items: ['/js/*', '/css/*']
+			}
+		}
+	};
+
+	try {
+		await cloudfront.createInvalidation(params);
+		console.log('CloudFront cache invalidation initiated');
+	} catch (err) {
+		console.error('CloudFront invalidation error:', err);
+	}
 }
 
 /**
@@ -235,6 +269,6 @@ exports.styles = buildStyles;
 exports.scripts = minifyJs;
 exports.watch = watchTask;
 exports.build = isProd 
-    ? series(parallel(buildStyles, minifyJs), uploadToS3, cleanup)
+    ? series(parallel(buildStyles, minifyJs), uploadToS3, invalidateCache, cleanup)
     : parallel(buildStyles, minifyJs);
 exports.default = series(parallel(buildStyles, minifyJs), watchTask);
