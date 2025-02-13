@@ -1,23 +1,22 @@
-The MIT License (MIT)
+License for Buses-Info
+=============================
 
-Copyright (c) .NET Foundation and Contributors
+Copyright (c) [2025] [Jacob Walton]
 
-All rights reserved.
+This License grants permission to contribute to the git repository and to run and modify the software in development environments solely for testing, evaluation, iterative development, and contributing purposes. Contributions are welcomed provided they adhere to the conditions below.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permitted:
+- Contributing code, bug reports, and documentation improvements.
+- Modifying and running the software in development environments strictly for the purpose of contributing to the project.
+- Running the unmodified software for personal, non-commercial development and testing.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+Prohibited:
+- Redistribution of the software in original or modified form.
+- Modifications made for personal commercial gain.
+- Public deployment or any external distribution of modified versions.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Limitation of Liability:
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING FROM THE USE OR DISTRIBUTION OF THE SOFTWARE.
+
+Governing Terms:
+All contributions to this repository shall be governed by the terms of this License. In case of any conflict, this License shall prevail.
