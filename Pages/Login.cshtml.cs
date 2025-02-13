@@ -90,9 +90,14 @@ namespace BusInfo.Pages
 
                 return Url.IsLocalUrl(authProperties.RedirectUri) ? Redirect(authProperties.RedirectUri) : Redirect("/");
             }
-            catch (Exception)
+            catch (InvalidOperationException)
             {
-                ModelState.AddModelError(string.Empty, "An error occurred while processing your request.");
+                ModelState.AddModelError(string.Empty, "Authentication service is unavailable.");
+                return Page();
+            }
+            catch (ArgumentException)
+            {
+                ModelState.AddModelError(string.Empty, "Invalid login credentials format.");
                 return Page();
             }
             finally
@@ -121,9 +126,14 @@ namespace BusInfo.Pages
                 TempData["StatusMessage"] = "Your account has been reactivated. Please login to continue.";
                 return RedirectToPage("/Login");
             }
-            catch (Exception)
+            catch (InvalidOperationException)
             {
-                ModelState.AddModelError(string.Empty, "An error occurred while processing your request.");
+                ModelState.AddModelError(string.Empty, "Account reactivation service is unavailable.");
+                return Page();
+            }
+            catch (ArgumentException)
+            {
+                ModelState.AddModelError(string.Empty, "Invalid email format.");
                 return Page();
             }
             finally

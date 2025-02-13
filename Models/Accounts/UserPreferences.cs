@@ -4,7 +4,12 @@ namespace BusInfo.Models.Accounts
 {
     public class UserPreferences
     {
-        public List<string> PreferredRoutes { get; set; } = [];
+        private List<string> _preferredRoutes = [];
+        public ICollection<string> PreferredRoutes 
+        {
+            get => _preferredRoutes;
+            init => _preferredRoutes = [..value];
+        }
         public bool ShowPreferredRoutesFirst { get; set; }
         public bool EnableEmailNotifications { get; set; }
     }

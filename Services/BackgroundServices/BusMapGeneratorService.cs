@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using BusInfo.Extensions;
@@ -12,21 +13,35 @@ using Microsoft.Extensions.Logging;
 
 namespace BusInfo.Services.BackgroundServices
 {
-    public class BusMapGeneratorService(
-        IServiceScopeFactory scopeFactory,
-        IMemoryCache cache,
-        ILogger<BusMapGeneratorService> logger) : BackgroundService
+    public class BusMapGeneratorService : BackgroundService
     {
         private static readonly Action<ILogger, Exception> _logGenerateError =
             LoggerMessage.Define(LogLevel.Error,
                                new EventId(1, nameof(ExecuteAsync)),
                                "Error generating bus lane map");
 
-        private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
-        private readonly IMemoryCache _cache = cache;
-        private readonly ILogger<BusMapGeneratorService> _logger = logger;
+        private readonly IServiceScopeFactory _scopeFactory;
+        private readonly IMemoryCache _cache;
+        private readonly ILogger<BusMapGeneratorService> _logger;
         private const string MAP_CACHE_KEY_PREFIX = "BusLaneMap_";
         private const int UPDATE_INTERVAL_MINUTES = 5;
+
+        public BusMapGeneratorService(
+            IServiceScopeFactory scopeFactory,
+            IMemoryCache cache,
+            ILogger<BusMapGeneratorService> logger)
+        {
+            _scopeFactory = scopeFactory;
+            _cache = cache;
+            _logger = logger;
+        }
+
+        public override void Dispose()
+        {
+            (_cache as IDisposable)?.Dispose();
+            base.Dispose();
+            GC.SuppressFinalize(this);
+        }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -36,7 +51,15 @@ namespace BusInfo.Services.BackgroundServices
                 {
                     await GenerateAndCacheMapAsync();
                 }
-                catch (Exception ex)
+                catch (InvalidOperationException ex)
+                {
+                    _logGenerateError(_logger, ex);
+                }
+                catch (HttpRequestException ex)
+                {
+                    _logGenerateError(_logger, ex);
+                }
+                catch (ArgumentException ex)
                 {
                     _logGenerateError(_logger, ex);
                 }

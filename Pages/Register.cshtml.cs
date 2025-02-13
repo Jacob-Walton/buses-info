@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using BusInfo.Services;
@@ -38,10 +39,14 @@ namespace BusInfo.Pages
 
                 return Redirect("/login");
             }
-            catch
+            catch (InvalidOperationException)
             {
-                ModelState.AddModelError(string.Empty, "An error occurred while registering the user.");
+                ModelState.AddModelError(string.Empty, "Registration service is currently unavailable.");
                 return Page();
+            }
+            catch (Exception)
+            {
+                throw; // Rethrow the exception to be handled by global error handler
             }
         }
     }

@@ -14,6 +14,8 @@ using Microsoft.EntityFrameworkCore;
 using BusInfo.Models.Accounts;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
+using System.Data.Common;
 
 namespace BusInfo.Controllers
 {
@@ -25,6 +27,16 @@ namespace BusInfo.Controllers
         private readonly ApplicationDbContext _context = context;
         private readonly IUserService _userService = userService;
         private readonly IApiKeyGenerator _apiKeyGenerator = apiKeyGenerator;
+
+        private static readonly string[] DefaultRoutes =
+        [
+            "102", "103", "115", "117", "119", "125", "566", "712", "715",
+            "718", "720", "760", "761", "762", "763", "764", "765", "778",
+            "800", "801", "803", "807", "809", "819", "820", "821", "822",
+            "823", "824", "825", "826", "953", "954", "956", "957", "958",
+            "959", "959B", "961", "962", "963", "964", "965", "965B", "975",
+            "983", "998"
+        ];
 
         // Account CRUD Operations
         [HttpGet]
@@ -97,7 +109,7 @@ namespace BusInfo.Controllers
             ApplicationUser? user = await _userService.GetUserByIdAsync(userId);
             if (user == null) return NotFound();
 
-            user.PreferredRoutes = preferences.PreferredRoutes;
+            user.PreferredRoutes = [..preferences.PreferredRoutes];
             user.ShowPreferredRoutesFirst = preferences.ShowPreferredRoutesFirst;
             user.EnableEmailNotifications = preferences.EnableEmailNotifications;
 
@@ -106,9 +118,13 @@ namespace BusInfo.Controllers
                 await _context.SaveChangesAsync();
                 return Ok(new { message = "Preferences updated successfully" });
             }
-            catch (Exception ex)
+            catch (DbUpdateException)
             {
-                return StatusCode(500, new { message = "Error updating preferences", error = ex.Message });
+                return StatusCode(500, new { message = "Database error while updating preferences", error = "Database operation failed" });
+            }
+            catch (InvalidOperationException)
+            {
+                return StatusCode(500, new { message = "Invalid operation while updating preferences", error = "Operation invalid" });
             }
         }
 
@@ -152,9 +168,13 @@ namespace BusInfo.Controllers
                 Uri locationUri = new($"{Request.Scheme}://{Request.Host}/api/accounts/api-keys/{userId}");
                 return Created(locationUri, new { message = "API key request submitted successfully." });
             }
-            catch (Exception ex)
+            catch (DbUpdateException)
             {
-                return StatusCode(500, new { message = "Error submitting request", error = ex.Message });
+                return StatusCode(500, new { message = "Database error while submitting request", error = "Database operation failed" });
+            }
+            catch (InvalidOperationException )
+            {
+                return StatusCode(500, new { message = "Invalid operation while submitting request", error = "Operation invalid" });
             }
         }
 
@@ -186,9 +206,13 @@ namespace BusInfo.Controllers
 
                 return Ok(new { key = newKey.Key, message = "API key regenerated successfully" });
             }
-            catch (Exception ex)
+            catch (DbUpdateException)
             {
-                return StatusCode(500, new { message = "Error regenerating API key", error = ex.Message });
+                return StatusCode(500, new { message = "Database error while regenerating API key", error = "Database operation failed" });
+            }
+            catch (InvalidOperationException)
+            {
+                return StatusCode(500, new { message = "Invalid operation while regenerating API key", error = "Operation invalid" });
             }
         }
 
@@ -248,9 +272,13 @@ namespace BusInfo.Controllers
                 await _context.SaveChangesAsync();
                 return Ok(new { message = "Profile updated successfully" });
             }
-            catch (Exception ex)
+            catch (DbUpdateException)
             {
-                return StatusCode(500, new { message = "Error updating profile", error = ex.Message });
+                return StatusCode(500, new { message = "Database error while updating profile", error = "Database operation failed" });
+            }
+            catch (InvalidOperationException)
+            {
+                return StatusCode(500, new { message = "Invalid operation while updating profile", error = "Operation invalid" });
             }
         }
 
@@ -299,19 +327,18 @@ namespace BusInfo.Controllers
                 // Fallback to default routes if none found in database
                 if (routes.Count == 0)
                 {
-                    routes = ["102", "103", "115", "117", "119", "125", "566", "712", "715",
-                             "718", "720", "760", "761", "762", "763", "764", "765", "778",
-                             "800", "801", "803", "807", "809", "819", "820", "821", "822",
-                             "823", "824", "825", "826", "953", "954", "956", "957", "958",
-                             "959", "959B", "961", "962", "963", "964", "965", "965B", "975",
-                             "983", "998"];
+                    routes = DefaultRoutes.ToList();
                 }
 
                 return Ok(new { routes });
             }
-            catch (Exception ex)
+            catch (DbException)
             {
-                return StatusCode(500, new { message = "Error retrieving routes" });
+                return StatusCode(500, new { message = "Database error while retrieving routes" });
+            }
+            catch (InvalidOperationException)
+            {
+                return StatusCode(500, new { message = "Error processing routes data" });
             }
         }
 

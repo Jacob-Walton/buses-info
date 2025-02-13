@@ -95,23 +95,33 @@ namespace BusInfo.Controllers.Api.V2
                 string requestedCacheKey = MapCacheKeyPrefix + string.Join("_", bayServiceMap.Select(kvp => $"{kvp.Key}:{kvp.Value}"));
 
                 // Try to get the exact match first
-                if (_cache.TryGetValue(requestedCacheKey, out byte[]? imageData))
+                if (_cache.TryGetValue(requestedCacheKey, out byte[]? imageData) && imageData != null)
                 {
                     return File(imageData, "image/png");
                 }
 
                 // Fall back to latest generated map
-                if (_cache.TryGetValue(MapCacheKeyPrefix + "latest", out (string key, byte[] data) latest))
+                if (_cache.TryGetValue(MapCacheKeyPrefix + "latest", out (string key, byte[] data) latest) && latest.data != null)
                 {
                     return File(latest.data, "image/png");
                 }
 
                 return NotFound("No map is currently available. Please try again in a few minutes.");
             }
+            catch (ApiException ex)
+            {
+                _logError(_logger, DateTime.UtcNow, "API error retrieving map", ex);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving the bus lane map.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logError(_logger, DateTime.UtcNow, "Invalid operation while retrieving map", ex);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing the map data.");
+            }
             catch (Exception ex)
             {
-                _logError(_logger, DateTime.UtcNow, "Error retrieving map", ex);
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving the bus lane map.");
+                _logError(_logger, DateTime.UtcNow, "Unexpected error retrieving map", ex);
+                throw;
             }
         }
 

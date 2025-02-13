@@ -381,12 +381,4 @@ namespace BusInfo.Services
             return (int)(highestProb * (0.7 + (ratio * 0.3)));
         }
     }
-
-    /// <summary>
-    /// Represents a record of bus arrivals for analysis.
-    /// </summary>
-    /// <param name="Service">The bus service identifier.</param>
-    /// <param name="ArrivalTime">The time the bus arrived.</param>
-    /// <param name="Date">The date of the arrival.</param>
-    internal sealed record ArrivalRecord(string Service, DateTime ArrivalTime, DateTime Date);
 }

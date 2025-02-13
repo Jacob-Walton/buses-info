@@ -9,7 +9,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace BusInfo.Services
 {
-    internal sealed class UserService(ApplicationDbContext context, IEmailService emailService, IConfiguration configuration) : IUserService
+    public class UserService(ApplicationDbContext context, IEmailService emailService, IConfiguration configuration) : IUserService
     {
         private readonly ApplicationDbContext _context = context;
         private readonly IEmailService _emailService = emailService;
