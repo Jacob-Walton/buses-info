@@ -261,7 +261,7 @@ This project is an independent project and is not affiliated with any external o
 
 ## License
 
-This project is licensed under the MIT licence. For more information, see the [LICENCE](LICENSE) file.
+This project is licensed under the MIT licence. For more information, see the [LICENCE](LICENCE) file.
 
 ## Contact
 
