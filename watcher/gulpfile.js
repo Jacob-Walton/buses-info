@@ -61,59 +61,68 @@ const s3 = require("gulp-s3-upload")({
 /**
  * Uploads files to an S3 bucket
  */
-function uploadToS3() {
-	// Upload JS files
-	const jsUpload = src(`${config.outputDir}/js/**/*.js`)
-		.pipe(s3({
-			Bucket: config.s3.bucket,
-			ACL: "public-read",
-			keyTransform: function (relative_filename) {
-				return `js/${relative_filename}`;
-			}
-		}));
+function uploadToS3(cb) {
+    const jsUpload = src(`${config.outputDir}/js/**/*.js`, { base: config.outputDir })
+        .pipe(s3({
+            Bucket: config.s3.bucket,
+            ACL: "public-read",
+            keyTransform: function(relative_filename) {
+                return relative_filename;
+            }
+        }));
 
-	// Upload CSS files
-	const cssUpload = src(`${config.outputDir}/css/**/*.css`)
-		.pipe(s3({
-			Bucket: config.s3.bucket,
-			ACL: "public-read",
-			keyTransform: function (relative_filename) {
-				return `css/${relative_filename}`;
-			}
-		}));
+    const cssUpload = src(`${config.outputDir}/css/**/*.css`, { base: config.outputDir })
+        .pipe(s3({
+            Bucket: config.s3.bucket,
+            ACL: "public-read",
+            keyTransform: function(relative_filename) {
+                return relative_filename;
+            }
+        }));
 
-	return merge(jsUpload, cssUpload);
+    return merge(jsUpload, cssUpload)
+        .on('error', function(err) {
+            console.error('Upload error:', err);
+            cb(err);
+        })
+        .on('end', function() {
+            console.log('Upload complete');
+            cb();
+        });
 }
 
 /**
  * Invalidates CloudFront cache
  */
-async function invalidateCache() {
-	const cloudfront = new CloudFront({
-		region: config.s3.region,
-		credentials: {
-			accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-			secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-		}
-	});
+function invalidateCache(cb) {
+    const cloudfront = new CloudFront({
+        region: config.s3.region,
+        credentials: {
+            accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        }
+    });
 
-	const params = {
-		DistributionId: config.cloudfront.distributionId,
-		InvalidationBatch: {
-			CallerReference: Date.now().toString(),
-			Paths: {
-				Quantity: 2,
-				Items: ['/js/*', '/css/*']
-			}
-		}
-	};
+    const params = {
+        DistributionId: config.cloudfront.distributionId,
+        InvalidationBatch: {
+            CallerReference: Date.now().toString(),
+            Paths: {
+                Quantity: 2,
+                Items: ['/js/*', '/css/*']
+            }
+        }
+    };
 
-	try {
-		await cloudfront.createInvalidation(params);
-		console.log('CloudFront cache invalidation initiated');
-	} catch (err) {
-		console.error('CloudFront invalidation error:', err);
-	}
+    cloudfront.createInvalidation(params)
+        .then(() => {
+            console.log('CloudFront cache invalidation initiated');
+            cb();
+        })
+        .catch(err => {
+            console.error('CloudFront invalidation error:', err);
+            cb(err);
+        });
 }
 
 /**
@@ -187,18 +196,17 @@ async function minifyJs() {
         });
 
         if (isProd) {
-            return src(outputPath)
-                .pipe(buffer())
-                .pipe(
-                    terser({
+            // Return a promise for the production processing
+            return new Promise((resolve, reject) => {
+                src(outputPath)
+                    .pipe(buffer())
+                    .pipe(terser({
                         compress: {
                             drop_console: true,
                             drop_debugger: true,
                         },
-                    })
-                )
-                .pipe(
-                    javascriptObfuscator({
+                    }))
+                    .pipe(javascriptObfuscator({
                         compact: true,
                         controlFlowFlattening: false,
                         deadCodeInjection: false,
@@ -216,10 +224,12 @@ async function minifyJs() {
                         stringArrayThreshold: 0.5,
                         transformObjectKeys: false,
                         unicodeEscapeSequence: false,
-                    })
-                )
-                .pipe(removeSourcemaps())
-                .pipe(dest(config.outputDir + "/js"));
+                    }))
+                    .pipe(removeSourcemaps())
+                    .pipe(dest(config.outputDir + "/js"))
+                    .on('end', resolve)
+                    .on('error', reject);
+            });
         }
 
         return Promise.resolve();
@@ -269,6 +279,11 @@ exports.styles = buildStyles;
 exports.scripts = minifyJs;
 exports.watch = watchTask;
 exports.build = isProd 
-    ? series(parallel(buildStyles, minifyJs), uploadToS3, invalidateCache, cleanup)
+    ? series(
+        parallel(buildStyles, minifyJs),
+        cb => uploadToS3(cb),
+        cb => invalidateCache(cb),
+        cleanup
+    )
     : parallel(buildStyles, minifyJs);
 exports.default = series(parallel(buildStyles, minifyJs), watchTask);
