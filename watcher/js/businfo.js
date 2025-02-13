@@ -383,9 +383,13 @@ const BusInfoModule = (() => {
 		if (!busItem) return;
 
 		const isPreferred = busItem.classList.contains("preferred");
-		const updatedRoutes = isPreferred
-			? state.preferences.preferredRoutes.filter((r) => r !== route)
-			: [...state.preferences.preferredRoutes, route];
+		// Create new array instead of modifying frozen preferences
+		const updatedPreferences = {
+			...state.preferences,
+			preferredRoutes: isPreferred
+				? state.preferences.preferredRoutes.filter((r) => r !== route)
+				: [...state.preferences.preferredRoutes, route]
+		};
 
 		try {
 			const response = await fetch(CONFIG.PREFERENCES_ENDPOINT, {
@@ -394,17 +398,14 @@ const BusInfoModule = (() => {
 					"Content-Type": "application/json",
 					RequestVerificationToken: document.querySelector('input[name="__RequestVerificationToken"]').value,
 				},
-				body: JSON.stringify({
-					...state.preferences,
-					preferredRoutes: updatedRoutes,
-				}),
+				body: JSON.stringify(updatedPreferences),
 			});
 
 			if (!response.ok) throw new Error("Failed to update preferences");
 
-			state.preferences.preferredRoutes = updatedRoutes;
+			// Update state with new preferences object
+			state.preferences = updatedPreferences;
 			
-			await fetchPreferences();
 			displayBusInfo();
 
 			Logger.debug(`Route ${route} ${isPreferred ? "removed from" : "added to"} preferred routes`);

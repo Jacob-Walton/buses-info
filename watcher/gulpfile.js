@@ -66,8 +66,7 @@ function uploadToS3() {
 			ACL: "public-read",
 			keyTransform: function (relative_filename) {
 				return `js/${relative_filename}`;
-			},
-			uploadNewFilesOnly: true
+			}
 		}));
 
 	// Upload CSS files
@@ -77,8 +76,7 @@ function uploadToS3() {
 			ACL: "public-read",
 			keyTransform: function (relative_filename) {
 				return `css/${relative_filename}`;
-			},
-			uploadNewFilesOnly: true
+			}
 		}));
 
 	return merge(jsUpload, cssUpload);
