@@ -1,0 +1,172 @@
+// Common section styles
+%section-base {
+  padding: $spacing-unit * 4 0;
+  background-color: $background;
+}
+
+// Common button styles
+%button-base {
+  width: 100%;
+  margin: calc($spacing-unit / 2) 0;
+}
+
+.hero {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+    url("https://dhfrjz15mb441.cloudfront.net/bus-info/runshaw.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  height: calc(100vh - 70px);
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-align: center;
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0 $spacing-unit;
+  }
+
+  .hero-title {
+    font-size: 3.5rem;
+    margin-bottom: $spacing-unit;
+    font-weight: 700;
+  }
+
+  .hero-subtitle {
+    font-size: 1.25rem;
+    opacity: 0.9;
+    margin-bottom: $spacing-unit * 2;
+  }
+
+  .button {
+    padding: $spacing-unit $spacing-unit * 2;
+    font-size: 1.125rem;
+    margin-bottom: $spacing-unit * 2;
+    display: inline-block;
+  }
+
+  .disclaimer {
+    font-size: 0.875rem;
+    opacity: 0.7;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+}
+
+.features-section {
+  @extend %section-base;
+  padding-bottom: calc(($spacing-unit * 8) + 75px);
+}
+
+.section-title {
+  font-size: 2rem;
+  margin-bottom: $spacing-unit * 2;
+  color: $text;
+  text-align: center;
+}
+
+.features-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-unit * 2;
+}
+
+.feature-card {
+  flex: 1;
+  padding: $spacing-unit * 2;
+  background-color: $background;
+  border: 1px solid $border;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  @include alternating-border-radius($regular-border-radius);
+
+  i {
+    font-size: 2rem;
+    margin-bottom: $spacing-unit;
+    color: $primary;
+  }
+
+  h3 {
+    font-size: 1.5rem;
+    margin-bottom: $spacing-unit;
+  }
+
+  p {
+    opacity: 0.8;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    @extend %button-base;
+  }
+
+  form {
+    width: 100%;
+  }
+
+  > * {
+    margin-bottom: $spacing-unit;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  pre[class*="language-"] {
+    background-color: var(--surface-alt);
+
+    &:not(.large-block) + .code-toolbar {
+      opacity: 0 !important;
+    }
+
+    code {
+      color: var(--text);
+    }
+  }
+}
+
+.cta-section {
+  border-top: 1px solid $border;
+  padding: $spacing-unit * 4 0;
+  background-color: $light-grey;
+  text-align: center;
+}
+
+.cta-buttons {
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  margin: $spacing-unit * 2 auto 0;
+
+  .button {
+    box-sizing: border-box;
+    width: 200px;
+    margin: 0 $spacing-unit;
+  }
+}
+
+.info-section {
+  @extend %section-base;
+}
+
+.steps-list {
+  padding-left: $spacing-unit * 2;
+
+  li {
+    margin-bottom: $spacing-unit;
+  }
+}

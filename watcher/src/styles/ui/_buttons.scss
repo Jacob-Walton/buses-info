@@ -1,0 +1,106 @@
+.button {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: center;
+  text-decoration: none;
+  color: white;
+  background-color: $primary;
+  border: none;
+  cursor: pointer;
+  user-select: none;
+  @include alternating-border-radius($button-border-radius);
+  @include transition;
+
+  &:hover,
+  &:focus {
+    background-color: $primary-dark;
+  }
+
+  &.secondary {
+    background-color: $secondary;
+
+    &:hover,
+    &:focus {
+      background-color: $secondary-dark;
+    }
+  }
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: center;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  @include alternating-border-radius($button-border-radius);
+  @include transition;
+
+  &:hover,
+  &:focus {
+    text-decoration: none;
+  }
+
+  i {
+    font-size: 1rem !important;
+    margin-right: 0.5rem;
+    margin-bottom: 0 !important;
+  }
+}
+
+.btn-primary {
+  @extend .btn;
+  color: white;
+  background-color: $primary;
+
+  &:hover,
+  &:focus {
+    background-color: $primary-dark;
+    color: white;
+  }
+
+  i {
+    color: white !important;
+  }
+}
+
+.btn-secondary {
+  @extend .btn;
+  color: white;
+  background-color: $secondary;
+
+  &:hover,
+  &:focus {
+    background-color: $secondary-dark;
+    color: white;
+  }
+
+  i {
+    color: white;
+  }
+}
+
+.btn-danger {
+  @extend .btn;
+  background-color: $accent;
+  color: white;
+  border: 1px solid darken($accent, 5%);
+
+  &:hover {
+    background-color: darken($accent, 10%);
+    border-color: darken($accent, 15%);
+  }
+
+  &:focus {
+    @include box-shadow(0 0 0 3px rgba($accent, 0.2));
+  }
+}

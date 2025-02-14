@@ -1,0 +1,56 @@
+.input-with-buttons {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+
+  input {
+    width: 100%;
+    padding-right: 90px;
+    font-family: "Fira Code", monospace;
+    font-size: 0.875rem;
+    letter-spacing: 0.5px;
+  }
+
+  .input-buttons {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    height: 100%;
+    border-left: 1px solid $border;
+
+    %shared-height {
+      height: 100%;
+    }
+
+    .input-button {
+      @include reset-button;
+      @extend %shared-height;
+      padding: 0 12px;
+      color: $dark-grey;
+      transition: 0.2s ease all;
+
+      i {
+        font-size: 14px;
+      }
+
+      &:hover {
+        color: $primary;
+        background-color: $primary-hover;
+      }
+
+      &:last-child {
+        border-radius: 0 $button-border-radius 0 0;
+      }
+    }
+
+    .button-divider {
+      @extend %shared-height;
+      width: 1px;
+      background-color: $border;
+    }
+  }
+}

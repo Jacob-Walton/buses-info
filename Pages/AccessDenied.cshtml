@@ -4,16 +4,19 @@
     ViewData["Title"] = "Access Denied";
 }
 
-<div class="container text-center mt-5">
-    <h1 class="text-danger">Access Denied</h1>
-    <h2 class="h4 mb-4">Sorry, you don't have permission to access this resource.</h2>
-    <p>You can try the following:</p>
-    <ul class="list-unstyled">
-        <li>Return to the <a href="/">homepage</a></li>
-        <li>Contact an administrator if you believe this is a mistake</li>
-        @if (!User.Identity?.IsAuthenticated ?? true)
-        {
-            <li>Try <a href="/login">logging in</a> with a different account</li>
-        }
-    </ul>
+<div class="access-denied-container">
+    <div class="access-denied-content">
+        <div class="access-denied-icon">
+            <i class="fas fa-lock"></i>
+        </div>
+        <h1>Access Denied</h1>
+        <p>Sorry, you don't have permission to access this resource.</p>
+        <div class="access-denied-actions">
+            <a href="/" class="btn btn-primary">Go Home</a>
+            @if (!User.Identity?.IsAuthenticated ?? true)
+            {
+                <a href="/login" class="btn btn-secondary">Log In</a>
+            }
+        </div>
+    </div>
 </div>

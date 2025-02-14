@@ -1,0 +1,78 @@
+.access-denied-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-unit * 2;
+  background-color: $surface;
+}
+
+.access-denied-content {
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+  background-color: $background;
+  padding: $spacing-unit * 3;
+  border: 1px solid $border;
+  @include alternating-border-radius($regular-border-radius);
+  @include box-shadow(0 4px 12px rgba($shadow-color, 0.08));
+
+  h1 {
+    color: $accent;
+    font-size: 2rem;
+    margin: $spacing-unit 0;
+  }
+
+  p {
+    color: $dark-grey;
+    margin-bottom: $spacing-unit * 2;
+    font-size: 1.1rem;
+  }
+}
+
+.access-denied-icon {
+  margin-bottom: $spacing-unit * 2;
+
+  i {
+    font-size: 4rem;
+    color: $accent;
+  }
+}
+
+.access-denied-actions {
+  display: flex;
+  gap: $spacing-unit;
+  justify-content: center;
+
+  .btn-primary,
+  .btn-secondary {
+    min-width: 140px;
+  }
+}
+
+@media (max-width: 768px) {
+  .access-denied-container {
+    padding: $spacing-unit;
+  }
+
+  .access-denied-content {
+    padding: $spacing-unit * 2;
+
+    h1 {
+      font-size: 1.75rem;
+    }
+
+    p {
+      font-size: 1rem;
+    }
+
+    .access-denied-actions {
+      flex-direction: column;
+
+      .btn-primary,
+      .btn-secondary {
+        width: 100%;
+      }
+    }
+  }
+}
