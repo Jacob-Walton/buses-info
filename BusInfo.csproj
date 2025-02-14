@@ -19,6 +19,7 @@
   <ItemGroup>
     <PackageReference Include="ConfigCat.Client" Version="9.3.2" />
     <PackageReference Include="CsvHelper" Version="33.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="9.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" Version="9.0.2" />

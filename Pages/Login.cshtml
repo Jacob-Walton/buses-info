@@ -15,6 +15,13 @@
             </div>
         }
 
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger" role="alert">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+
         <div asp-validation-summary="ModelOnly" class="error-summary" role="alert"></div>
 
         <form method="post" class="login-form" id="loginForm">
@@ -47,6 +54,22 @@
                 Sign In
             </button>
         </form>
+
+        <div class="divider">
+            <span>OR</span>
+        </div>
+        
+        <div class="social-login">
+            <a href="/signin/Google" class="btn-google">
+                <i class="fab fa-google"></i>
+                Sign in with Google
+            </a>
+
+            <a href="/signin/Microsoft" class="btn-microsoft">
+                <i class="fab fa-microsoft"></i>
+                Sign in with Microsoft
+            </a>
+        </div>
 
         <div class="login-links">
             <a asp-page="/Register">Create new account</a>

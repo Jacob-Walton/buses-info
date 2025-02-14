@@ -76,7 +76,7 @@ namespace BusInfo.Controllers
         public async Task<ActionResult> LogoutAsync()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return Ok();
+            return Redirect("/");
         }
 
         // Preferences CRUD Operations

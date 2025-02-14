@@ -985,6 +985,72 @@ body.nav-open {
   }
 }
 
+.divider {
+  margin: $spacing-unit * 2 0;
+  display: flex;
+  align-items: center;
+  text-align: center;
+
+  &::before,
+  &::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid $border;
+  }
+
+  span {
+    padding: 0 $spacing-unit;
+    color: $dark-grey;
+    font-size: 0.875rem;
+  }
+}
+
+.social-login {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-unit;
+  margin-bottom: $spacing-unit * 2;
+
+  .btn-google,
+  .btn-microsoft {
+    @include reset-button;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-unit;
+    padding: 0.75rem;
+    border: 1px solid $border;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: $text;
+    background-color: $background;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    @include alternating-border-radius($button-border-radius);
+
+    i {
+      font-size: 1.25rem;
+    }
+
+    &:hover {
+      background-color: $surface;
+      border-color: darken($border, 10%);
+    }
+  }
+
+  .btn-google {
+    i {
+      color: #ea4335;
+    }
+  }
+
+  .btn-microsoft {
+    i {
+      color: #00a4ef;
+    }
+  }
+}
+
 .error-summary {
   color: $accent;
   background-color: $accent-light;
@@ -2442,24 +2508,24 @@ pre[class*="language-"] {
     font-size: 0.9375rem;
     @include alternating-border-radius($button-border-radius);
     @include transition(all, 0.2s);
-  
+
     &:hover:not([readonly]) {
       border-color: darken($border, 10%);
     }
-  
+
     &:focus {
       outline: none;
       border-color: $primary;
       @include box-shadow(0 0 0 3px rgba($primary, 0.1));
     }
-  
+
     &[readonly] {
       background-color: $light-grey;
       color: $dark-grey;
       cursor: not-allowed;
     }
   }
-  
+
   label {
     display: block;
     margin-bottom: calc($spacing-unit / 2);
@@ -4930,32 +4996,33 @@ body {
   }
 }
 
-.map-section, .predictions-section {
-    .bus-section-content {
-        transition: max-height 0.3s ease-in-out;
-        overflow: hidden;
+.map-section,
+.predictions-section {
+  .bus-section-content {
+    transition: max-height 0.3s ease-in-out;
+    overflow: hidden;
 
-        &.collapsed {
-            max-height: 0 !important;
-        }
-
-        &:not(.collapsed) {
-            max-height: 500px !important;
-            overflow-y: auto;
-        }
-
-        // Hide scrollbar in WebKit browsers
-        &::-webkit-scrollbar {
-            width: 0;
-            background: transparent;
-        }
+    &.collapsed {
+      max-height: 0 !important;
     }
 
-    .bus-map {
-        width: 100%;
-        height: auto;
-        max-height: 500px;
-        object-fit: contain;
-        display: block;
+    &:not(.collapsed) {
+      max-height: 500px !important;
+      overflow-y: auto;
     }
+
+    // Hide scrollbar in WebKit browsers
+    &::-webkit-scrollbar {
+      width: 0;
+      background: transparent;
+    }
+  }
+
+  .bus-map {
+    width: 100%;
+    height: auto;
+    max-height: 500px;
+    object-fit: contain;
+    display: block;
+  }
 }
