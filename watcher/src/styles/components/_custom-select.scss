@@ -1,0 +1,229 @@
+.custom-select {
+  position: relative;
+  font-family: inherit;
+  margin-bottom: $spacing-unit;
+
+  .select-selected {
+    background: none;
+    padding: 10px 0;
+    border: none;
+    border-bottom: 1px solid $light-grey;
+    cursor: pointer;
+    position: relative;
+    outline: none;
+    transition: border-color 0.3s ease;
+
+    &:hover {
+      border-color: $primary;
+    }
+
+    &.select-arrow-active::after {
+      width: 100%;
+    }
+  }
+
+  .select-items {
+    position: absolute;
+    background-color: #fff;
+    z-index: 99;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: max-height 0.3s ease;
+
+    div {
+      padding: $spacing-unit;
+      cursor: pointer;
+
+      &:hover {
+        background-color: $light-grey;
+      }
+    }
+  }
+
+  .select-hide {
+    max-height: 0;
+    overflow: hidden;
+  }
+}
+
+.custom-dropdown {
+  position: relative;
+  width: 100%;
+
+  .selected-options {
+    position: relative;
+    width: 100%;
+    padding: 0.875rem 1rem;
+    background: $background;
+    border: 1px solid $border;
+    color: $text;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    @include alternating-border-radius($button-border-radius);
+    @include transition;
+
+    span {
+      font-size: 0.9375rem;
+      font-weight: 500;
+    }
+
+    i {
+      @include transition;
+    }
+
+    &:hover {
+      border-color: darken($border, 10%);
+    }
+  }
+
+  &.open {
+    .selected-options {
+      border-color: $primary;
+
+      i {
+        transform: rotate(180deg);
+      }
+    }
+
+    .dropdown-options {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+  }
+
+  .dropdown-options {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    right: 0;
+    background: $background;
+    border: 1px solid $border;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    @include transition;
+    @include alternating-border-radius($button-border-radius);
+    @include box-shadow(0 4px 12px rgba(0, 0, 0, 0.08));
+
+    .search-box {
+      position: sticky;
+      top: 0;
+      padding: 0.75rem;
+      background: $background;
+      border-bottom: 1px solid $border;
+      z-index: 1;
+
+      input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid $border;
+        background: $light-grey;
+        @include alternating-border-radius($button-border-radius);
+        @include transition;
+
+        &:focus {
+          outline: none;
+          border-color: $primary;
+          background: $background;
+        }
+
+        &::placeholder {
+          color: $dark-grey;
+        }
+      }
+    }
+
+    .option {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      @include transition;
+
+      &:hover {
+        background-color: $primary-hover;
+
+        .checkbox-custom {
+          border-color: $primary;
+        }
+      }
+
+      &:has(input:checked) {
+        background-color: rgba($primary, 0.1);
+
+        span {
+          color: $primary;
+        }
+      }
+
+      span {
+        color: $text;
+        font-size: 0.9375rem;
+        font-weight: 500;
+      }
+
+      .checkbox-wrapper {
+        position: relative;
+        width: 20px;
+        height: 20px;
+        margin-right: 0.75rem;
+      }
+
+      input[type="checkbox"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+
+        & + .checkbox-custom {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 20px;
+          height: 20px;
+          background: $background;
+          border: 2px solid $border;
+          @include alternating-border-radius(4px);
+          @include transition;
+          cursor: pointer;
+
+          &::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 10px;
+            height: 10px;
+            background: $primary;
+            @include alternating-border-radius(2px);
+            @include transition;
+          }
+        }
+
+        &:hover + .checkbox-custom,
+        &:focus + .checkbox-custom {
+          border-color: $primary;
+        }
+
+        &:checked + .checkbox-custom {
+          border-color: $primary;
+          background: $primary;
+
+          &::after {
+            transform: translate(-50%, -50%) scale(1);
+            background: white;
+          }
+        }
+      }
+    }
+  }
+}

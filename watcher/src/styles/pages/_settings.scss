@@ -1,0 +1,652 @@
+.settings-wrapper {
+  padding-top: calc(70px + ($spacing-unit * 2));
+  min-height: 100vh;
+  background-color: $surface;
+}
+
+.settings-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 $spacing-unit * 2;
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr); // Prevent content overflow
+  gap: $spacing-unit * 2;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    padding: 0 $spacing-unit;
+    gap: $spacing-unit * 1.5;
+  }
+}
+
+.settings-nav {
+  position: sticky;
+  top: calc(70px + $spacing-unit);
+  height: fit-content;
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background-color: $background;
+    border: 1px solid $border;
+    @include box-shadow(0 2px 4px rgba($shadow-color, 0.08));
+    @include alternating-border-radius($regular-border-radius);
+    overflow: hidden;
+  }
+
+  li {
+    &:not(:last-child) {
+      border-bottom: 1px solid $border;
+    }
+
+    a {
+      display: flex;
+      align-items: center;
+      padding: $spacing-unit $spacing-unit * 1.5;
+      color: $text;
+      text-decoration: none;
+      font-weight: 500;
+      @include transition(all, 0.2s);
+      position: relative;
+      overflow: hidden;
+
+      &::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background-color: $primary;
+        transform: scaleY(0);
+        @include transition(transform, 0.2s);
+      }
+
+      i {
+        width: 20px;
+        margin-right: $spacing-unit;
+        color: $dark-grey;
+        font-size: 1rem;
+        @include transition(color, 0.2s);
+      }
+
+      span {
+        font-size: 0.9375rem;
+        white-space: nowrap;
+      }
+
+      &:hover {
+        background-color: $primary-hover;
+        color: $primary;
+
+        i {
+          color: $primary;
+        }
+      }
+
+      &.active {
+        background-color: $primary-hover;
+        color: $primary;
+        font-weight: 600;
+
+        &::before {
+          transform: scaleY(1);
+        }
+
+        i {
+          color: $primary;
+        }
+      }
+    }
+  }
+}
+
+.settings-content {
+  background-color: $background;
+  border: 1px solid $border;
+  @include box-shadow(0 2px 4px rgba($shadow-color, 0.08));
+  @include alternating-border-radius($regular-border-radius);
+  padding: $spacing-unit * 2;
+  min-height: 600px; // Ensure consistent height
+}
+
+.settings-section {
+  h2 {
+    color: $secondary;
+    margin-bottom: $spacing-unit * 2;
+    font-size: 1.375rem;
+    font-weight: 600;
+  }
+}
+
+.settings-row {
+  margin-bottom: $spacing-unit * 2;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.settings-field {
+  input {
+    font-family: inherit;
+    border-radius: 0;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid $border;
+    background-color: $background;
+    color: $text;
+    font-size: 0.9375rem;
+    @include alternating-border-radius($button-border-radius);
+    @include transition(all, 0.2s);
+
+    &:hover:not([readonly]) {
+      border-color: darken($border, 10%);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: $primary;
+      @include box-shadow(0 0 0 3px rgba($primary, 0.1));
+    }
+
+    &[readonly] {
+      background-color: $light-grey;
+      color: $dark-grey;
+      cursor: not-allowed;
+    }
+  }
+
+  label {
+    display: block;
+    margin-bottom: calc($spacing-unit / 2);
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: $dark-grey;
+  }
+
+  &.full-width {
+    width: 100%;
+  }
+
+  .form-group {
+    textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid $border;
+      background-color: $background;
+      color: $text;
+      font-size: 0.9375rem;
+      max-width: 100%;
+      min-height: 75px;
+      min-width: 100%;
+      font-family: "Ubuntu", sans-serif;
+      @include alternating-border-radius($button-border-radius);
+      transition: border-color 0.2s, box-shadow 0.2s;
+
+      &:hover:not([readonly]) {
+        border-color: darken($border, 10%);
+      }
+
+      &:focus {
+        outline: none;
+        border-color: $primary;
+        @include box-shadow(0 0 0 3px rgba($primary, 0.1));
+      }
+
+      &[readonly] {
+        background-color: $light-grey;
+        color: $dark-grey;
+        cursor: not-allowed;
+      }
+    }
+  }
+}
+
+.api-key-group {
+  display: flex;
+  gap: $spacing-unit;
+  align-items: center;
+
+  input {
+    flex: 1;
+    font-family: "Fira Code", monospace;
+    font-size: 0.875rem;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-icon {
+    @include reset-button;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: $light-grey;
+    color: $dark-grey;
+    @include alternating-border-radius($button-border-radius);
+    @include transition(all, 0.2s);
+
+    &:hover {
+      background-color: $primary-hover;
+      color: $primary;
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+
+    i {
+      font-size: 1rem;
+    }
+
+    &:first-of-type {
+      margin-left: -$spacing-unit * 3;
+    }
+  }
+}
+
+.field-hint {
+  margin-top: calc($spacing-unit / 2);
+  color: $dark-grey;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.field-warning {
+  margin-top: calc($spacing-unit / 2);
+  padding: calc($spacing-unit / 2) $spacing-unit;
+  background-color: rgba($status-not-arrived, 0.1);
+  border-left: 3px solid $status-not-arrived;
+  color: darken($status-not-arrived, 10%);
+  font-size: 0.8125rem;
+  display: flex;
+  align-items: center;
+  gap: calc($spacing-unit / 2);
+  @include alternating-border-radius(calc($button-border-radius / 2));
+
+  i {
+    font-size: 0.875rem;
+  }
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 26px;
+
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+
+    &:checked + .slider {
+      background-color: $primary;
+      border-color: $primary;
+
+      &:before {
+        transform: translateX(22px);
+        background-color: white;
+        border-color: $primary;
+      }
+    }
+
+    &:focus + .slider {
+      border-color: $primary;
+    }
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: $background;
+    border: 2px solid $border;
+    @include transition;
+    @include alternating-border-radius($button-border-radius);
+
+    &:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 2px;
+      bottom: 2px;
+      background-color: $background;
+      border: 2px solid $border;
+      @include transition;
+      @include alternating-border-radius(calc($button-border-radius / 2));
+      box-sizing: border-box; // Ensure border is included in size
+    }
+
+    &:hover {
+      border-color: darken($border, 10%);
+
+      &:before {
+        border-color: darken($border, 10%);
+      }
+    }
+  }
+}
+
+.switch-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-unit;
+  background-color: $background;
+  border: 1px solid $border;
+  @include alternating-border-radius($button-border-radius);
+
+  span {
+    font-size: 0.9375rem;
+    color: $text;
+  }
+}
+
+.settings-save-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: $background;
+  border-top: 1px solid $border;
+  padding: $spacing-unit;
+  transform: translateY(100%);
+  @include transition(all, 0.3s);
+  @include box-shadow(0 -4px 6px rgba($shadow-color, 0.1));
+  z-index: 1000;
+
+  &.visible {
+    transform: translateY(0);
+  }
+
+  .save-bar-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 $spacing-unit * 2;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: $spacing-unit * 2;
+
+    @media (max-width: 768px) {
+      padding: 0 $spacing-unit;
+    }
+  }
+
+  .save-message {
+    display: flex;
+    align-items: center;
+    gap: calc($spacing-unit / 2);
+    color: $status-not-arrived;
+    font-size: 0.875rem;
+    font-weight: 500;
+
+    i {
+      font-size: 0.75rem;
+      animation: pulse 2s infinite;
+    }
+  }
+}
+
+.alert {
+  margin-bottom: $spacing-unit * 2;
+  padding: $spacing-unit $spacing-unit * 1.5;
+  @include alternating-border-radius($button-border-radius);
+  display: flex;
+  align-items: center;
+  gap: $spacing-unit;
+  font-size: 0.9375rem;
+  animation: slideIn 0.3s ease-out;
+
+  &.alert-success {
+    background-color: rgba($status-arrived, 0.1);
+    color: $status-arrived;
+    border: 1px solid rgba($status-arrived, 0.2);
+  }
+
+  i {
+    font-size: 1.125rem;
+  }
+}
+
+.api-status-banner {
+  margin-bottom: $spacing-unit * 2;
+  padding: $spacing-unit * 1.5;
+  display: flex;
+  gap: $spacing-unit * 1.5;
+  align-items: flex-start;
+  @include alternating-border-radius($regular-border-radius);
+
+  i {
+    font-size: 1.5rem;
+    margin-top: 0.2rem;
+  }
+
+  .status-content {
+    flex: 1;
+
+    h4 {
+      margin: 0 0 0.5rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    p {
+      margin: 0;
+      color: currentColor;
+      opacity: 0.9;
+    }
+
+    .review-notes {
+      margin-top: $spacing-unit;
+      padding: $spacing-unit;
+      background-color: $surface-alt;
+      border: 1px solid $border;
+      @include alternating-border-radius($regular-border-radius);
+
+      h5 {
+        margin: 0 0 $spacing-unit;
+        color: $secondary;
+      }
+
+      textarea {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid $border;
+        background-color: $background;
+        color: $text;
+        font-size: 0.9375rem;
+        min-height: 75px;
+        font-family: "Ubuntu", sans-serif;
+        @include alternating-border-radius($button-border-radius);
+        transition: border-color 0.2s, box-shadow 0.2s;
+
+        &:hover:not([readonly]) {
+          border-color: darken($border, 10%);
+        }
+
+        &:focus {
+          outline: none;
+          border-color: $primary;
+          @include box-shadow(0 0 0 3px rgba($primary, 0.1));
+        }
+
+        &[readonly] {
+          background-color: transparent;
+          color: $dark-grey;
+          cursor: default;
+          resize: none;
+          border: none;
+          padding: 0;
+          height: auto;
+          min-height: 0;
+          &::-webkit-input-placeholder {
+            color: transparent;
+          }
+          &::-moz-placeholder {
+            color: transparent;
+          }
+        }
+
+        &[readonly]:hover {
+          border-color: transparent;
+        }
+
+        &[readonly]:focus {
+          border-color: transparent;
+          @include box-shadow(none);
+        }
+      }
+    }
+  }
+
+  &.pending {
+    background-color: rgba($status-not-arrived, 0.1);
+    border: 1px solid rgba($status-not-arrived, 0.2);
+    border-left: 5px solid $status-not-arrived;
+    color: darken($status-not-arrived, 10%);
+  }
+
+  &.approved {
+    background-color: rgba($status-arrived, 0.1);
+    border: 1px solid rgba($status-arrived, 0.2);
+    border-left: 5px solid $status-arrived;
+    color: $status-arrived;
+  }
+
+  &.rejected {
+    background-color: rgba($accent, 0.1);
+    border: 1px solid rgba($accent, 0.2);
+    border-left: 5px solid $accent;
+    color: $accent;
+
+    .btn-secondary {
+      margin-top: $spacing-unit;
+    }
+  }
+
+  // Add position relative to handle dismiss button
+  position: relative;
+
+  // Add transition properties
+  transition: all 0.3s ease;
+
+  .banner-dismiss {
+    @include reset-button;
+    position: absolute;
+    top: $spacing-unit;
+    right: $spacing-unit;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    opacity: 0.6;
+    transition: all 0.2s ease;
+
+    &:hover {
+      opacity: 1;
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    i {
+      font-size: 14px;
+    }
+  }
+
+  // Adjust content padding for dismiss button
+  .status-content {
+    padding-right: $spacing-unit * 2;
+  }
+}
+
+.password-form {
+  background-color: $surface;
+  padding: $spacing-unit * 1.5;
+  border: 1px solid $border;
+  @include alternating-border-radius($button-border-radius);
+
+  .form-group {
+    margin-bottom: $spacing-unit;
+
+    &:last-child {
+      margin-bottom: $spacing-unit * 1.5;
+    }
+
+    label {
+      display: block;
+      margin-bottom: calc($spacing-unit / 2);
+      font-weight: 500;
+      font-size: 0.875rem;
+      color: $dark-grey;
+    }
+
+    input[type="password"] {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid $border;
+      background-color: $background;
+      color: $text;
+      font-size: 0.9375rem;
+      @include alternating-border-radius($button-border-radius);
+      @include transition(all, 0.2s);
+
+      &:hover:not([readonly]) {
+        border-color: darken($border, 10%);
+      }
+
+      &:focus {
+        outline: none;
+        border-color: $primary;
+        @include box-shadow(0 0 0 3px rgba($primary, 0.1));
+      }
+    }
+  }
+
+  button[type="submit"] {
+    width: 100%;
+    margin-top: $spacing-unit;
+  }
+}
+
+.settings-section {
+  h3 {
+    color: $secondary;
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: $spacing-unit;
+  }
+}
+
+@media (max-width: 768px) {
+  .settings-container {
+    padding: 0 $spacing-unit;
+  }
+
+  .settings-content {
+    padding: $spacing-unit * 1.5;
+  }
+
+  .settings-section h2 {
+    font-size: 1.25rem;
+  }
+
+  .save-bar-content {
+    flex-direction: column;
+    gap: $spacing-unit;
+    align-items: stretch;
+
+    .btn-primary {
+      width: 100%;
+    }
+  }
+}

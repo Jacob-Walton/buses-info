@@ -38,6 +38,7 @@ const isProd = process.env.NODE_ENV === "production";
 // Build paths and entry points configuration
 const config = {
 	entryPoints: ["js/site.js", "js/businfo.js", "js/settings.js"],
+	scssEntryPoints: ["styles/site.scss"],
 	modulesDir: "js/modules",
 	outputDir: "dist",
 	devOutputDirs: {
@@ -134,35 +135,39 @@ function invalidateCache(cb) {
  * @returns {NodeJS.ReadWriteStream} Gulp stream
  */
 function buildStyles() {
-	// Initialize stream
-	let stream = src("src/styles/**/*.scss", { sourcemaps: !isProd })
-		// Error handling to prevent watch task from breaking
-		.pipe(
-			plumber({
-				errorHandler: function (err) {
-					console.log(err);
-					this.emit("end");
-				},
-			}),
-		)
-		// Process SCSS
-		.pipe(
-			sass({
-				outputStyle: "compressed",
-				includePaths: ["node_modules"],
-			}).on("error", sass.logError),
-		)
-		// Apply vendor prefixes via autoprefixer
-		.pipe(postcss([autoprefixer()]));
+    const tasks = config.scssEntryPoints.map(entry => {
+        // Initialize stream
+        let stream = src(`src/${entry}`, { sourcemaps: !isProd })
+            // Error handling to prevent watch task from breaking
+            .pipe(
+                plumber({
+                    errorHandler: function (err) {
+                        console.log(err);
+                        this.emit("end");
+                    },
+                }),
+            )
+            // Process SCSS
+            .pipe(
+                sass({
+                    outputStyle: "compressed",
+                    includePaths: ["node_modules", "src/styles"],
+                }).on("error", sass.logError),
+            )
+            // Apply vendor prefixes via autoprefixer
+            .pipe(postcss([autoprefixer()]));
 
-	// Strip sourcemaps in production mode
-	if (isProd) {
-		stream = stream.pipe(removeSourcemaps());
-		return stream.pipe(dest(config.outputDir + "/css", { sourcemaps: false }));
-	}
+        // Strip sourcemaps in production mode
+        if (isProd) {
+            stream = stream.pipe(removeSourcemaps());
+            return stream.pipe(dest(config.outputDir + "/css", { sourcemaps: false }));
+        }
 
-	// Output to destination
-	return stream.pipe(dest(config.devOutputDirs.css, { sourcemaps: "." }));
+        // Output to destination
+        return stream.pipe(dest(config.devOutputDirs.css, { sourcemaps: "." }));
+    });
+
+    return merge(...tasks);
 }
 
 /**
@@ -245,10 +250,13 @@ async function minifyJs() {
  * @returns {void}
  */
 function watchTask() {
-	// Watch SCSS files with change logging
-	watch(["src/styles/**/*.scss"], buildStyles)
-		.on("change", (path) => console.log(`SCSS: ${path} changed`))
-		.on("error", (err) => console.log(`SCSS Error: ${err}`));
+    // Watch all SCSS files but only rebuild entry points
+    watch(["src/styles/**/*.scss"], function(cb) {
+        buildStyles();
+        cb();
+    })
+        .on("change", (path) => console.log(`SCSS: ${path} changed`))
+        .on("error", (err) => console.log(`SCSS Error: ${err}`));
 
 	// Watch JS files including modules directory
 	watch([...config.entryPoints, `${config.modulesDir}/**/*.js`], minifyJs)

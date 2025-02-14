@@ -1,0 +1,101 @@
+.error-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-unit * 2;
+  background-color: $surface;
+}
+
+.error-content {
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+  background-color: $background;
+  padding: $spacing-unit * 3;
+  border: 1px solid $border;
+  @include alternating-border-radius($regular-border-radius);
+  @include box-shadow(0 4px 12px rgba($shadow-color, 0.08));
+}
+
+.error-icon {
+  margin-bottom: $spacing-unit * 2;
+
+  i {
+    font-size: 4rem;
+    color: $accent;
+  }
+}
+
+.error-content {
+  h1 {
+    color: $secondary;
+    font-size: 2rem;
+    margin-bottom: $spacing-unit;
+  }
+
+  p {
+    color: $dark-grey;
+    margin-bottom: $spacing-unit * 2;
+    font-size: 1.1rem;
+  }
+}
+
+.error-details {
+  background-color: $surface-alt;
+  padding: $spacing-unit;
+  margin: $spacing-unit * 2 0;
+  @include alternating-border-radius($button-border-radius);
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-unit;
+
+  span {
+    color: $dark-grey;
+    font-size: 0.9rem;
+  }
+
+  code {
+    font-family: "Fira Code", monospace;
+    color: $accent;
+    font-size: 0.9rem;
+  }
+}
+
+.error-actions {
+  display: flex;
+  gap: $spacing-unit;
+  justify-content: center;
+  margin-top: $spacing-unit * 2;
+
+  .btn-primary,
+  .btn-secondary {
+    min-width: 140px;
+  }
+}
+@media (max-width: 768px) {
+  .error-container {
+    padding: $spacing-unit;
+  }
+
+  .error-content {
+    padding: $spacing-unit * 2;
+
+    h1 {
+      font-size: 1.75rem;
+    }
+
+    p {
+      font-size: 1rem;
+    }
+  }
+
+  .error-actions {
+    flex-direction: column;
+
+    .btn-primary,
+    .btn-secondary {
+      width: 100%;
+    }
+  }
+}
