@@ -109,7 +109,7 @@ namespace BusInfo.Controllers
             ApplicationUser? user = await _userService.GetUserByIdAsync(userId);
             if (user == null) return NotFound();
 
-            user.PreferredRoutes = [..preferences.PreferredRoutes];
+            user.PreferredRoutes = [.. preferences.PreferredRoutes];
             user.ShowPreferredRoutesFirst = preferences.ShowPreferredRoutesFirst;
             user.EnableEmailNotifications = preferences.EnableEmailNotifications;
 
@@ -172,7 +172,7 @@ namespace BusInfo.Controllers
             {
                 return StatusCode(500, new { message = "Database error while submitting request", error = "Database operation failed" });
             }
-            catch (InvalidOperationException )
+            catch (InvalidOperationException)
             {
                 return StatusCode(500, new { message = "Invalid operation while submitting request", error = "Operation invalid" });
             }
@@ -348,6 +348,29 @@ namespace BusInfo.Controllers
                 ?? User.FindFirst(ClaimTypes.Email)?.Value;
 
             return email == null ? null : (_context.Users.FirstOrDefault(u => u.Email == email)?.Id);
+        }
+
+        [HttpGet("auth-details")]
+        public async Task<ActionResult<AuthenticationDetails>> GetAuthenticationDetailsAsync()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+                return Unauthorized();
+
+            var user = await _userService.GetUserByIdAsync(userId);
+            if (user == null)
+                return NotFound();
+
+            return new AuthenticationDetails
+            {
+                Provider = user.AuthProvider,
+                ProviderName = user.AuthProvider.GetDisplayName(),
+                CanChangePassword = user.AuthProvider == AuthProvider.Local,
+                RequiresEmailVerification = user.AuthProvider == AuthProvider.Local,
+                IsEmailVerified = user.IsEmailVerified,
+                Email = user.Email,
+                HasExternalId = !string.IsNullOrEmpty(user.ExternalId)
+            };
         }
     }
 

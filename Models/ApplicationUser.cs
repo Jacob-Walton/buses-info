@@ -4,6 +4,13 @@ using System.Collections.ObjectModel;
 
 namespace BusInfo.Models
 {
+    public enum AuthProvider
+    {
+        Local,      // Email/Password
+        Google,     // Google OAuth
+        Microsoft   // Microsoft OAuth
+    }
+
     public class ApplicationUser
     {
         public ApplicationUser()
@@ -49,5 +56,8 @@ namespace BusInfo.Models
         public DateTime? TermsAgreedAt { get; set; }
 
         public ApiKey? ActiveApiKey { get; set; }
+
+        public AuthProvider AuthProvider { get; set; } = AuthProvider.Local;
+        public string? ExternalId { get; set; }
     }
 }

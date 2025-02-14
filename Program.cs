@@ -303,26 +303,38 @@ namespace BusInfo
                 options.ClientSecret = config["Authentication:Google:ClientSecret"] ?? throw new InvalidOperationException("Google Client Secret not configured");
                 options.SaveTokens = true;
                 options.CallbackPath = "/signin-google";
+                options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 
                 options.Events = new OAuthEvents
                 {
                     OnTicketReceived = async context =>
                     {
-                        var userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
-                        var user = await userService.GetOrCreateUserAsync(context.Principal);
-
-                        var claims = new List<Claim>
+                        try
                         {
-                            new Claim(ClaimTypes.NameIdentifier, user.Id),
-                            new Claim(ClaimTypes.Email, user.Email),
-                            new Claim("claims_last_refresh", DateTimeOffset.UtcNow.ToString("o"))
-                        };
+                            var userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
+                            var user = await userService.GetOrCreateUserAsync(context.Principal);
 
-                        if (user.IsAdmin)
-                            claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+                            var claims = new List<Claim>
+                            {
+                                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                                new Claim(ClaimTypes.Email, user.Email),
+                                new Claim("claims_last_refresh", DateTimeOffset.UtcNow.ToString("o")),
+                                new Claim("provider", user.AuthProvider.ToString()),
+                                new Claim("auth_provider", user.AuthProvider.ToString())
+                            };
 
-                        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                        context.Principal = new ClaimsPrincipal(identity);
+                            if (user.IsAdmin)
+                                claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+
+                            var identity = new ClaimsIdentity(claims, context.Principal.Identity?.AuthenticationType ?? 
+                                CookieAuthenticationDefaults.AuthenticationScheme);
+                            context.Principal = new ClaimsPrincipal(identity);
+                        }
+                        catch (InvalidOperationException ex) when (ex.Message.Contains("different authentication method"))
+                        {
+                            context.Response.Redirect($"/login?error=wrong_provider&message={Uri.EscapeDataString(ex.Message)}");
+                            context.HandleResponse();
+                        }
                     },
                     OnRemoteFailure = context =>
                     {
@@ -339,26 +351,38 @@ namespace BusInfo
                     throw new InvalidOperationException("Microsoft Client Secret not configured");
                 options.SaveTokens = true;
                 options.CallbackPath = "/signin-microsoft";
+                options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 
                 options.Events = new OAuthEvents
                 {
                     OnTicketReceived = async context =>
                     {
-                        var userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
-                        var user = await userService.GetOrCreateUserAsync(context.Principal);
-
-                        var claims = new List<Claim>
+                        try
                         {
-                            new Claim(ClaimTypes.NameIdentifier, user.Id),
-                            new Claim(ClaimTypes.Email, user.Email),
-                            new Claim("claims_last_refresh", DateTimeOffset.UtcNow.ToString("o"))
-                        };
+                            var userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
+                            var user = await userService.GetOrCreateUserAsync(context.Principal);
 
-                        if (user.IsAdmin)
-                            claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+                            var claims = new List<Claim>
+                            {
+                                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                                new Claim(ClaimTypes.Email, user.Email),
+                                new Claim("claims_last_refresh", DateTimeOffset.UtcNow.ToString("o")),
+                                new Claim("provider", user.AuthProvider.ToString()),
+                                new Claim("auth_provider", user.AuthProvider.ToString())
+                            };
 
-                        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                        context.Principal = new ClaimsPrincipal(identity);
+                            if (user.IsAdmin)
+                                claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+
+                            var identity = new ClaimsIdentity(claims, context.Principal.Identity?.AuthenticationType ?? 
+                                CookieAuthenticationDefaults.AuthenticationScheme);
+                            context.Principal = new ClaimsPrincipal(identity);
+                        }
+                        catch (InvalidOperationException ex) when (ex.Message.Contains("different authentication method"))
+                        {
+                            context.Response.Redirect($"/login?error=wrong_provider&message={Uri.EscapeDataString(ex.Message)}");
+                            context.HandleResponse();
+                        }
                     },
                     OnRemoteFailure = context =>
                     {

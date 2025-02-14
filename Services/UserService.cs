@@ -20,7 +20,7 @@ namespace BusInfo.Services
         {
             ApplicationUser? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
 
-            if (user == null)
+            if (user == null || user.AuthProvider != AuthProvider.Local)
                 return null;
 
             // Only block authentication if account is permanently deleted
@@ -147,19 +147,27 @@ namespace BusInfo.Services
 
             ApplicationUser? user = _context.Users.FirstOrDefault(u => u.Email == email);
 
+            string? externalId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            AuthProvider provider = DetermineAuthProvider(principal);
+
             if (user == null)
             {
                 user = new ApplicationUser
                 {
                     Email = email,
                     LastLoginAt = DateTime.UtcNow,
-                    HasRequestedApiAccess = false,
+                    AuthProvider = provider,
+                    ExternalId = externalId,
+                    IsEmailVerified = true,
+                    HasAgreedToTerms = true,
+                    TermsAgreedAt = DateTime.UtcNow
                 };
                 _context.Users.Add(user);
             }
-            else
+            else if (user.AuthProvider != provider)
             {
-                user.LastLoginAt = DateTime.UtcNow;
+                // If user exists but with different auth provider, block access
+                throw new InvalidOperationException($"Account exists with different authentication method: {user.AuthProvider}");
             }
 
             await _context.SaveChangesAsync();
@@ -287,6 +295,38 @@ namespace BusInfo.Services
             string salt = Convert.ToBase64String(hmac.Key);
             string hash = Convert.ToBase64String(hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password)));
             return (hash, salt);
+        }
+
+        private static AuthProvider DetermineAuthProvider(ClaimsPrincipal principal)
+        {
+            // Check for direct provider claims first
+            var providerClaim = principal.FindFirst("provider")?.Value;
+            if (!string.IsNullOrEmpty(providerClaim))
+            {
+                return Enum.Parse<AuthProvider>(providerClaim, true);
+            }
+
+            // Check for identity provider claims
+            var idp = principal.FindFirst("http://schemas.microsoft.com/identity/claims/identityprovider")?.Value
+                ?? principal.FindFirst("urn:google:issuer")?.Value;
+
+            // Check for login provider
+            var loginProvider = principal.FindFirst("LoginProvider")?.Value;
+
+            // Check scheme
+            var scheme = principal.Identity?.AuthenticationType;
+
+            if (idp?.Contains("google", StringComparison.OrdinalIgnoreCase) == true ||
+                loginProvider?.Equals("Google", StringComparison.OrdinalIgnoreCase) == true ||
+                scheme?.Equals("Google", StringComparison.OrdinalIgnoreCase) == true)
+                return AuthProvider.Google;
+
+            if (idp?.Contains("microsoft", StringComparison.OrdinalIgnoreCase) == true ||
+                loginProvider?.Equals("Microsoft", StringComparison.OrdinalIgnoreCase) == true ||
+                scheme?.Equals("Microsoft", StringComparison.OrdinalIgnoreCase) == true)
+                return AuthProvider.Microsoft;
+
+            return AuthProvider.Local;
         }
     }
 }
