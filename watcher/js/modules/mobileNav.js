@@ -3,7 +3,7 @@ export function initializeMobileNav() {
 		trigger: document.getElementById("mobileMenuTrigger"),
 		close: document.getElementById("mobileMenuClose"),
 		navbar: document.getElementById("mobileNavbar"),
-		overlay: document.getElementById("mobileOverlay"),
+		overlay: document.getElementById("mobileNavbarOverlay"),
 		body: document.body,
 	};
 
