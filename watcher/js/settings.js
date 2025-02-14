@@ -1,7 +1,7 @@
 class SettingsManager {
     constructor() {
         this.currentTab = new URLSearchParams(window.location.search).get('tab') || 'profile';
-        this.form = document.querySelector('.settings-form'); // Changed from getElementById to querySelector
+        this.form = document.querySelector('.settings-form');
         this.cache = {
             profile: null,
             routes: null,
@@ -90,7 +90,7 @@ class SettingsManager {
         window.history.replaceState({}, '', url);
 
         // Update navigation and panels
-        document.querySelectorAll('.nav-link').forEach(link => {
+        document.querySelectorAll('.nav-tabs > .nav-item > .nav-link').forEach(link => {
             const isActive = link.getAttribute('href') === `#${this.currentTab}`;
             link.closest('.nav-item')?.classList.toggle('active', isActive);
         });
@@ -208,7 +208,7 @@ class SettingsManager {
                 this.cache.apiStatus = {
                     hasApiKey: apiData.hasApiKey,
                     key: apiData.key,
-                    pendingRequest: apiData.pendingRequest, // Add this flag
+                    pendingRequest: apiData.pendingRequest,
                 };
             }
 
@@ -422,7 +422,7 @@ class SettingsManager {
 
     setupEventListeners() {
          // Tab navigation
-         document.querySelectorAll('.nav-link').forEach(link => {
+         document.querySelectorAll('.nav-tabs > .nav-item > .nav-link').forEach(link => {
             link.addEventListener('click', (e) => {
               e.preventDefault();
               this.switchTab(e.currentTarget.getAttribute('href').substring(1));
@@ -470,7 +470,6 @@ class SettingsManager {
             }
         });
 
-        // Add change listeners for preference toggles
         const toggles = [
             this.getElement('showPreferredRoutesFirst'),
             this.getElement('enableEmailNotifications')
@@ -484,7 +483,6 @@ class SettingsManager {
             }
         });
 
-        // Add change listeners for route checkboxes
         document.querySelectorAll('[name="PreferredRoutes"]').forEach(checkbox => {
             checkbox.addEventListener('change', () => {
                 this.checkFormChanges();
@@ -727,7 +725,6 @@ class SettingsManager {
             return;
         }
 
-        // Get the form from the API panel instead of this.form
         const form = document.querySelector('#api .api-request-form');
         if (!form) {
             return;
@@ -777,7 +774,6 @@ class SettingsManager {
         this.populateAllSections();
     }
 
-    // Helper method to safely get DOM elements
     getElement(id) {
         const element = document.getElementById(id);
         if (!element) {
@@ -786,7 +782,6 @@ class SettingsManager {
         return element;
     }
 
-    // Use this helper method when accessing DOM elements
     updateElementValue(id, value) {
         const element = this.getElement(id);
         if (element) {
@@ -795,7 +790,7 @@ class SettingsManager {
     }
 
     setupTabNavigation() {
-        document.querySelectorAll('.nav-link').forEach(link => {
+        document.querySelectorAll('.nav-tabs .nav-link').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 const tabId = e.currentTarget.getAttribute('href').substring(1);
@@ -805,8 +800,7 @@ class SettingsManager {
     }
 
     switchTab(tabId) {
-        // Update navigation
-        document.querySelectorAll('.nav-item').forEach(item => {
+        document.querySelectorAll('.nav-tabs .nav-item').forEach(item => {
             item.classList.toggle('active', 
                 item.querySelector('.nav-link').getAttribute('href') === `#${tabId}`);
         });
@@ -887,13 +881,13 @@ class SettingsManager {
                         ? `${selectedCount} routes selected`
                         : 'Select Routes';
                 }
-                this.checkFormChanges(); // Add this line
+                this.checkFormChanges();
             });
         });
 
         // Initial count update
         this.updateSelectedCount();
-        this.checkFormChanges(); // Add this line
+        this.checkFormChanges();
     }
 
     updateSelectedCount() {
