@@ -2,7 +2,7 @@
 
 ## High Priority
 
-- [ ] Reevaluate whether or not to host on heroku. If not, find a new method.
+- [x] Reevaluate whether or not to host on heroku. If not, find a new method. (Decided not to)
 - [ ] Implement Razor pages
 - [ ] Implement full API
 
