@@ -1,0 +1,174 @@
+// Common mixins
+@mixin link-style {
+  color: var(--primary);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(var(--primary), 0.3);
+  transition: border-color 0.2s;
+
+  &:hover {
+    border-color: var(--primary);
+  }
+}
+
+// Base styles
+.legal-banner {
+  background-color: rgba(var(--secondary), 0.98);
+  color: white;
+  padding: $spacing-unit 0;
+  position: relative;
+  z-index: 1001;
+
+  .container {
+    position: relative;
+  }
+
+  .legal-banner-content {
+    display: flex;
+    align-items: flex-start;
+    gap: $spacing-unit;
+    font-size: 0.875rem;
+    line-height: 1.5;
+
+    i {
+      font-size: 1.25rem;
+      margin-top: 0.125rem;
+      flex-shrink: 0;
+    }
+
+    p {
+      margin: 0;
+      padding-right: $spacing-unit * 2;
+
+      a {
+        @include link-style;
+      }
+    }
+  }
+
+  .legal-banner-dismiss {
+    @include reset-button;
+    position: absolute;
+    right: $spacing-unit;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(white, 0.7);
+    padding: 0.5rem;
+    transition: color 0.2s;
+
+    &:hover {
+      color: white;
+    }
+
+    i {
+      font-size: 1rem;
+    }
+  }
+}
+
+// Legal Modal
+.legal-modal {
+  position: fixed;
+  inset: 0;
+  background-color: rgba($secondary-dark, 0.95);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-unit;
+
+  &-content {
+    background-color: $background;
+    width: 100%;
+    max-width: 700px;
+    @include alternating-border-radius($regular-border-radius);
+    @include box-shadow(0 8px 32px rgba(0, 0, 0, 0.2));
+    overflow: hidden;
+    animation: modal-appear 0.3s ease-out;
+  }
+
+  &-header {
+    background-color: $secondary;
+    color: white;
+    padding: $spacing-unit * 1.5;
+    display: flex;
+    align-items: center;
+    gap: $spacing-unit;
+
+    i {
+      font-size: 1.5rem;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+  }
+
+  &-body {
+    padding: $spacing-unit * 2;
+    max-height: 60vh;
+    overflow-y: auto;
+
+    > p:first-child {
+      text-align: center;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: $spacing-unit * 2;
+    }
+
+    .legal-terms {
+      color: var(--text);
+
+      p {
+        margin-bottom: $spacing-unit;
+        line-height: 1.6;
+      }
+
+      ol {
+        padding-left: $spacing-unit * 1.5;
+        margin: $spacing-unit 0;
+
+        li {
+          margin-bottom: $spacing-unit;
+          line-height: 1.6;
+        }
+      }
+
+      a {
+        @include link-style;
+        color: $primary;
+      }
+    }
+  }
+
+  &-footer {
+    padding: $spacing-unit * 1.5;
+    background-color: $surface;
+    display: flex;
+    justify-content: center;
+
+    .btn-primary {
+      min-width: 200px;
+      justify-content: center;
+    }
+  }
+}
+
+@keyframes modal-appear {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+body.has-banner {
+  .navbar,
+  .mobile-navbar {
+    top: auto;
+  }
+}

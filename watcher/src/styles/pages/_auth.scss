@@ -1,0 +1,227 @@
+.login-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  height: calc(100vh - 70px);
+  overflow: hidden;
+  background: {
+    color: $background;
+    image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+      url("https://dhfrjz15mb441.cloudfront.net/bus-info/runshaw.jpg");
+    size: cover;
+    position: center;
+    repeat: no-repeat;
+  }
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.1);
+  }
+}
+
+.login-container {
+  width: 100%;
+  max-width: 600px;
+  padding: $spacing-unit * 2;
+  background-color: white;
+  border: 1px solid $light-grey;
+  z-index: 1;
+  @include alternating-border-radius(1rem);
+}
+
+.login-title {
+  font-size: 2rem;
+  color: $primary;
+  margin-bottom: $spacing-unit * 2;
+  text-align: center;
+}
+
+.login-form {
+  .form-group {
+    margin-bottom: $spacing-unit * 1.5;
+    position: relative;
+
+    label {
+      display: block;
+      margin-bottom: calc($spacing-unit / 4);
+      font-weight: 500;
+      font-size: 0.9rem;
+      color: $dark-grey;
+    }
+
+    input[type="email"],
+    input[type="password"],
+    input[type="tel"],
+    input[type="text"] {
+      width: 100%;
+      padding: calc($spacing-unit / 2) 0;
+      border: none;
+      border-bottom: 1px solid $border;
+      background-color: $background;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+      @include box-shadow(none);
+      @include alternating-border-radius(0);
+
+      &:focus {
+        outline: none;
+        border-bottom-color: $primary;
+      }
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background-color: $primary;
+      transition: width 0.3s ease;
+    }
+
+    input:focus + &::after {
+      width: 100%;
+    }
+  }
+
+  button {
+    @extend .button;
+    width: 100%;
+    margin-top: $spacing-unit;
+  }
+
+  .option {
+    margin-bottom: $spacing-unit;
+    padding: 0;
+    display: flex;
+    align-items: center;
+
+    &:hover {
+      background: none;
+    }
+
+    .checkbox-wrapper {
+      position: relative;
+      width: 20px;
+      height: 20px;
+      margin-right: 0.75rem;
+
+      input[type="checkbox"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+
+        & + .checkbox-custom {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 20px;
+          height: 20px;
+          background: $background;
+          border: 2px solid $border;
+          @include alternating-border-radius(4px);
+          @include transition;
+          cursor: pointer;
+
+          &::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 10px;
+            height: 10px;
+            background: $primary;
+            @include alternating-border-radius(2px);
+            @include transition;
+          }
+        }
+
+        &:hover + .checkbox-custom,
+        &:focus + .checkbox-custom {
+          border-color: $primary;
+        }
+
+        &:checked + .checkbox-custom {
+          border-color: $primary;
+          background: $primary;
+
+          &::after {
+            transform: translate(-50%, -50%) scale(1);
+            background: white;
+          }
+        }
+      }
+    }
+
+    span {
+      font-size: 0.9375rem;
+      font-weight: 500;
+      color: $text;
+    }
+  }
+}
+
+.error-summary {
+  color: $accent;
+  background-color: $accent-light;
+  border: 1px solid $accent;
+  padding: calc($spacing-unit / 2);
+  margin-bottom: $spacing-unit;
+  @include alternating-border-radius($button-border-radius);
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    li {
+      position: relative;
+      padding-left: $spacing-unit * 1.5;
+      font-size: 0.875rem;
+      line-height: 1.4;
+      margin-bottom: calc($spacing-unit / 4);
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      &::before {
+        content: "\f06a";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1rem;
+      }
+    }
+  }
+}
+
+.login-links {
+  margin-top: $spacing-unit;
+  text-align: center;
+
+  a {
+    color: $primary;
+    text-decoration: none;
+    @include transition(color);
+
+    &:hover {
+      color: $primary-dark;
+    }
+  }
+
+  span {
+    margin: 0 calc($spacing-unit / 2);
+    color: $dark-grey;
+  }
+}

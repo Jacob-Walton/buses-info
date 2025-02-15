@@ -23,6 +23,8 @@
 		"gulp-size": "^5.0.0",
 		"gulp-terser": "^2.1.0",
 		"javascript-obfuscator": "^4.1.1",
+		"postcss-combine-duplicated-selectors": "^10.0.3",
+		"postcss-scss": "^4.0.9",
 		"rollup": "^2.79.2",
 		"sass": "^1.84.0",
 		"vinyl-buffer": "^1.0.1",

@@ -1,0 +1,322 @@
+// Common mixins
+@mixin notice-box-base {
+  display: flex;
+  gap: $spacing-unit;
+  align-items: flex-start;
+  padding: $spacing-unit * 1.5;
+  @include alternating-border-radius($regular-border-radius);
+  
+  .notice-content p {
+    margin: 0;
+    color: $text;
+  }
+}
+
+// Common styles
+%box-base {
+  background-color: $surface;
+  border: 1px solid $border;
+  @include alternating-border-radius($regular-border-radius);
+}
+
+%section-header {
+  color: $secondary;
+  font-weight: 600;
+  margin-bottom: $spacing-unit;
+}
+
+.content-page {
+  padding-top: calc(70px + ($spacing-unit * 2));
+  min-height: 100vh;
+  background-color: $surface;
+
+  .page-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 $spacing-unit * 2 $spacing-unit * 2;
+
+    @media (max-width: 768px) {
+      padding: 0 $spacing-unit;
+    }
+  }
+
+  .page-content {
+    @extend %box-base;
+    padding: $spacing-unit * 3;
+    @include box-shadow(0 2px 4px rgba($shadow-color, 0.08));
+
+    @media (max-width: 768px) {
+      padding: $spacing-unit * 1.5;
+    }
+  }
+
+  .page-header {
+    margin-bottom: $spacing-unit * 3;
+    text-align: center;
+
+    h1 {
+      color: $secondary;
+      font-size: 2.5rem;
+      margin-bottom: $spacing-unit;
+
+      @media (max-width: 768px) {
+        font-size: 2rem;
+      }
+    }
+
+    .last-updated {
+      color: $dark-grey;
+      font-size: 0.875rem;
+      font-style: italic;
+    }
+  }
+
+  .content-section {
+    margin-bottom: $spacing-unit * 3;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    h2 {
+      @extend %section-header;
+      font-size: 1.5rem;
+    }
+
+    p {
+      color: $text;
+      line-height: 1.6;
+      margin-bottom: $spacing-unit;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    ul {
+      list-style-type: disc;
+      padding-left: $spacing-unit * 2;
+      margin: $spacing-unit 0;
+
+      li {
+        color: $text;
+        margin-bottom: calc($spacing-unit / 2);
+        line-height: 1.6;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+
+    a {
+      color: $primary;
+      text-decoration: none;
+      @include transition(color);
+
+      &:hover {
+        color: darken($primary, 10%);
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+.about-page {
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: $spacing-unit;
+    margin: $spacing-unit 0;
+
+    .feature-item {
+      @extend %box-base;
+      padding: $spacing-unit;
+      display: flex;
+      align-items: center;
+      gap: $spacing-unit;
+      @include alternating-border-radius($button-border-radius);
+
+      i {
+        font-size: 1.5rem;
+        color: $primary;
+      }
+
+      span {
+        font-weight: 500;
+        color: $text;
+      }
+    }
+  }
+
+  .notice-box {
+    @include notice-box-base;
+    background-color: rgba($primary, 0.05);
+    border: 1px solid rgba($primary, 0.2);
+
+    i {
+      font-size: 1.5rem;
+      color: $primary;
+    }
+  }
+
+  .github-box {
+    @extend %box-base;
+    padding: $spacing-unit * 2;
+    display: flex;
+    gap: $spacing-unit * 2;
+    align-items: center;
+
+    i {
+      font-size: 2.5rem;
+      color: $secondary;
+    }
+
+    .github-content {
+      flex: 1;
+
+      h3 {
+        @extend %section-header;
+        margin: 0 0 calc($spacing-unit / 2);
+      }
+
+      p {
+        margin: 0 0 $spacing-unit;
+        color: $dark-grey;
+      }
+    }
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      text-align: center;
+      gap: $spacing-unit;
+
+      i {
+        font-size: 2rem;
+      }
+    }
+  }
+
+  .contact-section {
+    text-align: center;
+
+    .contact-methods {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: $spacing-unit;
+      margin-top: $spacing-unit * 2;
+
+      .contact-method {
+        @extend %box-base;
+        padding: $spacing-unit * 1.5;
+        display: flex;
+        align-items: center;
+        gap: $spacing-unit;
+        text-decoration: none;
+        @include transition(all);
+
+        &:hover {
+          border-color: $primary;
+          transform: translateY(-2px);
+          @include box-shadow(0 4px 12px rgba($shadow-color, 0.08));
+        }
+
+        i {
+          font-size: 1.5rem;
+          color: $primary;
+        }
+
+        .method-details {
+          text-align: left;
+
+          .method-title {
+            display: block;
+            color: $text;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+          }
+
+          .method-value {
+            display: block;
+            color: $dark-grey;
+            font-size: 0.875rem;
+          }
+        }
+      }
+    }
+  }
+}
+
+.disclaimer-page {
+  .notice-box {
+    @include notice-box-base;
+    border-left: 5px solid $primary;
+    background-color: rgba($primary, 0.05);
+    margin-bottom: $spacing-unit * 2;
+
+    i {
+      color: $primary;
+      font-size: 1.75rem;
+      flex-shrink: 0;
+    }
+
+    .notice-content p {
+      line-height: 1.6;
+
+      strong {
+        color: $primary;
+        font-weight: 600;
+      }
+    }
+  }
+
+  .content-section {
+    ul {
+      border-left: 3px solid $border;
+      list-style-type: none;
+      padding-left: $spacing-unit * 1.5;
+
+      li {
+        position: relative;
+        padding: calc($spacing-unit / 2) 0;
+
+        &::before {
+          content: "";
+          position: absolute;
+          left: -$spacing-unit * 1.5;
+          top: 50%;
+          width: $spacing-unit;
+          height: 2px;
+          background-color: $border;
+        }
+      }
+    }
+
+    a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+
+      i {
+        font-size: 1rem;
+        color: $primary;
+      }
+
+      &:hover i {
+        transform: translateX(2px);
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    .notice-box {
+      flex-direction: column;
+      text-align: center;
+
+      i {
+        margin-bottom: calc($spacing-unit / 2);
+      }
+    }
+  }
+}

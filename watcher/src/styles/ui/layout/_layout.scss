@@ -1,0 +1,25 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 $spacing-unit;
+}
+
+.home-container {
+  margin-top: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-top: 70px;
+}
+
+.content-container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 $spacing-unit;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 calc($spacing-unit / 2);
+  }
+}
