@@ -1,14 +1,15 @@
-using System.IO;
-using Microsoft.Extensions.Logging;
 using System;
+using System.IO;
+using System.Reflection;
 using System.Globalization;
+using Microsoft.Extensions.Logging;
 
 namespace BusInfo.Services
 {
     public class EmailTemplateService(ILogger<EmailTemplateService> logger) : IEmailTemplateService
     {
         private readonly ILogger<EmailTemplateService> _logger = logger;
-        private readonly string _templatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Templates", "Email");
+        private readonly Assembly _assembly = Assembly.GetExecutingAssembly();
 
         private static readonly Action<ILogger, string, Exception?> LogTemplateNotFound =
             LoggerMessage.Define<string>(
@@ -18,15 +19,19 @@ namespace BusInfo.Services
 
         private string LoadTemplate(string templateName)
         {
-            string filePath = Path.Combine(_templatePath, $"{templateName}.html");
-
-            if (!File.Exists(filePath))
+            string cleanName = Path.GetFileNameWithoutExtension(templateName);
+            string resourcePath = $"{typeof(EmailTemplateService).Namespace}.Templates.Email.{cleanName}.html";
+            
+            using Stream? stream = _assembly.GetManifestResourceStream(resourcePath);
+            
+            if (stream == null)
             {
                 LogTemplateNotFound(_logger, templateName, null);
-                throw new FileNotFoundException($"Email template not found: {templateName}");
+                throw new InvalidOperationException($"Email template not found: {templateName}");
             }
 
-            return File.ReadAllText(filePath);
+            using StreamReader reader = new(stream);
+            return reader.ReadToEnd();
         }
 
         public string GetPasswordResetTemplate(string resetLink)
