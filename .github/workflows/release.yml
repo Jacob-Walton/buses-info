@@ -17,6 +17,12 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '9.0.x'
+
+      - name: Get Version
+        id: version
+        run: |
+          version=$(grep -oPm1 "(?<=<Version>)[^<]+" BusInfo.csproj)
+          echo "version=$version" >> $GITHUB_OUTPUT
           
       - name: Restore dependencies
         run: dotnet restore
@@ -24,21 +30,29 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release --no-restore
         
-      - name: Publish
-        run: dotnet publish --configuration Release --output ./publish --self-contained false
+      - name: Publish Windows
+        run: dotnet publish --configuration Release --runtime win-x64 --self-contained false --output ./publish-win
 
-      - name: Zip Release Files
+      - name: Publish Linux
+        run: dotnet publish --configuration Release --runtime linux-x64 --self-contained false --output ./publish-linux
+
+      - name: Create Zips
         run: |
-          cd publish
-          zip -r ../release.zip *
+          cd publish-win
+          zip -r ../businfo-windows.zip *
+          cd ../publish-linux
+          zip -r ../businfo-linux.zip *
           cd ..
         
       - name: Create Release
         uses: softprops/action-gh-release@v1
         if: success()
         with:
-          files: release.zip
-          tag_name: v${{ github.run_number }}
+          files: |
+            businfo-windows.zip
+            businfo-linux.zip
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Release v${{ steps.version.outputs.version }}
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
