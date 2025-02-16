@@ -5,6 +5,8 @@
 - [ ] Reevaluate whether or not to host on heroku. If not, find a new method.
 - [ ] Implement Razor pages
 - [ ] Implement full API
+- [ ] Federated login
+- [ ] Updated settings page
 
 ## Medium Priority
 
