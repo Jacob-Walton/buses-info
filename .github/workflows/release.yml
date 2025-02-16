@@ -25,13 +25,19 @@ jobs:
         run: dotnet build --configuration Release --no-restore
         
       - name: Publish
-        run: dotnet publish --configuration Release --output ./publish
+        run: dotnet publish --configuration Release --output ./publish --self-contained false
+
+      - name: Zip Release Files
+        run: |
+          cd publish
+          zip -r ../release.zip *
+          cd ..
         
       - name: Create Release
         uses: softprops/action-gh-release@v1
         if: success()
         with:
-          files: ./publish/**
+          files: release.zip
           tag_name: v${{ github.run_number }}
           generate_release_notes: true
         env:
