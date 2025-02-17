@@ -23,7 +23,18 @@ jobs:
         run: |
           version=$(grep -oPm1 "(?<=<Version>)[^<]+" BusInfo.csproj)
           echo "version=$version" >> $GITHUB_OUTPUT
-          
+
+      - name: Get Latest Changelog
+        id: changelog
+        run: |
+          commit_date=$(git log -1 --format=%cd --date=short)
+          expected_version="${{ steps.version.outputs.version }}"
+          changelog=$(sed -n "/^## \\[v${expected_version}\\]/,/^---/p" CHANGELOG.md)
+          changelog=$(echo "$changelog" | sed "s/^## \\[v${expected_version}\\] - .*/## [v${expected_version}] - ${commit_date}/")
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$changelog" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Restore dependencies
         run: dotnet restore
         
@@ -53,6 +64,7 @@ jobs:
             businfo-${{ steps.version.outputs.version }}-linux-x64.zip
           tag_name: v${{ steps.version.outputs.version }}
           name: Release v${{ steps.version.outputs.version }}
-          generate_release_notes: true
+          generate_release_notes: false
+          body: ${{ steps.changelog.outputs.changelog }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
