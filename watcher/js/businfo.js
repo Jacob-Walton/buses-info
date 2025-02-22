@@ -97,12 +97,6 @@ const BusInfoModule = (() => {
 		Logger.debug(`Loading indicator ${show ? "shown" : "hidden"}`);
 	}
 
-	function showLoading(show) {
-		state.isLoading = show;
-		elements.loadingIndicator.style.display = show ? "flex" : "none";
-		Logger.debug(`Loading indicator ${show ? "shown" : "hidden"}`);
-	}
-
 	/**
 	 * Displays the bus map
 	 * @returns {void}

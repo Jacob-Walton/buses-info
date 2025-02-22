@@ -2,6 +2,7 @@
 @model SettingsModel
 @{
     ViewData["Title"] = "Account Settings";
+    var currentTab = Request.Query["tab"].FirstOrDefault() ?? "profile";
 }
 
 <div class="settings-page">
@@ -11,32 +12,36 @@
         </div>
 
         <nav class="settings-navigation">
-            <ul class="nav-tabs" role="tablist">
-                <li class="nav-item active">
+            <button type="button" class="current-tab">
+                <span>@(Model.GetTabName(currentTab))</span>
+                <i class="fas fa-chevron-down"></i>
+            </button>
+            <ul class="nav-tabs">
+                <li class="nav-item @(currentTab == "profile" ? "active" : "")">
                     <a class="nav-link" href="#profile" role="tab">
                         <i class="fas fa-user"></i>
                         <span>Profile</span>
                     </a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item @(currentTab == "preferences" ? "active" : "")">
                     <a class="nav-link" href="#preferences" role="tab">
                         <i class="fas fa-bus"></i>
                         <span>Bus Routes</span>
                     </a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item @(currentTab == "security" ? "active" : "")">
                     <a class="nav-link" href="#security" role="tab">
                         <i class="fas fa-shield-alt"></i>
                         <span>Security</span>
                     </a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item @(currentTab == "notifications" ? "active" : "")">
                     <a class="nav-link" href="#notifications" role="tab">
                         <i class="fas fa-bell"></i>
                         <span>Notifications</span>
                     </a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item @(currentTab == "api" ? "active" : "")">
                     <a class="nav-link" href="#api" role="tab">
                         <i class="fas fa-code"></i>
                         <span>API Access</span>
@@ -47,7 +52,7 @@
 
         <div class="settings-content">
             <!-- Profile Panel -->
-            <div class="settings-panel" id="profile" style="display: block;">
+            <div class="settings-panel" id="profile" style="display: @(currentTab == "profile" ? "block" : "none");">
                 <div class="panel-header">
                     <h2>Profile Information</h2>
                 </div>
@@ -70,7 +75,7 @@
             </div>
 
             <!-- Preferences Panel -->
-            <div class="settings-panel" id="preferences" style="display: none;">
+            <div class="settings-panel" id="preferences" style="display: @(currentTab == "preferences" ? "block" : "none");">
                 <div class="panel-header">
                     <h2>Bus Route Preferences</h2>
                 </div>
@@ -107,7 +112,7 @@
             </div>
 
             <!-- Security Panel -->
-            <div class="settings-panel" id="security" style="display: none;">
+            <div class="settings-panel" id="security" style="display: @(currentTab == "security" ? "block" : "none");">
                 <div class="panel-header">
                     <h2>Security Settings</h2>
                 </div>
@@ -131,7 +136,7 @@
             </div>
 
             <!-- Notifications Panel -->
-            <div class="settings-panel" id="notifications" style="display: none;">
+            <div class="settings-panel" id="notifications" style="display: @(currentTab == "notifications" ? "block" : "none");">
                 <div class="panel-header">
                     <h2>Notification Preferences</h2>
                 </div>
@@ -151,7 +156,7 @@
             </div>
 
             <!-- API Panel -->
-            <div class="settings-panel" id="api" style="display: none;">
+            <div class="settings-panel" id="api" style="display: @(currentTab == "api" ? "block" : "none");">
                 <div class="panel-header">
                     <h2>API Access</h2>
                 </div>

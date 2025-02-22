@@ -37,7 +37,7 @@ const isProd = process.env.NODE_ENV === "production";
  */
 // Build paths and entry points configuration
 const config = {
-	entryPoints: ["js/site.js", "js/businfo.js", "js/settings.js"],
+	entryPoints: ["js/site.js", "js/businfo.js", "js/settings.js", "js/admin/dashboard.js"],
 	scssEntryPoints: ["styles/site.scss"],
 	modulesDir: "js/modules",
 	outputDir: "dist",
@@ -180,17 +180,26 @@ function buildStyles() {
  */
 async function minifyJs() {
     const tasks = config.entryPoints.map(async (entry) => {
-        // Bundle using Rollup
         const bundle = await rollup.rollup({
             input: entry,
             plugins: [nodeResolve()],
         });
 
-        // Extract filename from entry path
-        const filename = entry.split("/").pop();
+        // Extract filename and directory structure from entry path
+        const pathParts = entry.split("/");
+        const filename = pathParts.pop();
+        const subdirs = pathParts.slice(1).join("/"); // Remove 'js/' prefix and join remaining paths
+
+        // Construct output path preserving directory structure
         const outputPath = isProd 
-            ? `${config.outputDir}/js/${filename}`
-            : `${config.devOutputDirs.js}/${filename}`;
+            ? `${config.outputDir}/js/${subdirs}/${filename}`.replace(/\/+/g, '/')
+            : `${config.devOutputDirs.js}/${subdirs}/${filename}`.replace(/\/+/g, '/');
+
+        // Ensure directory exists
+        const outputDir = outputPath.substring(0, outputPath.lastIndexOf('/'));
+        if (!require('fs').existsSync(outputDir)) {
+            require('fs').mkdirSync(outputDir, { recursive: true });
+        }
 
         // Generate bundle in IIFE format
         await bundle.write({
@@ -201,7 +210,6 @@ async function minifyJs() {
         });
 
         if (isProd) {
-            // Return a promise for the production processing
             return new Promise((resolve, reject) => {
                 src(outputPath)
                     .pipe(buffer())
@@ -231,7 +239,7 @@ async function minifyJs() {
                         unicodeEscapeSequence: false,
                     }))
                     .pipe(removeSourcemaps())
-                    .pipe(dest(config.outputDir + "/js"))
+                    .pipe(dest(outputDir)) // Use the directory with subdirs preserved
                     .on('end', resolve)
                     .on('error', reject);
             });

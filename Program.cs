@@ -42,6 +42,7 @@ using BusInfo.Authentication.Authorization;
 using Azure.Core;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.Extensions.Logging;
+using BusInfo.Middleware;
 
 namespace BusInfo
 {
@@ -496,6 +497,8 @@ namespace BusInfo
 
             app.UseSession(); // Make sure this is before authentication
             app.UseAuthentication();
+            
+            app.UseMiddleware<ClaimsRefreshMiddleware>();
             app.UseAuthorization();
 
             app.UseSerilogRequestLogging(options =>

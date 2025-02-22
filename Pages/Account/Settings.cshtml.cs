@@ -49,5 +49,15 @@ namespace BusInfo.Pages.Account
 
             return Page();
         }
+
+        public string GetTabName(string tab) => tab switch
+        {
+            "profile" => "Profile",
+            "preferences" => "Bus Routes",
+            "security" => "Security",
+            "notifications" => "Notifications",
+            "api" => "API Access",
+            _ => "Profile"
+        };
     }
 }

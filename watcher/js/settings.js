@@ -12,7 +12,7 @@ class SettingsManager {
         this.isApiRequestFormVisible = false;
         this.toast = window.toast;
         this.saveBar = document.querySelector('.settings-save-bar');
-        
+
         // Wait for DOM to be fully loaded before initialization
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => this.init());
@@ -29,9 +29,11 @@ class SettingsManager {
             this.setupPasswordForm();
             this.setupTabNavigation();
 
-            // Load data and initialize UI
+            // Load data for current tab first
+            await this.loadTabContent(this.currentTab);
+
+            // Then load all data in background
             await this.loadAllData();
-            await this.loadSettings();
 
             // Store initial state after data is loaded
             this.initialState = this.getCurrentFormState();
@@ -49,7 +51,7 @@ class SettingsManager {
 
         try {
             this.setLoadingState(true);
-            
+
             // Ensure we have the cache data before proceeding
             if (!this.cache.profile) {
                 await this.loadAllData();
@@ -421,21 +423,21 @@ class SettingsManager {
     }
 
     setupEventListeners() {
-         // Tab navigation
-         document.querySelectorAll('.nav-tabs > .nav-item > .nav-link').forEach(link => {
+        // Tab navigation
+        document.querySelectorAll('.nav-tabs > .nav-item > .nav-link').forEach(link => {
             link.addEventListener('click', (e) => {
-              e.preventDefault();
-              this.switchTab(e.currentTarget.getAttribute('href').substring(1));
+                e.preventDefault();
+                this.switchTab(e.currentTarget.getAttribute('href').substring(1));
             });
-          });
-      
-          // Form submissions
-          document.querySelectorAll('.settings-form').forEach(form => {
+        });
+
+        // Form submissions
+        document.querySelectorAll('.settings-form').forEach(form => {
             form.addEventListener('submit', (e) => {
-              e.preventDefault();
-              this.saveSettings(e.target.id);
+                e.preventDefault();
+                this.saveSettings(e.target.id);
             });
-          });
+        });
 
         // Main settings form submit
         const saveButton = document.querySelector(
@@ -790,6 +792,36 @@ class SettingsManager {
     }
 
     setupTabNavigation() {
+        const navContainer = document.querySelector('.settings-navigation');
+        const tabsList = document.querySelector('.nav-tabs');
+        const prevButton = navContainer?.querySelector('.scroll-button.prev');
+        const nextButton = navContainer?.querySelector('.scroll-button.next');
+        
+        if (navContainer && tabsList && prevButton && nextButton) {
+            const checkScroll = () => {
+                const { scrollLeft, scrollWidth, clientWidth } = tabsList;
+                
+                // Show/hide scroll buttons based on scroll position
+                prevButton.classList.toggle('visible', scrollLeft > 0);
+                nextButton.classList.toggle('visible', scrollLeft < scrollWidth - clientWidth);
+            };
+
+            // Scroll handlers
+            prevButton.addEventListener('click', () => {
+                tabsList.scrollBy({ left: -100, behavior: 'smooth' });
+            });
+
+            nextButton.addEventListener('click', () => {
+                tabsList.scrollBy({ left: 100, behavior: 'smooth' });
+            });
+
+            // Check scroll on load, resize, and scroll
+            checkScroll();
+            window.addEventListener('resize', checkScroll);
+            tabsList.addEventListener('scroll', checkScroll);
+        }
+
+        // Existing tab click handlers
         document.querySelectorAll('.nav-tabs .nav-link').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -797,11 +829,45 @@ class SettingsManager {
                 this.switchTab(tabId);
             });
         });
+
+        const nav = document.querySelector('.settings-navigation');
+        const currentTab = nav?.querySelector('.current-tab');
+        const tabs = nav?.querySelectorAll('.nav-link');
+        
+        if (currentTab && tabs) {
+            // Toggle mobile dropdown
+            currentTab.addEventListener('click', () => {
+                nav.classList.toggle('open');
+                currentTab.classList.toggle('active');
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!nav.contains(e.target)) {
+                    nav.classList.remove('open');
+                    currentTab.classList.remove('active');
+                }
+            });
+
+            // Update current tab text and close dropdown on selection
+            tabs.forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const tabId = e.currentTarget.getAttribute('href').substring(1);
+                    currentTab.querySelector('span').textContent = e.currentTarget.textContent.trim();
+                    nav.classList.remove('open');
+                    currentTab.classList.remove('active');
+                    this.switchTab(tabId);
+                });
+            });
+        }
     }
 
     switchTab(tabId) {
+        if (this.currentTab === tabId) return; // Don't switch if already on the tab
+
         document.querySelectorAll('.nav-tabs .nav-item').forEach(item => {
-            item.classList.toggle('active', 
+            item.classList.toggle('active',
                 item.querySelector('.nav-link').getAttribute('href') === `#${tabId}`);
         });
 
@@ -810,15 +876,13 @@ class SettingsManager {
             panel.style.display = panel.id === tabId ? 'block' : 'none';
         });
 
-        // Update URL
+        // Update URL without reload
         const url = new URL(window.location);
         url.searchParams.set('tab', tabId);
         window.history.pushState({}, '', url);
 
-        // Update current tab
+        // Update current tab and load content
         this.currentTab = tabId;
-
-        // Load content for the tab if needed
         this.loadTabContent(tabId);
     }
 
@@ -849,7 +913,7 @@ class SettingsManager {
         const selectedCount = selectedRoutes.length;
         const dropdownTrigger = container.closest('.custom-dropdown')?.querySelector('.selected-options span');
         if (dropdownTrigger) {
-            dropdownTrigger.textContent = selectedCount > 0 
+            dropdownTrigger.textContent = selectedCount > 0
                 ? `${selectedCount} routes selected`
                 : 'Select Routes';
         }
@@ -877,7 +941,7 @@ class SettingsManager {
                 // Update dropdown trigger text
                 const selectedCount = container.querySelectorAll('input[type="checkbox"]:checked').length;
                 if (dropdownTrigger) {
-                    dropdownTrigger.textContent = selectedCount > 0 
+                    dropdownTrigger.textContent = selectedCount > 0
                         ? `${selectedCount} routes selected`
                         : 'Select Routes';
                 }
@@ -962,7 +1026,7 @@ class SettingsManager {
     toggleApiKeyVisibility(button) {
         const input = button.parentElement.querySelector('input');
         const icon = button.querySelector('i');
-        
+
         if (input.type === 'password') {
             input.type = 'text';
             icon.classList.remove('fa-eye');
