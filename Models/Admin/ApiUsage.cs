@@ -6,12 +6,12 @@ namespace BusInfo.Models.Admin
     public class ApiUsageStats
     {
         public int ActiveKeys { get; set; }
-        public int TotalRequests { get; set; }
+        public int KeysExpiringSoon { get; set; }
+        public long TotalRequests { get; set; }
+        public long Requests24Hours { get; set; }
         public double AverageResponseTime { get; set; }
         public int ErrorCount { get; set; }
-        public Dictionary<string, int> EndpointUsage { get; set; } = [];
-        public List<ApiUsageMetric> UsageHistory { get; set; } = [];
-        public int KeyChange { get; set; }
+        public string TopEndpoint { get; set; } = string.Empty;
     }
 
     public class ApiUsageMetric

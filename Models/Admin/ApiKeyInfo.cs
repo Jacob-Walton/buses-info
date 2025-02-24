@@ -12,6 +12,6 @@ namespace BusInfo.Models.Admin
         public bool IsActive { get; set; }
         public int RequestsToday { get; set; }
         public int TotalRequests { get; set; }
-        public DateTime LastUsed { get; set; }
+        public DateTime? LastUsed { get; set; }
     }
 }

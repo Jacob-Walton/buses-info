@@ -5,12 +5,16 @@
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   z-index: 9999;
   padding: 1rem;
   animation: modalFadeIn 0.2s ease-out;
+
+  &.active {
+    display: flex;
+  }
 
   .custom-modal-content {
     background-color: #ffffff;

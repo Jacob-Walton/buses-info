@@ -1,0 +1,95 @@
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th, td {
+    padding: $spacing-unit;
+    text-align: left;
+    border-bottom: 1px solid $border;
+  }
+
+  th {
+    font-weight: 600;
+    color: $secondary;
+    background-color: rgba($light-grey, 0.5);
+  }
+
+  td {
+    vertical-align: middle;
+    color: $text;
+
+    &.expiring-soon {
+      color: $accent;
+      font-weight: 500;
+    }
+
+    code {
+      font-family: 'Fira Code', monospace;
+      padding: 0.25rem 0.5rem;
+      background: $light-grey;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      margin-right: 0.5rem;
+    }
+
+    .copy-btn {
+      @include reset-button;
+      color: $dark-grey;
+      padding: 0.25rem;
+      border-radius: 4px;
+      
+      &:hover {
+        color: $primary;
+        background: $primary-hover;
+      }
+    }
+  }
+
+  .status-badge {
+    display: inline-flex;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+
+    &.active {
+      background-color: rgba(#28a745, 0.1);
+      color: #28a745;
+    }
+
+    &.inactive {
+      background-color: rgba($accent, 0.1);
+      color: $accent;
+    }
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+  }
+}
+
+.search-filter-group {
+  display: flex;
+  gap: $spacing-unit;
+  margin-bottom: $spacing-unit;
+
+  .search-input {
+    flex: 1;
+    min-width: 250px;
+    padding: 0.75rem 1rem;
+    border: 1px solid $border;
+    background: $background;
+    @include alternating-border-radius($button-border-radius);
+    
+    &:focus {
+      outline: none;
+      border-color: $primary;
+    }
+  }
+
+  .custom-dropdown {
+    min-width: 150px;
+  }
+}

@@ -37,7 +37,7 @@ const isProd = process.env.NODE_ENV === "production";
  */
 // Build paths and entry points configuration
 const config = {
-	entryPoints: ["js/site.js", "js/businfo.js", "js/settings.js", "js/admin/dashboard.js"],
+	entryPoints: ["js/site.js", "js/businfo.js", "js/settings.js", "js/admin/dashboard.js", "js/admin/apiManagement.js"],
 	scssEntryPoints: ["styles/site.scss"],
 	modulesDir: "js/modules",
 	outputDir: "dist",
