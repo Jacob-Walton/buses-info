@@ -5,12 +5,12 @@
 - [x] Reevaluate whether or not to host on heroku. If not, find a new method. (Decided not to)
 - [ ] Implement Razor pages
 - [ ] Implement full API
-- [ ] Federated login
-- [ ] Updated settings page
+- [x] Federated login
+- [x] Updated settings page
 
 ## Medium Priority
 
-- None
+- Cleanup the codebase for this branch
 
 ## Low Priority
 
