@@ -1,0 +1,86 @@
+# Attributions
+
+This project utilises the following nuget packages:
+
+- [AspNetCoreRateLimit](https://www.nuget.org/packages/AspNetCoreRateLimit/)
+- [Azure.Extensions.AspNetCore.Configuration.Secrets](https://www.nuget.org/packages/Azure.Extensions.AspNetCore.Configuration.Secrets/)
+- [BCrypt.NET-Next](https://www.nuget.org/packages/BCrypt.NET-Next/)
+- [ConfigCat.Client](https://www.nuget.org/packages/ConfigCat.Client/)
+- [CsvHelper](https://www.nuget.org/packages/CsvHelper/)
+- [HtmlAgilityPack](https://www.nuget.org/packages/HtmlAgilityPack/)
+- [Humanizer.Core](https://www.nuget.org/packages/Humanizer.Core/)
+- [Microsoft.AspNetCore.Authentication.Google](https://www.nuget.org/packages/Microsoft.AspNetCore.Authentication.Google/)
+- [Microsoft.AspNetCore.Authentication.JwtBearer](https://www.nuget.org/packages/Microsoft.AspNetCore.Authentication.JwtBearer/)
+- [Microsoft.AspNetCore.Authentication.MicrosoftAccount](https://www.nuget.org/packages/Microsoft.AspNetCore.Authentication.MicrosoftAccount/)
+- [Microsoft.AspNetCore.DataProtection.StackExchangeRedis](https://www.nuget.org/packages/Microsoft.AspNetCore.DataProtection.StackExchangeRedis/)
+- [Microsoft.EntityFrameworkCore](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore/)
+- [Microsoft.Extensions.Caching.Memory](https://www.nuget.org/packages/Microsoft.Extensions.Caching.Memory/)
+- [Microsoft.Extensions.Caching.StackExchangeRedis](https://www.nuget.org/packages/Microsoft.Extensions.Caching.StackExchangeRedis/)
+- [Microsoft.Identity.Web](https://www.nuget.org/packages/Microsoft.Identity.Web/)
+- [Microsoft.Identity.Web.UI](https://www.nuget.org/packages/Microsoft.Identity.Web.UI/)
+- [MongoDB.Driver](https://www.nuget.org/packages/MongoDB.Driver/)
+- [Newtonsoft.Json](https://www.nuget.org/packages/Newtonsoft.Json/)
+- [NodaTime](https://www.nuget.org/packages/NodaTime/)
+- [Npgsql.EntityFrameworkCore.PostgreSQL](https://www.nuget.org/packages/Npgsql.EntityFrameworkCore.PostgreSQL/)
+- [Serilog](https://www.nuget.org/packages/Serilog/)
+- [Serilog.AspNetCore](https://www.nuget.org/packages/Serilog.AspNetCore/)
+- [Serilog.Enrichers.Environment](https://www.nuget.org/packages/Serilog.Enrichers.Environment/)
+- [Serilog.Enrichers.Process](https://www.nuget.org/packages/Serilog.Enrichers.Process/)
+- [Serilog.Enrichers.Thread](https://www.nuget.org/packages/Serilog.Enrichers.Thread/)
+- [Serilog.Exceptions](https://www.nuget.org/packages/Serilog.Exceptions/)
+- [Serilog.Expressions](https://www.nuget.org/packages/Serilog.Expressions/)
+- [Serilog.Formatting.Compact](https://www.nuget.org/packages/Serilog.Formatting.Compact/)
+- [Serilog.Settings.Configuration](https://www.nuget.org/packages/Serilog.Settings.Configuration/)
+- [Serilog.Sinks.Async](https://www.nuget.org/packages/Serilog.Sinks.Async/)
+- [Serilog.Sinks.Console](https://www.nuget.org/packages/Serilog.Sinks.Console/)
+- [Serilog.Sinks.File](https://www.nuget.org/packages/Serilog.Sinks.File/)
+- [Serilog.Sinks.Seq](https://www.nuget.org/packages/Serilog.Sinks.Seq/)
+- [SkiaSharp](https://www.nuget.org/packages/SkiaSharp/)
+- [SkiaSharp.NativeAssets.Linux.NoDependencies](https://www.nuget.org/packages/SkiaSharp.NativeAssets.Linux.NoDependencies/)
+- [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis/)
+
+## External Resources
+
+### Runshaw College
+
+- Bus arrival data
+- Base bus map image
+- Source: [Runshaw College](https://www.runshaw.ac.uk/) and [Runshaw College Bus Departures](https://webservices.runshaw.ac.uk/bus/busdepartures.aspx)
+
+### ToastedCheesyBeans
+
+- Modified bus map image
+- Site logo and assets
+- Source: [GitHub](https://github.com/ToastedCheesyBeans)
+
+## Analyzers
+
+The project uses the following code analysis packages:
+
+- [AsyncFixer](https://www.nuget.org/packages/AsyncFixer/)
+- [Microsoft.CodeAnalysis.BannedApiAnalyzers](https://www.nuget.org/packages/Microsoft.CodeAnalysis.BannedApiAnalyzers/)
+- [Microsoft.CodeAnalysis.NetAnalyzers](https://www.nuget.org/packages/Microsoft.CodeAnalysis.NetAnalyzers/)
+- [Microsoft.VisualStudio.Threading.Analyzers](https://www.nuget.org/packages/Microsoft.VisualStudio.Threading.Analyzers/)
+- [Roslynator.Analyzers](https://www.nuget.org/packages/Roslynator.Analyzers/)
+- [Roslynator.CodeFixes](https://www.nuget.org/packages/Roslynator.CodeFixes/)
+
+## Framework Attribution
+
+This project is built using the .NET platform:
+
+- .NET is © Microsoft Corporation. All rights reserved.
+- ASP.NET Core is © Microsoft Corporation. All rights reserved.
+- .NET Core Runtime is licensed under the MIT License
+- For more information, visit [.NET Foundation](https://dotnetfoundation.org/)
+
+## Python Dependencies
+
+The following Python packages are used in Scripts/buslanes.py:
+
+- [OpenCV (cv2)](https://github.com/opencv/opencv) - Apache License 2.0
+- [NumPy](https://numpy.org/) - NumPy License
+- [Matplotlib](https://matplotlib.org/) - Matplotlib License
+- [Pillow (PIL)](https://python-pillow.github.io/) - MIT-CMU License
+- [pytesseract](https://github.com/madmaze/pytesseract) - Apache License 2.0
+
+All packages are used under their respective licenses. Visit the links above for more information.
