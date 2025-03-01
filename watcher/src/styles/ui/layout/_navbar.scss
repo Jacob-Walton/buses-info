@@ -33,6 +33,11 @@
       position: absolute;
       background-repeat: no-repeat;
       background-position: center;
+      background-image: url("https://d1tl6qv7xwsvxx.cloudfront.net/assets/logo-transparent.png");
+      // Anti-aliasing fix
+      transform: translateZ(0);
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
     }
 
     &.simple::after {
@@ -43,7 +48,6 @@
       background-size: contain;
       height: 50px;
       aspect-ratio: 21 / 9;
-      filter: hue-rotate(213.66deg) saturate(51.9%) brightness(15.49%);
       background-size: 80% auto;
       box-sizing: border-box;
     }
@@ -460,7 +464,12 @@ body.nav-open {
           background-size: contain;
           width: 100px;
           height: 40px;
-          filter: hue-rotate(213.66deg) saturate(51.9%) brightness(15.49%);
+          background-image: url("https://d1tl6qv7xwsvxx.cloudfront.net/assets/logo-transparent.png");
+
+          // Anti-aliasing fix
+          transform: translateZ(0);
+          -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
         }
       }
     }

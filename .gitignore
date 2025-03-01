@@ -14,9 +14,10 @@ package-lock.json
 *.old
 appsettings*.json
 !appsettings.example.json
-wwwroot/js/**/*.js
+wwwroot/**/*.js
 wwwroot/**/*.map
-wwwroot/css/*.css
+wwwroot/**/*.css
 *.py
 *.yml
 *.log
+!Scripts/*.py

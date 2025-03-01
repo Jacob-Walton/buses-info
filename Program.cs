@@ -243,6 +243,9 @@ namespace BusInfo
                 options.Providers.Add<GzipCompressionProvider>();
             });
 
+            // Configure Npgsql before setting up DbContext
+            BusInfo.Data.NpgsqlConfiguration.Configure();
+
             // Configure DB Context
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(config.GetConnectionString("DefaultConnection")));
@@ -495,7 +498,8 @@ namespace BusInfo
 
             app.UseCors();
 
-            app.UseSession(); // Make sure this is before authentication
+            app.UseSession();
+            app.UseMiddleware<ApiRequestTrackingMiddleware>();
             app.UseAuthentication();
             
             app.UseMiddleware<ClaimsRefreshMiddleware>();

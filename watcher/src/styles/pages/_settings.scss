@@ -634,3 +634,235 @@
     }
   }
 }
+
+.api-request-rejected {
+  background-color: rgba($status-not-arrived, 0.05);
+  border: 1px solid rgba($status-not-arrived, 0.3);
+  border-radius: $button-border-radius;
+  padding: $spacing-unit * 1.5;
+  margin-bottom: $spacing-unit * 2;
+
+  .rejection-header {
+    display: flex;
+    align-items: center;
+    gap: $spacing-unit;
+    margin-bottom: $spacing-unit;
+
+    i {
+      color: $status-not-arrived;
+      font-size: 1.5rem;
+    }
+
+    h3 {
+      margin: 0;
+      color: $status-not-arrived;
+      font-weight: 600;
+      font-size: 1.125rem;
+    }
+  }
+
+  .rejection-reason {
+    margin-bottom: $spacing-unit;
+    
+    strong {
+      display: block;
+      margin-bottom: $spacing-unit / 2;
+    }
+    
+    p {
+      margin: 0;
+      color: $text;
+    }
+  }
+
+  .rejection-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $spacing-unit;
+    margin-top: $spacing-unit;
+  }
+}
+
+.api-request-pending {
+  background-color: rgba($primary, 0.05);
+  border: 1px solid rgba($primary, 0.3);
+  border-radius: $button-border-radius;
+  padding: $spacing-unit * 1.5;
+  margin-bottom: $spacing-unit * 2;
+  
+  p {
+    margin: 0;
+    
+    &:first-child {
+      font-weight: 600;
+      margin-bottom: $spacing-unit / 2;
+    }
+  }
+}
+
+.api-request-intro,
+.api-request-form {
+  margin-top: $spacing-unit * 2;
+}
+
+.api-request-form {
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $spacing-unit;
+    margin-top: $spacing-unit * 1.5;
+  }
+}
+
+@media (max-width: 768px) {
+  .api-request-rejected,
+  .api-request-pending {
+    padding: $spacing-unit;
+  }
+  
+  .api-request-form {
+    .form-actions {
+      flex-direction: column;
+      
+      button {
+        width: 100%;
+      }
+    }
+  }
+}
+
+.api-key-display {
+  margin-bottom: $spacing-unit * 2;
+  
+  label {
+    display: block;
+    margin-bottom: $spacing-unit;
+    font-weight: 500;
+    color: $dark-grey;
+  }
+}
+
+.api-documentation {
+  margin-top: $spacing-unit * 3;
+  
+  h3 {
+    font-size: 1.125rem;
+    margin-bottom: $spacing-unit;
+    color: $secondary;
+  }
+  
+  p {
+    color: $text;
+    margin-bottom: $spacing-unit;
+  }
+  
+  .api-endpoints {
+    margin-top: $spacing-unit;
+    
+    .endpoint {
+      background-color: $light-grey;
+      border-radius: $button-border-radius;
+      padding: $spacing-unit;
+      margin-bottom: $spacing-unit;
+      font-family: monospace;
+      
+      .method {
+        display: inline-block;
+        padding: 2px 6px;
+        background: $primary;
+        color: white;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        margin-right: $spacing-unit / 2;
+      }
+    }
+  }
+}
+
+.api-request-rejected {
+  background-color: rgba($status-not-arrived, 0.05);
+  border: 1px solid rgba($status-not-arrived, 0.2);
+  border-radius: $button-border-radius;
+  padding: $spacing-unit * 1.5;
+  margin-bottom: $spacing-unit * 2;
+
+  .rejection-header {
+    display: flex;
+    align-items: center;
+    gap: $spacing-unit;
+    margin-bottom: $spacing-unit;
+
+    i {
+      color: $status-not-arrived;
+      font-size: 1.25rem;
+    }
+
+    h3 {
+      margin: 0;
+      color: darken($status-not-arrived, 10%);
+      font-weight: 600;
+      font-size: 1.125rem;
+    }
+  }
+
+  .rejection-reason {
+    margin-bottom: $spacing-unit;
+    
+    strong {
+      display: block;
+      margin-bottom: $spacing-unit / 2;
+      color: $dark-grey;
+    }
+    
+    p {
+      margin: 0;
+      color: $text;
+    }
+  }
+
+  .rejection-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $spacing-unit;
+    margin-top: $spacing-unit * 1.5;
+  }
+}
+
+.api-request-pending {
+  background-color: rgba($primary, 0.05);
+  border: 1px solid rgba($primary, 0.2);
+  border-radius: $button-border-radius;
+  padding: $spacing-unit * 1.5;
+  margin-bottom: $spacing-unit * 2;
+  
+  p {
+    margin: 0;
+    
+    &:first-child {
+      font-weight: 600;
+      color: darken($primary, 10%);
+      margin-bottom: $spacing-unit / 2;
+    }
+  }
+}
+
+.api-request-intro {
+  margin-top: $spacing-unit;
+  margin-bottom: $spacing-unit * 2;
+  
+  p {
+    margin-bottom: $spacing-unit * 1.5;
+    line-height: 1.5;
+  }
+}
+
+.api-request-form {
+  margin-top: $spacing-unit * 2;
+  
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $spacing-unit;
+    margin-top: $spacing-unit * 1.5;
+  }
+}

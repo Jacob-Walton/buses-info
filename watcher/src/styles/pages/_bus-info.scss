@@ -46,7 +46,6 @@
   &-header {
     margin-bottom: $spacing-unit;
     padding-bottom: calc($spacing-unit / 2);
-    border-bottom: 2px solid $border;
     cursor: pointer;
     user-select: none;
     padding: $spacing-unit 0;
@@ -182,7 +181,6 @@
 
   &.preferred-section {
     .bus-section-header {
-      border-bottom-color: rgba($primary, 0.2);
 
       h3 {
         color: $primary;
@@ -372,7 +370,6 @@
   .bus-map {
     width: 100%;
     height: auto;
-    max-height: 500px;
     object-fit: contain;
     display: block;
   }

@@ -157,12 +157,34 @@ class SettingsManager {
     }
 
     async loadApiSettings() {
-        const data = await this.cache.apiStatus || await this.loadAllData();
-        if (data) {
-            const container = this.getElement('apiKeyContainer');
-            if (container) {
-                this.populateApiSection(container, data);
+        try {
+            // Load fresh API status data directly from server to ensure we get latest status
+            const apiResponse = await fetch("/api/accounts/api-keys");
+            
+            if (apiResponse.ok) {
+                const apiData = await apiResponse.json();
+                console.log("API Status data (fresh load):", apiData);
+                
+                // Update cache with fresh data
+                this.cache.apiStatus = {
+                    hasApiKey: apiData.hasApiKey,
+                    key: apiData.key,
+                    pendingRequest: apiData.pendingRequest,
+                    rejectedRequest: apiData.rejectedRequest,
+                    rejectionReason: apiData.rejectionReason
+                };
+                
+                const container = this.getElement('apiKeyContainer');
+                if (container) {
+                    this.populateApiSection(container, this.cache.apiStatus);
+                }
+            } else {
+                console.error("Error loading API settings:", apiResponse.status);
+                this.toast.show("Failed to load API settings", "error");
             }
+        } catch (error) {
+            console.error("Error in loadApiSettings:", error);
+            this.toast.show("Failed to load API settings", "error");
         }
     }
 
@@ -207,10 +229,13 @@ class SettingsManager {
             // Handle API status
             if (apiResponse.ok) {
                 const apiData = await apiResponse.json();
+                console.log("API Status data:", apiData); // Add debugging to check data
                 this.cache.apiStatus = {
                     hasApiKey: apiData.hasApiKey,
                     key: apiData.key,
                     pendingRequest: apiData.pendingRequest,
+                    rejectedRequest: apiData.rejectedRequest,
+                    rejectionReason: apiData.rejectionReason
                 };
             }
 
@@ -271,59 +296,7 @@ class SettingsManager {
         // Populate API section
         const apiContainer = this.getElement("apiKeyContainer");
         if (apiContainer && this.cache.apiStatus) {
-            if (this.cache.apiStatus.hasApiKey) {
-                apiContainer.innerHTML = `
-          <div class="api-key-display">
-              <label>Your API Key</label>
-              <div class="api-key-field">
-                  <input type="password" value="${this.cache.apiStatus.key}" readonly />
-                  <button type="button" onclick="window.settings.toggleApiKeyVisibility(this)">
-                      <i class="fas fa-eye"></i>
-                  </button>
-                  <button type="button" onclick="window.settings.regenerateApiKey()">
-                      <i class="fas fa-sync-alt"></i>
-                  </button>
-              </div>
-          </div>`;
-            } else if (this.cache.apiStatus.pendingRequest) {
-                apiContainer.innerHTML = `
-          <div class="api-request-pending">
-              <p>Your API access request is being reviewed.</p>
-              <p>We'll notify you via email once a decision has been made.</p>
-          </div>`;
-            } else if (this.isApiRequestFormVisible) {
-                apiContainer.innerHTML = `
-          <div class="api-request-form">
-              <div class="form-group">
-                  <label>Reason for API Access</label>
-                  <textarea name="reason" class="form-control" rows="3"
-                      placeholder="Explain why you need API access"></textarea>
-                  <span class="text-danger"></span>
-              </div>
-
-              <div class="form-group">
-                  <label>Intended Use</label>
-                  <textarea name="intendedUse" class="form-control" rows="3"
-                      placeholder="Describe how you will use the API"></textarea>
-                  <span class="text-danger"></span>
-              </div>
-
-              <button type="button" class="btn-secondary" onclick="window.settings.hideApiRequestForm()">
-                  Cancel
-              </button>
-              <button type="button" class="btn-primary" onclick="window.settings.requestApiAccess()">
-                  <i class="fas fa-paper-plane"></i> Submit Request
-              </button>
-          </div>`;
-            } else {
-                apiContainer.innerHTML = `
-          <div class="api-request-intro">
-              <p>You currently don't have API access. Request access to integrate our services into your applications.</p>
-              <button type="button" class="btn-primary" onclick="window.settings.showApiRequestForm()">
-                  <i class="fas fa-key"></i> Request API Access
-              </button>
-          </div>`;
-            }
+            this.populateApiSection(apiContainer, this.cache.apiStatus);
         }
 
         // Populate account settings
@@ -776,6 +749,37 @@ class SettingsManager {
         this.populateAllSections();
     }
 
+    async dismissRejection() {
+        try {
+            const response = await fetch("/api/accounts/api-keys/dismiss-rejection", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to dismiss rejection notification");
+            }
+
+            // Update local state and refresh the UI
+            if (this.cache.apiStatus) {
+                this.cache.apiStatus.rejectedRequest = false;
+                this.cache.apiStatus.rejectionReason = null;
+            }
+            
+            const container = this.getElement("apiKeyContainer");
+            if (container && this.cache.apiStatus) {
+                this.populateApiSection(container, this.cache.apiStatus);
+            }
+
+            this.toast.show("Rejection notification dismissed", "success");
+        } catch (error) {
+            console.error("Error dismissing rejection:", error);
+            this.toast.show("Error dismissing notification", "error");
+        }
+    }
+
     getElement(id) {
         const element = document.getElementById(id);
         if (!element) {
@@ -883,7 +887,12 @@ class SettingsManager {
 
         // Update current tab and load content
         this.currentTab = tabId;
-        this.loadTabContent(tabId);
+        
+        if (tabId === 'api') {
+            this.loadApiSettings();
+        } else {
+            this.loadTabContent(tabId);
+        }
     }
 
     async loadTabContent(tabId) {
@@ -965,66 +974,114 @@ class SettingsManager {
 
     populateApiSection(container, data) {
         if (!container) return;
+        
+        console.log("Populating API section with data:", data);
 
+        // First check if user has active API key
         if (data.hasApiKey) {
             container.innerHTML = `
                 <div class="api-key-display">
                     <label>Your API Key</label>
-                    <div class="api-key-field">
+                    <div class="input-with-buttons">
                         <input type="password" value="${data.key}" readonly />
-                        <button type="button" onclick="window.settings.toggleApiKeyVisibility(this)">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button type="button" onclick="window.settings.regenerateApiKey()">
-                            <i class="fas fa-sync-alt"></i>
-                        </button>
+                        <div class="input-buttons">
+                            <button type="button" class="input-button" onclick="window.settings.toggleApiKeyVisibility(this)">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <div class="button-divider"></div>
+                            <button type="button" class="input-button" onclick="window.settings.regenerateApiKey()">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="api-documentation">
+                    <h3>Using Your API Key</h3>
+                    <p>Include your API key in request headers as <code>X-API-Key</code> when making requests to our API endpoints.</p>
+                    <div class="api-endpoints">
+                        <div class="endpoint"><span class="method">GET</span> /api/v1/routes</div>
+                        <div class="endpoint"><span class="method">GET</span> /api/v1/buses</div>
                     </div>
                 </div>`;
-        } else if (data.pendingRequest) {
-            container.innerHTML = `
+            return; // Exit early if user has API key
+        }
+
+        // Create an array to collect HTML sections to display
+        let sections = [];
+        
+        // Add rejection message if there is one
+        if (data.rejectedRequest === true) { 
+            console.log("Adding rejection UI. Reason:", data.rejectionReason);
+            sections.push(`
+                <div class="api-request-rejected">
+                    <div class="rejection-header">
+                        <i class="fas fa-times-circle"></i>
+                        <h3>API Access Request Rejected</h3>
+                    </div>
+                    <div class="rejection-reason">
+                        <strong>Reason for rejection:</strong>
+                        <p>${data.rejectionReason || 'Your request for API access has been denied.'}</p>
+                    </div>
+                    <div class="rejection-actions">
+                        <button type="button" class="btn-secondary" onclick="window.settings.dismissRejection()">
+                            Dismiss
+                        </button>
+                    </div>
+                </div>`);
+        }
+
+        // Check for pending request
+        if (data.pendingRequest) {
+            sections.push(`
                 <div class="api-request-pending">
                     <p>API Access Request Pending</p>
                     <p>Your request is currently being reviewed. We'll notify you via email once a decision has been made.</p>
-                </div>`;
-        } else if (this.isApiRequestFormVisible) {
-            container.innerHTML = `
-                <div class="api-request-form">
-                    <div class="form-group">
-                        <label>Reason for API Access</label>
-                        <textarea name="reason" 
-                                placeholder="Please explain why you need API access and how you plan to use it"></textarea>
-                        <span class="text-danger"></span>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Intended Use</label>
-                        <textarea name="intendedUse" 
-                                placeholder="Describe the specific features or functionality you plan to implement"></textarea>
-                        <span class="text-danger"></span>
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="button" class="btn-secondary" onclick="window.settings.hideApiRequestForm()">
-                            Cancel
-                        </button>
-                        <button type="button" class="btn-primary" onclick="window.settings.requestApiAccess()">
-                            <i class="fas fa-paper-plane"></i> Submit Request
-                        </button>
-                    </div>
-                </div>`;
+                </div>`);
         } else {
-            container.innerHTML = `
-                <div class="api-request-intro">
-                    <p>Request API access to integrate our bus information services into your applications.</p>
-                    <button type="button" class="btn-primary" onclick="window.settings.showApiRequestForm()">
-                        <i class="fas fa-key"></i> Request API Access
-                    </button>
-                </div>`;
+            // Show request form or intro if no pending request
+            if (this.isApiRequestFormVisible) {
+                sections.push(`
+                    <div class="api-request-form">
+                        <div class="form-group">
+                            <label>Reason for API Access</label>
+                            <textarea name="reason" 
+                                    placeholder="Please explain why you need API access and how you plan to use it"></textarea>
+                            <span class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Intended Use</label>
+                            <textarea name="intendedUse" 
+                                    placeholder="Describe the specific features or functionality you plan to implement"></textarea>
+                            <span class="text-danger"></span>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn-secondary" onclick="window.settings.hideApiRequestForm()">
+                                Cancel
+                            </button>
+                            <button type="button" class="btn-primary" onclick="window.settings.requestApiAccess()">
+                                <i class="fas fa-paper-plane"></i> Submit Request
+                            </button>
+                        </div>
+                    </div>`);
+            } else {
+                sections.push(`
+                    <div class="api-request-intro">
+                        <p>API access allows you to integrate our real-time bus information into your own applications. You can request access to our API by clicking the button below and explaining your use case.</p>
+                        <button type="button" class="btn-primary" onclick="window.settings.showApiRequestForm()">
+                            <i class="fas fa-key"></i> Request API Access
+                        </button>
+                    </div>`);
+            }
         }
+
+        // Join all sections and update container
+        container.innerHTML = sections.join('');
     }
 
     toggleApiKeyVisibility(button) {
-        const input = button.parentElement.querySelector('input');
+        const input = button.closest('.input-with-buttons').querySelector('input');
         const icon = button.querySelector('i');
 
         if (input.type === 'password') {

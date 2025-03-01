@@ -5,70 +5,103 @@
 }
 
 <div class="login-page">
-    <div class="login-container">
-        <h1 class="login-title">Create Account</h1>
-        
-        <div asp-validation-summary="ModelOnly" class="error-summary" role="alert"></div>
-        
-        <form method="post" class="login-form" autocomplete="off">
-            <div class="form-group">
-                <label asp-for="RegisterInput.Email">Email Address</label>
-                <input asp-for="RegisterInput.Email" type="email" autocomplete="email" required 
-                       placeholder="Enter your email address" />
-                <span asp-validation-for="RegisterInput.Email" class="error-message"></span>
-            </div>
-            
-            <div class="form-group">
-                <label asp-for="RegisterInput.Password">Create Password</label>
-                <input asp-for="RegisterInput.Password" type="password" autocomplete="new-password" required 
-                       placeholder="Enter a strong password" />
-                <span asp-validation-for="RegisterInput.Password" class="error-message"></span>
+    <div class="auth-background">
+        <div class="brand-content">
+            <h2>Bus Info</h2>
+            <p>Join to access bus information, predictions and more.</p>
+        </div>
+    </div>
+
+    <!-- Clean initial state with no animation classes -->
+    <div class="auth-form-container">
+        <div class="login-container">
+            <div class="login-logo">
+                <img src="https://d1tl6qv7xwsvxx.cloudfront.net/assets/logo-full.png" alt="Bus Info Logo">
             </div>
 
-            <div class="form-group">
-                <label asp-for="RegisterInput.ConfirmPassword">Confirm Password</label>
-                <input asp-for="RegisterInput.ConfirmPassword" type="password" autocomplete="new-password" required 
-                       placeholder="Confirm your password" />
-                <span asp-validation-for="RegisterInput.ConfirmPassword" class="error-message"></span>
+            <h1 class="login-title">Create Account</h1>
+
+            <div asp-validation-summary="ModelOnly" class="error-summary" role="alert"></div>
+
+            <form method="post" class="login-form" autocomplete="off">
+                @Html.AntiForgeryToken()
+
+                <div class="form-group">
+                    <label asp-for="RegisterInput.Email">Email Address</label>
+                    <input asp-for="RegisterInput.Email" type="email" autocomplete="email" required
+                        placeholder="Enter your email address" />
+                    <span asp-validation-for="RegisterInput.Email" class="error-message"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="RegisterInput.Password">Create Password</label>
+                    <input asp-for="RegisterInput.Password" type="password" autocomplete="new-password" required
+                        placeholder="Enter a strong password" />
+                    <span asp-validation-for="RegisterInput.Password" class="error-message"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="RegisterInput.ConfirmPassword">Confirm Password</label>
+                    <input asp-for="RegisterInput.ConfirmPassword" type="password" autocomplete="new-password" required
+                        placeholder="Confirm your password" />
+                    <span asp-validation-for="RegisterInput.ConfirmPassword" class="error-message"></span>
+                </div>
+
+                <div class="form-options">
+                    <label class="option">
+                        <div class="checkbox-wrapper">
+                            <input asp-for="RegisterInput.AgreeToTerms" type="checkbox" required />
+                            <div class="checkbox-custom"></div>
+                        </div>
+                        <span class="terms-text">
+                            I agree to the
+                            <a href="/terms" target="_blank">Terms and Conditions</a>
+                            and acknowledge the
+                            <a href="/disclaimer" target="_blank">Independence Disclaimer</a>
+                        </span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-user-plus"></i>
+                    Create Account
+                </button>
+            </form>
+
+            <div class="divider">
+                <div class="divider-line"></div>
+                <span>or register with</span>
+                <div class="divider-line"></div>
             </div>
 
-            <div class="form-group terms-agreement">
-                <label class="checkbox-wrapper">
-                    <input asp-for="RegisterInput.AgreeToTerms" type="checkbox" />
-                    <span class="checkbox-custom"></span>
-                    <span class="terms-text">
-                        I agree to the <a href="/terms" target="_blank">Terms and Conditions</a> and acknowledge the <a href="/disclaimer" target="_blank">Independence Disclaimer</a>
-                    </span>
-                </label>
-                <span asp-validation-for="RegisterInput.AgreeToTerms" class="error-message"></span>
+            <div class="social-login">
+                <button type="button" onclick="window.location.href='/signin/Google'" class="btn-google">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/google/google-original.svg"
+                        alt="Google" width="18" height="18" />
+                    Google
+                </button>
+
+                <button type="button" onclick="window.location.href='/signin/Microsoft'" class="btn-microsoft">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/windows11/windows11-original.svg"
+                        alt="Microsoft" width="18" height="18" />
+                    Microsoft
+                </button>
             </div>
 
-            <button type="submit" class="btn-primary">
-                <i class="fas fa-user-plus"></i>
-                Create Account
-            </button>
-        </form>
-
-        <div class="login-links">
-            <a asp-page="/Login">
-                <i class="fas fa-arrow-left"></i>
-                Already have an account? Sign in
-            </a>
+            <div class="login-links">
+                <a asp-page="/Login" class="auth-transition-link">
+                    <i class="fas fa-arrow-left"></i>
+                    Already have an account? Sign in
+                </a>
+            </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/authTransitions.js"></script>
     <script>
-        // Add focused class to form groups
-        document.querySelectorAll('.form-group input').forEach(input => {
-            input.addEventListener('focus', () => {
-                input.parentElement.classList.add('focused');
-            });
-            input.addEventListener('blur', () => {
-                input.parentElement.classList.remove('focused');
-            });
-        });
+        console.log('Register page script loaded');
     </script>
 }

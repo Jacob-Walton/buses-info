@@ -10,8 +10,8 @@ namespace BusInfo.Models.Admin
         public DateTime CreatedAt { get; set; }
         public DateTime ExpiresAt { get; set; }
         public bool IsActive { get; set; }
-        public int RequestsToday { get; set; }
-        public int TotalRequests { get; set; }
+        public long RequestsToday { get; set; }
+        public long TotalRequests { get; set; }
         public DateTime? LastUsed { get; set; }
     }
 }

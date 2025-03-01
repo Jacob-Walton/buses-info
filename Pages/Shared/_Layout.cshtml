@@ -9,8 +9,11 @@
     <link rel="stylesheet" cdn href="/css/site.css" />
 
     <!-- Defer non-critical CSS -->
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></noscript>
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" as="style"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    </noscript>
 
     @* Disallow scraping *@
     <meta name="robots" content="noindex, nofollow" />
@@ -81,40 +84,40 @@
                         <a class="nav-link @(ViewContext.RouteData.Values["Page"]?.ToString() == "/BusInfo" ? "active" : "")"
                             asp-page="/BusInfo">Bus Information</a>
                     </li>
-                </ul>
 
-                @if (User.Identity?.IsAuthenticated != true)
-                {
-                    <a class="nav-link nav-link__bold" asp-page="/Login">Sign In</a>
-                }
-                else
-                {
-                    <div class="profile-menu">
-                        <button class="profile-trigger" id="profileTrigger">
-                            <i class="fas fa-user"></i>
-                            <i class="fas fa-chevron-down"></i>
-                        </button>
-                        <div class="profile-dropdown" id="profileDropdown">
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <a class="dropdown-item" asp-page="/Admin/Index">
-                                    <i class="fas fa-shield-alt"></i>
-                                    Admin
+                    @if (User.Identity?.IsAuthenticated != true)
+                    {
+                        <a class="nav-link nav-link__bold" asp-page="/Login">Sign In</a>
+                    }
+                    else
+                    {
+                        <div class="profile-menu">
+                            <button class="profile-trigger" id="profileTrigger">
+                                <i class="fas fa-user"></i>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <a class="dropdown-item" asp-page="/Admin/Index">
+                                        <i class="fas fa-shield-alt"></i>
+                                        Admin
+                                    </a>
+                                }
+                                <a class="dropdown-item" asp-page="/Account/Settings">
+                                    <i class="fas fa-cog"></i>
+                                    Settings
                                 </a>
-                            }
-                            <a class="dropdown-item" asp-page="/Account/Settings">
-                                <i class="fas fa-cog"></i>
-                                Settings
-                            </a>
-                            <form method="post" action="/api/accounts/logout">
-                                <button type="submit" class="dropdown-item danger">
-                                    <i class="fas fa-sign-out-alt"></i>
-                                    Sign Out
-                                </button>
-                            </form>
+                                <form method="post" action="/api/accounts/logout">
+                                    <button type="submit" class="dropdown-item danger">
+                                        <i class="fas fa-sign-out-alt"></i>
+                                        Sign Out
+                                    </button>
+                                </form>
+                            </div>
                         </div>
-                    </div>
-                }
+                    }
+                </ul>
             </div>
         </div>
     </nav>

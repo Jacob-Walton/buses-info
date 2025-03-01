@@ -99,10 +99,10 @@ const BusInfoModule = (() => {
 
 	/**
 	 * Displays the bus map
+	 * @param {Blob} mapBlob - The map image blob
 	 * @returns {void}
-	 * @throws {Error} If the map is already displayed
 	 */
-	function displayBusMap() {
+	function displayBusMap(mapBlob) {
 		if (state.mapDisplayed) return;
 
 		const mapSection = document.createElement("div");
@@ -113,10 +113,7 @@ const BusInfoModule = (() => {
 		mapHeader.className = "bus-section-header";
 
 		const mapContent = document.createElement("div");
-		mapContent.className = "bus-section-content single-column collapsed";
-		// Set initial max-height to 0 for collapsed state
-		mapContent.style.maxHeight = "0px";
-		// Add transition for smooth toggling
+		mapContent.className = "bus-section-content single-column";
 		mapContent.style.transition = "max-height 0.3s ease-in-out";
 
 		mapHeader.innerHTML = `
@@ -128,52 +125,35 @@ const BusInfoModule = (() => {
 			</button>
 		`;
 
-		mapContent.innerHTML = `
-			<div id="busMap"></div>
-		`;
+		mapContent.innerHTML = `<div id="busMap"></div>`;
 
+		// Append header and content to section before adding the map
+		mapSection.appendChild(mapHeader);
+		mapSection.appendChild(mapContent);
+
+		// Create and add the map image
 		const map = mapContent.querySelector("#busMap");
+		const url = URL.createObjectURL(mapBlob);
+		const img = new Image();
+		img.src = url;
+		img.className = "bus-map";
+		img.alt = "Bus map";
+		map.appendChild(img);
 
-		fetch(`${CONFIG.API_ENDPOINT}/map`) // Fetch bus map image
-			.then((response) => response.blob()) // Convert response to blob
-			.then((blob) => {
-				const url = URL.createObjectURL(blob); // Create URL for blob
-				map.innerHTML = `<img src="${url}" alt="Bus map" class="bus-map">`; // Display image
-			})
-			.catch((error) => {
-				// Handle errors
-				map.innerHTML = `<p class="error">Failed to load bus map</p>`;
-				Logger.error("Failed to load bus map", error);
-			});
-
-		mapSection.appendChild(mapHeader); // Add header to section
-		mapSection.appendChild(mapContent); // Add content to section
-
-		// Insert map section after bus info list
+		// Add section to DOM
 		elements.busInfoList.insertAdjacentElement("afterend", mapSection);
 
-			// Set initial collapsed state from saved state
+		// Set initial collapsed state
 		const isCollapsed = state.collapsedSections.has("bus-map-section");
-		mapContent.classList.toggle("collapsed", isCollapsed);
-		mapContent.style.maxHeight = isCollapsed ? "0px" : "500px";
-		mapHeader.querySelector(".section-toggle").style.transform =
-			isCollapsed ? "rotate(0)" : "rotate(180deg)";
+		if (isCollapsed) {
+			mapContent.classList.add("collapsed");
+			mapContent.style.maxHeight = "0px";
+			mapHeader.querySelector(".section-toggle").style.transform = "rotate(0deg)";
+		} else {
+			mapContent.style.maxHeight = "500px";
+			mapHeader.querySelector(".section-toggle").style.transform = "rotate(180deg)";
+		}
 
-		// Add event listener to toggle map section with enter/space key
-		document.addEventListener("keydown", (event) => {
-			if (event.key === "Enter" || event.key === " ") {
-				const header = event.target.closest(".bus-section-header");
-				if (header) {
-					event.preventDefault();
-					const section = header.closest(".bus-section");
-					if (section) {
-						toggleSection(section.id);
-					}
-				}
-			}
-		});
-
-		// Set map displayed flag
 		state.mapDisplayed = true;
 	}
 
@@ -202,12 +182,12 @@ const BusInfoModule = (() => {
 
 			state.busData = data.busData;
 			displayBusInfo();
-			displayBusMap();
 
 			state.lastFetchTime = new Date();
 			updateLastFetchedTime();
 
-			// Fetch and update predictions from the API
+			// Move map and predictions fetching outside of bus data success
+			fetchAndDisplayMap();
 			fetchAndDisplayPredictions();
 
 			Logger.debug("Bus information fetched successfully", {
@@ -216,6 +196,10 @@ const BusInfoModule = (() => {
 		} catch (error) {
 			Logger.error("Error fetching bus information", { error: error.message });
 			displayError("Unable to fetch bus information. Please try again.");
+
+			// Still try to fetch map and predictions even if bus data fails
+			fetchAndDisplayMap();
+			fetchAndDisplayPredictions();
 		} finally {
 			showLoading(false);
 			Logger.endPerformanceMark("fetchBusInfo");
@@ -272,7 +256,7 @@ const BusInfoModule = (() => {
 				preferredSection.className = "bus-section preferred-section";
 
 				const isCollapsed = state.collapsedSections.has(sectionId);
-				
+
 				preferredSection.innerHTML = `
 					<div class="bus-section-header" role="button" tabindex="0">
 						<div class="section-header-content">
@@ -377,7 +361,7 @@ const BusInfoModule = (() => {
 		if (!busItem) return;
 
 		const isPreferred = busItem.classList.contains("preferred");
-		// Create new array instead of modifying frozen preferences
+
 		const updatedPreferences = {
 			...state.preferences,
 			preferredRoutes: isPreferred
@@ -399,7 +383,7 @@ const BusInfoModule = (() => {
 
 			// Update state with new preferences object
 			state.preferences = updatedPreferences;
-			
+
 			displayBusInfo();
 
 			Logger.debug(`Route ${route} ${isPreferred ? "removed from" : "added to"} preferred routes`);
@@ -503,10 +487,10 @@ const BusInfoModule = (() => {
 		elements.busInfoList.addEventListener("click", (event) => {
 			const starBadge = event.target.closest(".star-badge");
 			if (!starBadge) return;
-			
+
 			const busItem = starBadge.closest(".bus-item");
 			if (!busItem) return;
-			
+
 			const busNumber = busItem.querySelector(".bus-number").textContent.trim();
 			togglePreferredRoute(busNumber, starBadge);
 		});
@@ -605,7 +589,7 @@ const BusInfoModule = (() => {
 			Logger.warn("No section ID provided");
 			return;
 		}
-		
+
 		const section = document.getElementById(sectionId);
 		if (!section) return;
 
@@ -722,12 +706,37 @@ const BusInfoModule = (() => {
 	}
 
 	/**
+	 * Fetches and displays the bus map
+	 * @returns {Promise<void>}
+	 */
+	async function fetchAndDisplayMap() {
+		if (state.mapDisplayed) return;
+
+		try {
+			const response = await fetch(`${CONFIG.API_ENDPOINT}/map`);
+			if (!response.ok) {
+				throw new Error('Failed to fetch map');
+			}
+
+			const blob = await response.blob();
+			if (blob.size === 0) {
+				throw new Error('Empty map image received');
+			}
+
+			displayBusMap(blob);
+		} catch (error) {
+			Logger.error("Failed to load bus map", error);
+			state.mapDisplayed = false;
+		}
+	}
+
+	/**
 	 * Creates the predictions section
 	 * @returns {HTMLElement} - Predictions section element
 	 */
 	function createPredictionsSection() {
 		if (document.querySelector(".predictions-section")) return;
-		
+
 		const predictionsSection = document.createElement("div");
 		predictionsSection.id = "predictions-section"; // Add ID for state management
 		predictionsSection.className = "bus-section map-section predictions-section";
@@ -740,7 +749,6 @@ const BusInfoModule = (() => {
 			"bus-section-content single-column collapsed";
 		// Set initial max-height to 0 for collapsed state
 		predictionsContent.style.maxHeight = "0px";
-		// Add transition for smooth toggling
 		predictionsContent.style.transition = "max-height 0.3s ease-in-out";
 
 		predictionsHeader.innerHTML = `
@@ -770,9 +778,9 @@ const BusInfoModule = (() => {
 				"afterend",
 				predictionsSection,
 			);
-				}
+		}
 
-			// Set initial collapsed state from saved state
+		// Set initial collapsed state from saved state
 		const isCollapsed = state.collapsedSections.has("predictions-section");
 		predictionsContent.classList.toggle("collapsed", isCollapsed);
 		predictionsContent.style.maxHeight = isCollapsed ? "0px" : "500px";
@@ -806,13 +814,21 @@ const BusInfoModule = (() => {
 	 * @param {Object} predictions - Bus predictions data
 	 */
 	function updatePredictionsDisplay(predictions) {
-		if (!predictions || typeof predictions !== "object" || !predictions.predictions) {
+		if (!predictions ||
+			typeof predictions !== "object" ||
+			!predictions.predictions ||
+			Object.keys(predictions.predictions).length === 0) {
+			// Remove predictions section if it exists but there's no data
+			const existingSection = document.querySelector(".predictions-section");
+			if (existingSection) {
+				existingSection.remove();
+			}
+			state.predictionsDisplayed = false;
 			Logger.warn("No predictions to display");
 			return;
 		}
 
-		const predictionsSection = document.querySelector(".predictions-section");
-		if (!predictionsSection) {
+		if (!state.predictionsDisplayed) {
 			createPredictionsSection();
 		}
 
@@ -822,9 +838,11 @@ const BusInfoModule = (() => {
 
 		const fragment = document.createDocumentFragment();
 		const entries = Object.entries(predictions.predictions);
+		let hasValidPredictions = false;
 
 		for (const [busNumber, info] of entries) {
 			if (info.predictions && info.predictions.length > 0) {
+				hasValidPredictions = true;
 				const card = document.createElement("div");
 				card.className = "prediction-card";
 				card.dataset.busNumber = busNumber.toLowerCase();
@@ -855,6 +873,19 @@ const BusInfoModule = (() => {
 				predictionsList.appendChild(fragment);
 			}
 		}
+
+		if (!hasValidPredictions) {
+			// Remove section if no valid predictions
+			const section = document.querySelector(".predictions-section");
+			if (section) {
+				section.remove();
+			}
+			state.predictionsDisplayed = false;
+			return;
+		}
+
+		predictionsList.appendChild(fragment);
+		state.predictionsDisplayed = true;
 	}
 
 	/**

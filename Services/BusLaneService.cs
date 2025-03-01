@@ -12,10 +12,10 @@ namespace BusInfo.Services
     {
         private readonly IWebHostEnvironment _environment = environment;
 
-        // Define bounds (min_row, max_row, min_col, max_col)
-        private static readonly (int MinRow, int MaxRow, int MinCol, int MaxCol) RedBounds = (588, 622, 451, 2606);
-        private static readonly (int MinRow, int MaxRow, int MinCol, int MaxCol) GreenBounds = (651, 684, 451, 2606);
-        private static readonly (int MinRow, int MaxRow, int MinCol, int MaxCol) BlueBounds = (712, 746, 451, 2606);
+        // Define bounds (x, y, width, height) based on Python output
+        private static readonly (int X, int Y, int Width, int Height) RedBounds = (391, 492, 2153, 59);
+        private static readonly (int X, int Y, int Width, int Height) GreenBounds = (391, 563, 2153, 59);
+        private static readonly (int X, int Y, int Width, int Height) BlueBounds = (391, 634, 2153, 59);
 
         public async Task<byte[]> GenerateBusLaneMapAsync(Dictionary<string, string> bayServiceMap)
         {
@@ -42,7 +42,7 @@ namespace BusInfo.Services
         }
 
         private static void AddBayNumbers(
-            (int MinRow, int MaxRow, int MinCol, int MaxCol) bounds,
+            (int X, int Y, int Width, int Height) bounds,
             string prefix,
             SKCanvas canvas,
             Dictionary<string, string> bayServiceMap,
@@ -50,9 +50,10 @@ namespace BusInfo.Services
         {
             if (bounds == default) return;
 
-            int width = bounds.MaxCol - bounds.MinCol;
-            int sectionWidth = width / 16;
-            int y = (bounds.MinRow + bounds.MaxRow) / 2;
+            int sectionWidth = bounds.Width / 16;
+            float rectWidth = 70f;
+            float rectHeight = 50f;
+            int y = bounds.Y + (bounds.Height / 2);
 
             using SKPaint paint = new()
             {
@@ -64,26 +65,47 @@ namespace BusInfo.Services
             using SKPaint textPaint = new()
             {
                 IsAntialias = true,
-                Color = SKColors.WhiteSmoke
+                Color = SKColors.White,
+                TextAlign = SKTextAlign.Center
             };
 
             using SKFont textFont = new(SKTypeface.FromFile(fontPath) ?? SKTypeface.Default, 16);
 
             for (int i = 0; i < 16; i++)
             {
-                int x = bounds.MinCol + (i * sectionWidth) + (sectionWidth / 2);
-                float rectWidth = 70f;
-                float rectHeight = 40f;
+                int x = bounds.X + (i * sectionWidth) + (sectionWidth / 2);
                 string bayNumber = $"{prefix}{16 - i}";
 
-                SKRect rect = new(x - (rectWidth / 2), y - (rectHeight / 2), x + (rectWidth / 2), y + (rectHeight / 2));
-                canvas.DrawRect(rect, paint);
+                // Create rounded rectangle path with square corners on top-left and bottom-right
+                using SKPath path = new();
+                float radius = 10f;
+                
+                SKRect rect = new(x - (rectWidth / 2), y - (rectHeight / 2), 
+                                x + (rectWidth / 2), y + (rectHeight / 2));
 
-                canvas.DrawText(bayNumber, x, y - 5, SKTextAlign.Center, textFont, textPaint);
+                path.MoveTo(rect.Left, rect.Top); // Start top-left (square)
+                path.LineTo(rect.Right - radius, rect.Top); // Top edge
+                path.ArcTo(new SKRect(rect.Right - radius, rect.Top, rect.Right, rect.Top + radius), 
+                          270, 90, false);
+                path.LineTo(rect.Right, rect.Bottom - radius); // Right edge
+                path.ArcTo(new SKRect(rect.Right - radius, rect.Bottom - radius, rect.Right, rect.Bottom),
+                          0, 90, false);
+                path.LineTo(rect.Left + radius, rect.Bottom); // Bottom edge
+                path.ArcTo(new SKRect(rect.Left, rect.Bottom - radius, rect.Left + radius, rect.Bottom),
+                          90, 90, false);
+                path.LineTo(rect.Left, rect.Top); // Back to start
+                path.Close();
 
+                canvas.DrawPath(path, paint);
+
+                // Draw bay number
+                float textY = rect.Top + (rect.Height - textFont.Size * 2) / 2 + textFont.Size;
+                canvas.DrawText(bayNumber, x, textY, textFont, textPaint);
+
+                // Draw service number if available
                 if (bayServiceMap.TryGetValue(bayNumber, out string? serviceName))
                 {
-                    canvas.DrawText(serviceName, x, y + 15, SKTextAlign.Center, textFont, textPaint);
+                    canvas.DrawText(serviceName, x, textY + textFont.Size, textFont, textPaint);
                 }
             }
         }

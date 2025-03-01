@@ -130,7 +130,7 @@ namespace BusInfo.Controllers
 
         // API Key Operations
         [HttpPost("api-keys")]
-        public async Task<IActionResult> RequestApiKeyAsync([FromBody] ApiKeyRequest request)
+        public async Task<IActionResult> RequestApiKeyAsync([FromBody] ApiKeyRequestDto requestDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
@@ -157,8 +157,8 @@ namespace BusInfo.Controllers
                 _context.ApiKeyRequests.Add(new ApiKeyRequest
                 {
                     UserId = userId,
-                    Reason = request.Reason,
-                    IntendedUse = request.IntendedUse,
+                    Reason = requestDto.Reason,
+                    IntendedUse = requestDto.IntendedUse,
                     Status = "Pending",
                     RequestedAt = DateTime.UtcNow
                 });
@@ -220,20 +220,71 @@ namespace BusInfo.Controllers
         public async Task<IActionResult> GetApiKeyStatusAsync()
         {
             string? userId = GetCurrentUserId();
+            
+            // Return a proper error response instead of redirecting
+            if (userId == null) 
+                return Unauthorized(new { message = "User is not authenticated or not found" });
+
+            try {
+                ApiKey? activeKey = await _context.ApiKeys
+                    .FirstOrDefaultAsync(k => k.UserId == userId && k.IsActive);
+
+                bool hasPendingRequest = await _context.ApiKeyRequests
+                    .AnyAsync(r => r.UserId == userId && r.Status == "Pending");
+
+                // Check for rejected requests that haven't been dismissed
+                var rejectedRequest = await _context.ApiKeyRequests
+                    .Where(r => r.UserId == userId && r.Status == "Rejected" && !r.DismissedByUser)
+                    .OrderByDescending(r => r.UpdatedAt)
+                    .FirstOrDefaultAsync();
+
+                // Use either RejectionReason or ReviewNotes for the rejection reason
+                string? rejectionReason = rejectedRequest?.RejectionReason ?? rejectedRequest?.ReviewNotes;
+
+                return Ok(new
+                {
+                    hasApiKey = activeKey != null,
+                    key = activeKey?.Key,
+                    pendingRequest = hasPendingRequest,
+                    rejectedRequest = rejectedRequest != null,
+                    rejectionReason = rejectionReason
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error retrieving API key status", error = ex.Message });
+            }
+        }
+
+        [HttpPost("api-keys/dismiss-rejection")]
+        public async Task<IActionResult> DismissRejectionAsync()
+        {
+            string? userId = GetCurrentUserId();
             if (userId == null) return Unauthorized();
 
-            ApiKey? activeKey = await _context.ApiKeys
-                .FirstOrDefaultAsync(k => k.UserId == userId && k.IsActive);
-
-            bool hasPendingRequest = await _context.ApiKeyRequests
-                .AnyAsync(r => r.UserId == userId && r.Status == "Pending");
-
-            return Ok(new
+            try
             {
-                hasApiKey = activeKey != null,
-                key = activeKey?.Key,
-                pendingRequest = hasPendingRequest
-            });
+                var rejectedRequests = await _context.ApiKeyRequests
+                    .Where(r => r.UserId == userId && r.Status == "Rejected" && !r.DismissedByUser)
+                    .ToListAsync();
+
+                if (rejectedRequests.Any())
+                {
+                    foreach (var request in rejectedRequests)
+                    {
+                        request.DismissedByUser = true;
+                        request.DismissedAt = DateTime.UtcNow;
+                    }
+
+                    await _context.SaveChangesAsync();
+                }
+
+                return Ok(new { message = "Rejection notification dismissed successfully" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error dismissing rejection notification", error = ex.Message });
+            }
         }
 
         [HttpGet("profile")]
