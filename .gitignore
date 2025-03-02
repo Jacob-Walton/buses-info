@@ -17,3 +17,4 @@ appsettings*.json
 wwwroot/js/*.js
 wwwroot/**/*.map
 wwwroot/css/*.css
+.DS_Store
