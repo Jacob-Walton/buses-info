@@ -13,6 +13,6 @@ namespace BusInfo.Services
         Task<ApiKeyMetrics> GetApiKeyMetricsAsync(string apiKey);
         Task<List<EndpointMetrics>> GetTopEndpointsAsync(int count = 5);
         Task<Dictionary<int, int>> GetStatusCodeDistributionAsync();
-        Task<Dictionary<string, int>> GetHourlyRequestsAsync(string date = null);
+        Task<Dictionary<string, int>> GetHourlyRequestsAsync(string? date = null);
     }
 }

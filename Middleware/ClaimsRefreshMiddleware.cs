@@ -5,24 +5,16 @@ using Microsoft.AspNetCore.Http;
 
 namespace BusInfo.Middleware
 {
-    public class ClaimsRefreshMiddleware
+    public class ClaimsRefreshMiddleware(RequestDelegate next)
     {
-        private readonly RequestDelegate _next;
-
-        public ClaimsRefreshMiddleware(RequestDelegate next)
-        {
-            _next = next;
-        }
+        private readonly RequestDelegate _next = next;
 
         public async Task InvokeAsync(HttpContext context, ClaimsRefreshService claimsRefreshService)
         {
-            if (context.User.Identity?.IsAuthenticated == true)
+            if (context.User.Identity?.IsAuthenticated == true && claimsRefreshService.ShouldRefreshClaims(context.User))
             {
-                if (claimsRefreshService.ShouldRefreshClaims(context.User))
-                {
-                    var newPrincipal = await claimsRefreshService.RefreshClaimsAsync(context.User);
-                    await context.SignInAsync(newPrincipal);
-                }
+                System.Security.Claims.ClaimsPrincipal newPrincipal = await claimsRefreshService.RefreshClaimsAsync(context.User);
+                await context.SignInAsync(newPrincipal);
             }
 
             await _next(context);

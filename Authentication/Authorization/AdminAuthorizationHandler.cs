@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BusInfo.Authentication.Authorization
 {
-    public class AdminRequirement : IAuthorizationRequirement { }
+    public class AdminRequirement : IAuthorizationRequirement;
 
     public class AdminAuthorizationHandler(ApplicationDbContext context) : AuthorizationHandler<AdminRequirement>
     {
@@ -29,7 +29,7 @@ namespace BusInfo.Authentication.Authorization
 
             if (string.IsNullOrEmpty(email)) return;
 
-            ApplicationUser? dbUser = await _context.Users
+            ApplicationUser? dbUser = await _context!.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Email == email);
 

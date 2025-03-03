@@ -6,9 +6,18 @@ namespace BusInfo.Models
 {
     public enum AuthProvider
     {
-        Local,      // Email/Password
-        Google,     // Google OAuth
-        Microsoft   // Microsoft OAuth
+        /// <summary>
+        /// Email/Password
+        /// </summary>
+        Local = 0,
+        /// <summary>
+        /// Google OAuth
+        /// </summary>
+        Google = 1,
+        /// <summary>
+        /// Microsoft OAuth
+        /// </summary>
+        Microsoft = 2
     }
 
     public class ApplicationUser
@@ -45,7 +54,7 @@ namespace BusInfo.Models
         public List<string> RecoveryCodes { get; set; }
         public int FailedLoginAttempts { get; set; }
         public DateTime? LockoutEnd { get; set; }
-        public bool IsLocked => LockoutEnd.HasValue && LockoutEnd.Value > DateTime.UtcNow;
+        public bool IsLocked => LockoutEnd > DateTime.UtcNow;
 
         public DateTime? DeletedAt { get; set; }
         public bool IsPendingDeletion => DeletedAt.HasValue && DeletedAt.Value.AddDays(30) > DateTime.UtcNow;

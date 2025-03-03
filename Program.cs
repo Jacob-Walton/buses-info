@@ -43,10 +43,11 @@ using Azure.Core;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.Extensions.Logging;
 using BusInfo.Middleware;
+using Npgsql;
 
 namespace BusInfo
 {
-    public class Marker { }
+    public class Marker;
 
     public class KeyVaultSecretNameFormatter : KeyVaultSecretManager
     {
@@ -182,10 +183,10 @@ namespace BusInfo
                 .WriteTo.File(new CompactJsonFormatter(),
                               Path.Combine("logs", "log-.ndjson"),
                               fileSizeLimitBytes: 10_000_000,
+                              flushToDiskInterval: TimeSpan.FromSeconds(2),
                               rollingInterval: RollingInterval.Day,
                               rollOnFileSizeLimit: true,
-                              retainedFileCountLimit: 7,
-                              flushToDiskInterval: TimeSpan.FromSeconds(2))
+                              retainedFileCountLimit: 7)
             );
         }
 
@@ -243,19 +244,27 @@ namespace BusInfo
                 options.Providers.Add<GzipCompressionProvider>();
             });
 
-            // Configure Npgsql before setting up DbContext
-            BusInfo.Data.NpgsqlConfiguration.Configure();
+            // Configure Npgsql before setting up DbContext pass through data context
+            NpgsqlConfiguration.Configure();
 
             // Configure DB Context
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(config.GetConnectionString("DefaultConnection")));
+            {
+                string? connectionString = config.GetConnectionString("DefaultConnection");
+                NpgsqlDataSourceBuilder dataSourceBuilder = new(connectionString);
+                NpgsqlConfiguration.ConfigureDataSource(dataSourceBuilder);
+                NpgsqlDataSource dataSource = dataSourceBuilder.Build();
+
+                options.UseNpgsql(dataSource, npgsqlOptions =>
+                    npgsqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+            });
 
             // Configure Bus Info Services
             builder.Services.AddScoped<IBusInfoService, BusInfoService>();
             builder.Services.AddScoped<IBusLaneService, BusLaneService>();
             builder.Services.AddHttpClient();
 
-            // Add session support - Move this BEFORE authentication configuration
+            // Add session support
             builder.Services.AddSession(options =>
             {
                 options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -263,6 +272,8 @@ namespace BusInfo
                 options.Cookie.IsEssential = true;
                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
             });
+
+            builder.Services.AddScoped<IHealthCheckService, HealthCheckService>();
 
             // Configure Authentication
             builder.Services.AddScoped<ClaimsRefreshService>();
@@ -315,22 +326,22 @@ namespace BusInfo
                     {
                         try
                         {
-                            var userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
-                            var user = await userService.GetOrCreateUserAsync(context.Principal);
+                            IUserService userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
+                            ApplicationUser user = await userService.GetOrCreateUserAsync(context!.Principal);
 
-                            var claims = new List<Claim>
-                            {
+                            List<Claim> claims =
+                            [
                                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                                 new Claim(ClaimTypes.Email, user.Email),
                                 new Claim("claims_last_refresh", DateTimeOffset.UtcNow.ToString("o")),
                                 new Claim("provider", user.AuthProvider.ToString()),
                                 new Claim("auth_provider", user.AuthProvider.ToString())
-                            };
+                            ];
 
                             if (user.IsAdmin)
                                 claims.Add(new Claim(ClaimTypes.Role, "Admin"));
 
-                            var identity = new ClaimsIdentity(claims, context.Principal.Identity?.AuthenticationType ?? 
+                            ClaimsIdentity identity = new(claims, context.Principal.Identity?.AuthenticationType ??
                                 CookieAuthenticationDefaults.AuthenticationScheme);
                             context.Principal = new ClaimsPrincipal(identity);
                         }
@@ -349,36 +360,36 @@ namespace BusInfo
             })
             .AddMicrosoftAccount(options =>
             {
-                options.ClientId = config["Authentication:Microsoft:ClientId"] ?? 
+                options.ClientId = config["Authentication:Microsoft:ClientId"] ??
                     throw new InvalidOperationException("Microsoft Client ID not configured");
-                options.ClientSecret = config["Authentication:Microsoft:ClientSecret"] ?? 
+                options.ClientSecret = config["Authentication:Microsoft:ClientSecret"] ??
                     throw new InvalidOperationException("Microsoft Client Secret not configured");
                 options.SaveTokens = true;
                 options.CallbackPath = "/signin-microsoft";
                 options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                
+
                 options.Events = new OAuthEvents
                 {
                     OnTicketReceived = async context =>
                     {
                         try
                         {
-                            var userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
-                            var user = await userService.GetOrCreateUserAsync(context.Principal);
+                            IUserService userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
+                            ApplicationUser user = await userService.GetOrCreateUserAsync(context!.Principal);
 
-                            var claims = new List<Claim>
-                            {
+                            List<Claim> claims =
+                            [
                                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                                 new Claim(ClaimTypes.Email, user.Email),
                                 new Claim("claims_last_refresh", DateTimeOffset.UtcNow.ToString("o")),
                                 new Claim("provider", user.AuthProvider.ToString()),
                                 new Claim("auth_provider", user.AuthProvider.ToString())
-                            };
+                            ];
 
                             if (user.IsAdmin)
                                 claims.Add(new Claim(ClaimTypes.Role, "Admin"));
 
-                            var identity = new ClaimsIdentity(claims, context.Principal.Identity?.AuthenticationType ?? 
+                            ClaimsIdentity identity = new(claims, context.Principal.Identity?.AuthenticationType ??
                                 CookieAuthenticationDefaults.AuthenticationScheme);
                             context.Principal = new ClaimsPrincipal(identity);
                         }
@@ -476,18 +487,19 @@ namespace BusInfo
                 // Update error handling for auth failures
                 app.UseExceptionHandler(errorApp =>
                 {
-                    errorApp.Run(async context =>
+                    errorApp.Run(context =>
                     {
-                        var exceptionHandlerPathFeature = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerPathFeature>();
-                        var exception = exceptionHandlerPathFeature?.Error;
+                        Microsoft.AspNetCore.Diagnostics.IExceptionHandlerPathFeature? exceptionHandlerPathFeature = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerPathFeature>();
+                        Exception? exception = exceptionHandlerPathFeature?.Error;
 
                         if (exception is AuthenticationFailureException)
                         {
                             context.Response.Redirect("/login");
-                            return;
+                            return Task.CompletedTask;
                         }
 
                         context.Response.Redirect("/error");
+                        return Task.CompletedTask;
                     });
                 });
                 app.UseHsts();
@@ -501,7 +513,7 @@ namespace BusInfo
             app.UseSession();
             app.UseMiddleware<ApiRequestTrackingMiddleware>();
             app.UseAuthentication();
-            
+
             app.UseMiddleware<ClaimsRefreshMiddleware>();
             app.UseAuthorization();
 
@@ -601,5 +613,5 @@ namespace BusInfo
             return Task.FromResult(string.Empty);
         }
     }
-    #endregion
+    #endregion Rate Limiting
 }

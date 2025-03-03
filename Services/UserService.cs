@@ -18,7 +18,7 @@ namespace BusInfo.Services
 
         public async Task<ApplicationUser?> AuthenticateAsync(string email, string password)
         {
-            ApplicationUser? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            ApplicationUser? user = await _context!.Users.FirstOrDefaultAsync(u => u.Email == email);
 
             if (user == null || user.AuthProvider != AuthProvider.Local)
                 return null;
@@ -39,10 +39,10 @@ namespace BusInfo.Services
         public async Task<bool> CancelAccountDeletionAsync(string userIdOrEmail, bool isEmail = false)
         {
             ApplicationUser? user = isEmail
-                ? _context.Users.FirstOrDefault(u => u.Email == userIdOrEmail)
-                : _context.Users.FirstOrDefault(u => u.Id == userIdOrEmail);
+                ? _context!.Users.FirstOrDefault(u => u.Email == userIdOrEmail)
+                : _context!.Users.FirstOrDefault(u => u.Id == userIdOrEmail);
 
-            if (user == null || !user.IsPendingDeletion) return false;
+            if (user?.IsPendingDeletion != true) return false;
 
             user.DeletedAt = null;
             user.DeletionReason = null;
@@ -77,7 +77,7 @@ namespace BusInfo.Services
         public async Task<bool> ConfirmAccountDeletionAsync(string userId)
         {
             ApplicationUser? user = await _context.Users.FindAsync(userId);
-            if (user == null || !user.DeletedAt.HasValue) return false;
+            if (user?.DeletedAt.HasValue != true) return false;
 
             if ((DateTime.UtcNow - user.DeletedAt.Value).TotalDays >= 30)
             {
@@ -124,7 +124,7 @@ namespace BusInfo.Services
                 user.LastLoginAt,
                 user.PreferredRoutes,
                 user.EnableEmailNotifications,
-                ApiAccess = !string.IsNullOrEmpty(_context.ApiKeys.FirstOrDefault(k => k.UserId == userId)?.Key),
+                ApiAccess = !string.IsNullOrEmpty(_context!.ApiKeys.FirstOrDefault(k => k.UserId == userId)?.Key),
             };
             string json = System.Text.Json.JsonSerializer.Serialize(userData, _jsonOptions);
 
@@ -145,7 +145,7 @@ namespace BusInfo.Services
             if (string.IsNullOrEmpty(email))
                 throw new ArgumentException("Email claim not found in principal", nameof(principal));
 
-            ApplicationUser? user = _context.Users.FirstOrDefault(u => u.Email == email);
+            ApplicationUser? user = _context!.Users.FirstOrDefault(u => u.Email == email);
 
             string? externalId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             AuthProvider provider = DetermineAuthProvider(principal);
@@ -207,7 +207,7 @@ namespace BusInfo.Services
 
         public async Task<bool> InitiatePasswordResetAsync(string email)
         {
-            ApplicationUser? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            ApplicationUser? user = await _context!.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (user == null)
                 return false;
 
@@ -230,7 +230,7 @@ namespace BusInfo.Services
             if (!agreeToTerms)
                 return (false, "You must agree to the terms and conditions to register");
 
-            if (await _context.Users.AnyAsync(u => u.Email == email))
+            if (await _context!.Users.AnyAsync(u => u.Email == email))
                 return (false, "An account with that email address already exists");
 
             (string hash, string salt) = HashPassword(password);
@@ -253,7 +253,7 @@ namespace BusInfo.Services
 
         public async Task<(bool Success, string Message)> ResetPasswordAsync(string token, string email, string newPassword)
         {
-            ApplicationUser? user = await _context.Users.FirstOrDefaultAsync(u =>
+            ApplicationUser? user = await _context!.Users.FirstOrDefaultAsync(u =>
                 u.Email == email &&
                 u.PasswordResetToken == token &&
                 u.PasswordResetTokenExpiry > DateTime.UtcNow);
@@ -300,33 +300,31 @@ namespace BusInfo.Services
         private static AuthProvider DetermineAuthProvider(ClaimsPrincipal principal)
         {
             // Check for direct provider claims first
-            var providerClaim = principal.FindFirst("provider")?.Value;
+            string? providerClaim = principal.FindFirst("provider")?.Value;
             if (!string.IsNullOrEmpty(providerClaim))
             {
                 return Enum.Parse<AuthProvider>(providerClaim, true);
             }
 
             // Check for identity provider claims
-            var idp = principal.FindFirst("http://schemas.microsoft.com/identity/claims/identityprovider")?.Value
+            string? idp = principal.FindFirst("http://schemas.microsoft.com/identity/claims/identityprovider")?.Value
                 ?? principal.FindFirst("urn:google:issuer")?.Value;
 
             // Check for login provider
-            var loginProvider = principal.FindFirst("LoginProvider")?.Value;
+            string? loginProvider = principal.FindFirst("LoginProvider")?.Value;
 
             // Check scheme
-            var scheme = principal.Identity?.AuthenticationType;
+            string? scheme = principal.Identity?.AuthenticationType;
 
-            if (idp?.Contains("google", StringComparison.OrdinalIgnoreCase) == true ||
+            return idp?.Contains("google", StringComparison.OrdinalIgnoreCase) == true ||
                 loginProvider?.Equals("Google", StringComparison.OrdinalIgnoreCase) == true ||
-                scheme?.Equals("Google", StringComparison.OrdinalIgnoreCase) == true)
-                return AuthProvider.Google;
-
-            if (idp?.Contains("microsoft", StringComparison.OrdinalIgnoreCase) == true ||
-                loginProvider?.Equals("Microsoft", StringComparison.OrdinalIgnoreCase) == true ||
-                scheme?.Equals("Microsoft", StringComparison.OrdinalIgnoreCase) == true)
-                return AuthProvider.Microsoft;
-
-            return AuthProvider.Local;
+                scheme?.Equals("Google", StringComparison.OrdinalIgnoreCase) == true
+                ? AuthProvider.Google
+                : idp?.Contains("microsoft", StringComparison.OrdinalIgnoreCase) == true ||
+                                loginProvider?.Equals("Microsoft", StringComparison.OrdinalIgnoreCase) == true ||
+                                scheme?.Equals("Microsoft", StringComparison.OrdinalIgnoreCase) == true
+                    ? AuthProvider.Microsoft
+                    : AuthProvider.Local;
         }
     }
 }

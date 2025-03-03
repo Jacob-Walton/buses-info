@@ -13,10 +13,12 @@ namespace BusInfo.Models
         public string? RejectionReason { get; set; }
         public DateTime RequestedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
-        public bool DismissedByUser { get; set; } = false;
+        public bool DismissedByUser { get; set; }
         public DateTime? DismissedAt { get; set; }
-        
-        // Add missing properties used in AdminApiController
+
+        /// <summary>
+        /// Add missing properties used in AdminApiController
+        /// </summary>
         public string? ReviewedBy { get; set; }
         public DateTime? ReviewedAt { get; set; }
         public string? ReviewNotes { get; set; }

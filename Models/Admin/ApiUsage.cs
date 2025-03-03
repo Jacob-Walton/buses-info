@@ -18,7 +18,6 @@ namespace BusInfo.Models.Admin
             : 0;
     }
 
-
     public class ApiUsageMetric
     {
         public DateTime Timestamp { get; set; }

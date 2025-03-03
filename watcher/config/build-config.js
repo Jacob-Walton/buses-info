@@ -30,7 +30,8 @@ const config = {
             "js/authTransitions.js"
         ],
         scss: [
-            "styles/site.scss"
+            "styles/site.scss",
+            "styles/admin/admin.scss"
         ]
     },
     

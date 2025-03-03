@@ -1,3 +1,4 @@
+using System;
 using Npgsql;
 
 namespace BusInfo.Data
@@ -6,8 +7,8 @@ namespace BusInfo.Data
     {
         public static void Configure()
         {
-            // Enable dynamic JSON serialization for Dictionary<string, string> to jsonb conversion
-            NpgsqlConnection.GlobalTypeMapper.EnableDynamicJson();
         }
+
+        public static Action<NpgsqlDataSourceBuilder> ConfigureDataSource => builder => builder.EnableDynamicJson();
     }
 }

@@ -7,6 +7,6 @@ namespace BusInfo.Models
         public string? UserId { get; set; }
         public string? ApiKey { get; set; }
         public double ResponseTimeMs { get; set; }
-        public bool IsSuccessful => StatusCode >= 200 && StatusCode < 400;
+        public bool IsSuccessful => StatusCode is >= 200 and < 400;
     }
 }

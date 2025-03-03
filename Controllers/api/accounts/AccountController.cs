@@ -38,7 +38,10 @@ namespace BusInfo.Controllers
             "983", "998"
         ];
 
-        // Account CRUD Operations
+        /// <summary>
+        /// Account CRUD Operations
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> GetAccountAsync()
         {
@@ -79,14 +82,17 @@ namespace BusInfo.Controllers
             return Redirect("/");
         }
 
-        // Preferences CRUD Operations
+        /// <summary>
+        /// Preferences CRUD Operations
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("preferences")]
         public async Task<IActionResult> GetPreferencesAsync()
         {
             string? userId = GetCurrentUserId();
             if (userId == null) return Unauthorized();
 
-            UserPreferences? preferences = await _context.Users
+            UserPreferences? preferences = await _context!.Users
                 .AsNoTracking()
                 .Where(u => u.Id == userId)
                 .Select(u => new UserPreferences
@@ -128,7 +134,11 @@ namespace BusInfo.Controllers
             }
         }
 
-        // API Key Operations
+        /// <summary>
+        /// API Key Operations
+        /// </summary>
+        /// <param name="requestDto"></param>
+        /// <returns></returns>
         [HttpPost("api-keys")]
         public async Task<IActionResult> RequestApiKeyAsync([FromBody] ApiKeyRequestDto requestDto)
         {
@@ -140,13 +150,13 @@ namespace BusInfo.Controllers
             ApplicationUser? user = await _userService.GetUserByIdAsync(userId);
             if (user == null) return NotFound();
 
-            ApiKeyRequest? existingRequest = await _context.ApiKeyRequests
+            ApiKeyRequest? existingRequest = await _context!.ApiKeyRequests
                 .FirstOrDefaultAsync(r => r.UserId == userId && r.Status == "Pending");
 
             if (existingRequest != null)
                 return BadRequest(new { message = "You already have a pending API key request." });
 
-            ApiKey? existingActiveKey = await _context.ApiKeys
+            ApiKey? existingActiveKey = await _context!.ApiKeys
                 .FirstOrDefaultAsync(k => k.UserId == userId && k.IsActive);
 
             if (existingActiveKey != null)
@@ -184,7 +194,7 @@ namespace BusInfo.Controllers
             string? userId = GetCurrentUserId();
             if (userId == null) return Unauthorized();
 
-            ApiKey? existingKey = await _context.ApiKeys
+            ApiKey? existingKey = await _context!.ApiKeys
                 .FirstOrDefaultAsync(k => k.UserId == userId && k.IsActive);
 
             if (existingKey == null)
@@ -220,20 +230,21 @@ namespace BusInfo.Controllers
         public async Task<IActionResult> GetApiKeyStatusAsync()
         {
             string? userId = GetCurrentUserId();
-            
+
             // Return a proper error response instead of redirecting
-            if (userId == null) 
+            if (userId == null)
                 return Unauthorized(new { message = "User is not authenticated or not found" });
 
-            try {
-                ApiKey? activeKey = await _context.ApiKeys
+            try
+            {
+                ApiKey? activeKey = await _context!.ApiKeys
                     .FirstOrDefaultAsync(k => k.UserId == userId && k.IsActive);
 
-                bool hasPendingRequest = await _context.ApiKeyRequests
+                bool hasPendingRequest = await _context!.ApiKeyRequests
                     .AnyAsync(r => r.UserId == userId && r.Status == "Pending");
 
                 // Check for rejected requests that haven't been dismissed
-                var rejectedRequest = await _context.ApiKeyRequests
+                ApiKeyRequest? rejectedRequest = await _context.ApiKeyRequests
                     .Where(r => r.UserId == userId && r.Status == "Rejected" && !r.DismissedByUser)
                     .OrderByDescending(r => r.UpdatedAt)
                     .FirstOrDefaultAsync();
@@ -247,7 +258,7 @@ namespace BusInfo.Controllers
                     key = activeKey?.Key,
                     pendingRequest = hasPendingRequest,
                     rejectedRequest = rejectedRequest != null,
-                    rejectionReason = rejectionReason
+                    rejectionReason
                 });
             }
             catch (Exception ex)
@@ -264,13 +275,13 @@ namespace BusInfo.Controllers
 
             try
             {
-                var rejectedRequests = await _context.ApiKeyRequests
+                List<ApiKeyRequest> rejectedRequests = await _context!.ApiKeyRequests
                     .Where(r => r.UserId == userId && r.Status == "Rejected" && !r.DismissedByUser)
                     .ToListAsync();
 
-                if (rejectedRequests.Any())
+                if (rejectedRequests.Count != 0)
                 {
-                    foreach (var request in rejectedRequests)
+                    foreach (ApiKeyRequest? request in rejectedRequests)
                     {
                         request.DismissedByUser = true;
                         request.DismissedAt = DateTime.UtcNow;
@@ -293,7 +304,7 @@ namespace BusInfo.Controllers
             string? userId = GetCurrentUserId();
             if (userId == null) return Unauthorized();
 
-            var user = await _context.Users
+            var user = await _context!.Users
                 .Select(u => new
                 {
                     u.Id,
@@ -348,7 +359,11 @@ namespace BusInfo.Controllers
             return Ok(new { message = "Feedback submitted successfully" });
         }
 
-        // Password Operations
+        /// <summary>
+        /// Password Operations
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPut("password")]
         public async Task<IActionResult> UpdatePasswordAsync([FromBody] ChangePasswordModel model)
         {
@@ -356,10 +371,7 @@ namespace BusInfo.Controllers
             if (userId == null) return Unauthorized();
 
             bool result = await _userService.ChangePasswordAsync(userId, model.CurrentPassword, model.NewPassword);
-            if (!result)
-                return BadRequest(new { message = "Invalid current password" });
-
-            return Ok(new { message = "Password updated successfully" });
+            return !result ? BadRequest(new { message = "Invalid current password" }) : Ok(new { message = "Password updated successfully" });
         }
 
         [HttpGet("routes")]
@@ -367,7 +379,7 @@ namespace BusInfo.Controllers
         {
             try
             {
-                List<string> routes = await _context.BusArrivals
+                List<string> routes = await _context!.BusArrivals
                     .AsNoTracking()
                     .Select(b => b.Service)
                     .Where(s => !string.IsNullOrEmpty(s))
@@ -378,7 +390,7 @@ namespace BusInfo.Controllers
                 // Fallback to default routes if none found in database
                 if (routes.Count == 0)
                 {
-                    routes = DefaultRoutes.ToList();
+                    routes = [.. DefaultRoutes];
                 }
 
                 return Ok(new { routes });
@@ -398,30 +410,29 @@ namespace BusInfo.Controllers
             string? email = User.FindFirst("preferred_username")?.Value
                 ?? User.FindFirst(ClaimTypes.Email)?.Value;
 
-            return email == null ? null : (_context.Users.FirstOrDefault(u => u.Email == email)?.Id);
+            return email == null ? null : (_context!.Users.FirstOrDefault(u => u.Email == email)?.Id);
         }
 
         [HttpGet("auth-details")]
         public async Task<ActionResult<AuthenticationDetails>> GetAuthenticationDetailsAsync()
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId == null)
                 return Unauthorized();
 
-            var user = await _userService.GetUserByIdAsync(userId);
-            if (user == null)
-                return NotFound();
-
-            return new AuthenticationDetails
-            {
-                Provider = user.AuthProvider,
-                ProviderName = user.AuthProvider.GetDisplayName(),
-                CanChangePassword = user.AuthProvider == AuthProvider.Local,
-                RequiresEmailVerification = user.AuthProvider == AuthProvider.Local,
-                IsEmailVerified = user.IsEmailVerified,
-                Email = user.Email,
-                HasExternalId = !string.IsNullOrEmpty(user.ExternalId)
-            };
+            ApplicationUser? user = await _userService.GetUserByIdAsync(userId);
+            return user == null
+                ? (ActionResult<AuthenticationDetails>)NotFound()
+                : (ActionResult<AuthenticationDetails>)new AuthenticationDetails
+                {
+                    Provider = user.AuthProvider,
+                    ProviderName = user.AuthProvider.GetDisplayName(),
+                    CanChangePassword = user.AuthProvider == AuthProvider.Local,
+                    RequiresEmailVerification = user.AuthProvider == AuthProvider.Local,
+                    IsEmailVerified = user.IsEmailVerified,
+                    Email = user.Email,
+                    HasExternalId = !string.IsNullOrEmpty(user.ExternalId)
+                };
         }
     }
 

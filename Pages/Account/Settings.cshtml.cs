@@ -22,14 +22,14 @@ namespace BusInfo.Pages.Account
 
         public async Task<IActionResult> OnGetAsync()
         {
-            ApplicationUser? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == (User.Identity != null ? User.Identity.Name : null));
+            ApplicationUser? user = await _context!.Users.FirstOrDefaultAsync(u => u.Email == (User.Identity != null ? User.Identity.Name : null));
             if (user != null)
             {
                 LastLogin = user.LastLoginAt;
             }
 
             // Only load routes as fallback - client will try API first
-            _availableRoutes = await _context.BusArrivals
+            _availableRoutes = await _context!.BusArrivals
                 .AsNoTracking()
                 .Select(b => b.Service)
                 .Where(s => !string.IsNullOrEmpty(s))

@@ -6,9 +6,9 @@ namespace BusInfo.Models
     {
         public long TotalRequests { get; set; }
         public int RequestsToday { get; set; }
-        public Dictionary<int, int> StatusCodes { get; set; } = new();
+        public Dictionary<int, int> StatusCodes { get; set; } = [];
         public double AverageResponseTime { get; set; }
-        public List<TimeSeriesDataPoint> RequestsTimeSeries { get; set; } = new();
+        public List<TimeSeriesDataPoint> RequestsTimeSeries { get; set; } = [];
     }
 
     public class TimeSeriesDataPoint

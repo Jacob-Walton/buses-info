@@ -9,16 +9,10 @@ using Microsoft.Extensions.Logging;
 
 namespace BusInfo.Middleware
 {
-    public class ApiRequestTrackingMiddleware
+    public class ApiRequestTrackingMiddleware(RequestDelegate next, ILogger<ApiRequestTrackingMiddleware> logger)
     {
-        private readonly RequestDelegate _next;
-        private readonly ILogger<ApiRequestTrackingMiddleware> _logger;
-
-        public ApiRequestTrackingMiddleware(RequestDelegate next, ILogger<ApiRequestTrackingMiddleware> logger)
-        {
-            _next = next;
-            _logger = logger;
-        }
+        private readonly RequestDelegate _next = next;
+        private readonly ILogger<ApiRequestTrackingMiddleware> _logger = logger;
 
         public async Task InvokeAsync(HttpContext context, IRequestTrackingService requestTrackingService)
         {
@@ -31,8 +25,8 @@ namespace BusInfo.Middleware
 
             _logger.LogInformation("Tracking API request: {Path}", context.Request.Path);
 
-            var stopwatch = Stopwatch.StartNew();
-            var originalBodyStream = context.Response.Body;
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            System.IO.Stream originalBodyStream = context.Response.Body;
 
             try
             {
@@ -40,15 +34,15 @@ namespace BusInfo.Middleware
 
                 stopwatch.Stop();
 
-                var requestInfo = new ApiRequestInfo
+                ApiRequestInfo requestInfo = new()
                 {
-                    Endpoint = NormalizeEndpoint(context.Request.Path.Value),
+                    Endpoint = NormalizeEndpoint(context!.Request.Path.Value),
                     StatusCode = context.Response.StatusCode,
                     ResponseTimeMs = stopwatch.Elapsed.TotalMilliseconds,
                     UserId = context.User?.FindFirstValue(ClaimTypes.NameIdentifier)
                 };
 
-                if (context.Request.Headers.TryGetValue("X-Api-Key", out var apiKey))
+                if (context.Request.Headers.TryGetValue("X-Api-Key", out Microsoft.Extensions.Primitives.StringValues apiKey))
                 {
                     requestInfo.ApiKey = apiKey.ToString();
                 }
@@ -66,7 +60,7 @@ namespace BusInfo.Middleware
             }
         }
 
-        private string NormalizeEndpoint(string path)
+        private static string NormalizeEndpoint(string path)
         {
             if (string.IsNullOrEmpty(path))
                 return "unknown";
@@ -76,7 +70,7 @@ namespace BusInfo.Middleware
 
             // Replace any numeric IDs with {id} for better grouping
             // Example: /api/users/123 -> /api/users/{id}
-            var segments = path.Split('/');
+            string[] segments = path.Split('/');
             for (int i = 0; i < segments.Length; i++)
             {
                 if (i > 0 && segments[i].Length > 0 && int.TryParse(segments[i], out _))

@@ -12,13 +12,16 @@ namespace BusInfo.Services
 {
     public class ApiKeyGenerator(ApplicationDbContext context) : IApiKeyGenerator
     {
-        private const int RANDOM_BYTES_LENGTH = 16; // 128 bits of entropy
+        /// <summary>
+        /// 128 bits of entropy
+        /// </summary>
+        private const int RANDOM_BYTES_LENGTH = 16;
         private const string VALID_CHARS = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
         private readonly ApplicationDbContext _context = context;
 
         public async Task<string> GenerateApiKeyAsync(string userId)
         {
-            if (!await _context.Users.AnyAsync(u => u.Id == userId))
+            if (!await _context!.Users.AnyAsync(u => u.Id == userId))
             {
                 throw new InvalidUserIdException(userId);
             }
@@ -41,7 +44,7 @@ namespace BusInfo.Services
 
         public string GenerateApiKey(string userId)
         {
-            if (!_context.Users.Any(u => u.Id == userId))
+            if (!_context!.Users.Any(u => u.Id == userId))
             {
                 throw new InvalidUserIdException(userId);
             }
@@ -66,7 +69,7 @@ namespace BusInfo.Services
         {
             string timestamp = DateTimeOffset.UtcNow.ToString("yyMMdd", CultureInfo.InvariantCulture);
             string entropy = GenerateSecureRandomString(RANDOM_BYTES_LENGTH);
-            string baseKey = $"{timestamp}{entropy}";
+            string baseKey = timestamp + entropy;
             char checkDigit = CalculateLuhnDigit(baseKey);
             return FormatWithHyphens($"RB{baseKey}{checkDigit}");
         }
@@ -98,10 +101,6 @@ namespace BusInfo.Services
             catch (FormatException)
             {
                 return false;
-            }
-            catch
-            {
-                throw;
             }
         }
 

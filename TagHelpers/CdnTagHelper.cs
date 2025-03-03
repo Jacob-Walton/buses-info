@@ -25,7 +25,7 @@ namespace BusInfo.TagHelpers
                 return;
 
             string attributeName = output.Attributes.ContainsName("href") ? "href" : "src";
-            output.Attributes.SetAttribute(attributeName, $"{cdnBaseUrl.TrimEnd('/')}{url}");
+            output.Attributes.SetAttribute(attributeName, cdnBaseUrl.TrimEnd('/') + url);
             output.Attributes.RemoveAll("cdn");
         }
     }

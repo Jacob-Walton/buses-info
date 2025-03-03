@@ -23,6 +23,9 @@ namespace BusInfo.Services
     /// <summary>
     /// Provides functionality to fetch and manage bus information and arrival predictions.
     /// </summary>
+    /// <param name="clientFactory"></param>
+    /// <param name="cache"></param>
+    /// <param name="dbContext"></param>
     public sealed class BusInfoService(
         IHttpClientFactory clientFactory,
         IDistributedCache cache,
@@ -96,7 +99,7 @@ namespace BusInfo.Services
                     foreach (HtmlNode? row in rows)
                     {
                         HtmlNodeCollection cells = row.SelectNodes("td");
-                        if (cells != null && cells.Count >= 3)
+                        if (cells?.Count >= 3)
                         {
                             string service = cells[0].InnerText.Trim();
                             string bay = Escape(cells[2].InnerText.Trim()).Trim();
@@ -164,7 +167,7 @@ namespace BusInfo.Services
                     foreach (HtmlNode? row in rows)
                     {
                         HtmlNodeCollection cells = row.SelectNodes("td");
-                        if (cells != null && cells.Count >= 3)
+                        if (cells?.Count >= 3)
                         {
                             string service = cells[0].InnerText.Trim();
                             string status = Escape(cells[2].InnerText.Trim()).Trim();
@@ -236,7 +239,7 @@ namespace BusInfo.Services
             DateTime now = DateTime.UtcNow;
             int currentDayOfWeek = (int)now.DayOfWeek;
 
-            var historicalData = await _dbContext.BusArrivals
+            var historicalData = await _dbContext!.BusArrivals
                 .AsNoTracking()
                 .Where(ba => services.Contains(ba.Service) &&
                             ba.ArrivalTime >= now.AddDays(-28) &&

@@ -6,15 +6,15 @@ using BusInfo.Models;
 using StackExchange.Redis;
 using System.Linq;
 using Microsoft.Extensions.Logging;
+using System.Globalization;
 
 namespace BusInfo.Services
 {
-    public class RequestTrackingService : IRequestTrackingService
+    public class RequestTrackingService(IConnectionMultiplexer redis, ILogger<RequestTrackingService> logger) : IRequestTrackingService
     {
-        private readonly IConnectionMultiplexer _redis;
-        private readonly ILogger<RequestTrackingService> _logger;
-        
-        // Key patterns for Redis
+        private readonly IConnectionMultiplexer _redis = redis;
+        private readonly ILogger<RequestTrackingService> _logger = logger;
+
         private const string API_REQUESTS_KEY = "metrics:api:requests:total";
         private const string API_REQUESTS_24H_KEY = "metrics:api:requests:24h";
         private const string API_RESPONSE_TIMES_KEY = "metrics:api:response_times";
@@ -27,18 +27,12 @@ namespace BusInfo.Services
         private const string API_ERROR_COUNT_KEY = "metrics:api:errors";
         private const string API_HOURLY_STATS_KEY_PREFIX = "metrics:api:hourly:";
 
-        public RequestTrackingService(IConnectionMultiplexer redis, ILogger<RequestTrackingService> logger)
-        {
-            _redis = redis;
-            _logger = logger;
-        }
-
         public async Task IncrementApiRequestCountAsync()
         {
             try
             {
                 IDatabase db = _redis.GetDatabase();
-                var now = DateTime.UtcNow;
+                DateTime now = DateTime.UtcNow;
 
                 // Increment total requests
                 await db.StringIncrementAsync(API_REQUESTS_KEY);
@@ -47,7 +41,7 @@ namespace BusInfo.Services
                 await db.SortedSetAddAsync(API_REQUESTS_24H_KEY, now.Ticks.ToString(), now.Ticks);
 
                 // Remove old entries (older than 24h)
-                var dayAgo = DateTime.UtcNow.AddHours(-24).Ticks;
+                long dayAgo = DateTime.UtcNow.AddHours(-24).Ticks;
                 await db.SortedSetRemoveRangeByScoreAsync(API_REQUESTS_24H_KEY, 0, dayAgo);
             }
             catch (Exception ex)
@@ -92,7 +86,7 @@ namespace BusInfo.Services
                 RedisValue errorCount = await db.StringGetAsync(API_ERROR_COUNT_KEY);
 
                 // Get 24h request count
-                var requests24h = await db.SortedSetLengthAsync(API_REQUESTS_24H_KEY);
+                long requests24h = await db.SortedSetLengthAsync(API_REQUESTS_24H_KEY);
 
                 double avgResponseTime = 0.0;
                 if (responseCount.HasValue && (long)responseCount > 0)
@@ -122,9 +116,9 @@ namespace BusInfo.Services
                 _logger.LogInformation("Tracking API request: {Endpoint}, {StatusCode}, {ResponseTime}, {UserId}, {ApiKey}",
                     requestInfo.Endpoint, requestInfo.StatusCode, requestInfo.ResponseTimeMs, requestInfo.UserId, requestInfo.ApiKey);
                 IDatabase db = _redis.GetDatabase();
-                var now = DateTime.UtcNow;
-                var hourKey = $"{now:yyyy-MM-dd-HH}";
-                var dayKey = $"{now:yyyy-MM-dd}";
+                DateTime now = DateTime.UtcNow;
+                string hourKey = $"{now:yyyy-MM-dd-HH}";
+                string dayKey = $"{now:yyyy-MM-dd}";
 
                 // Start a transaction for atomic updates
                 ITransaction transaction = db.CreateTransaction();
@@ -159,13 +153,13 @@ namespace BusInfo.Services
                     // Track total requests
                     transaction.StringIncrementAsync($"{API_KEY_REQUEST_KEY_PREFIX}{requestInfo.ApiKey}");
                     transaction.StringIncrementAsync($"{API_KEY_REQUEST_KEY_PREFIX}{requestInfo.ApiKey}:{dayKey}");
-                    
+
                     // Track key-specific status codes
                     transaction.StringIncrementAsync($"{API_KEY_REQUEST_KEY_PREFIX}{requestInfo.ApiKey}:status:{requestInfo.StatusCode}");
-                    
+
                     // Track hourly data for this key
                     transaction.HashIncrementAsync($"{API_KEY_REQUEST_KEY_PREFIX}{requestInfo.ApiKey}:hourly:{dayKey}", hourKey);
-                    
+
                     // Track response time for this key
                     transaction.StringIncrementAsync($"{API_KEY_RESPONSE_TIME_KEY_PREFIX}{requestInfo.ApiKey}", (long)requestInfo.ResponseTimeMs);
                     transaction.StringIncrementAsync($"{API_KEY_RESPONSE_TIME_KEY_PREFIX}{requestInfo.ApiKey}:count");
@@ -194,17 +188,17 @@ namespace BusInfo.Services
                 }
 
                 IDatabase db = _redis.GetDatabase();
-                var now = DateTime.UtcNow;
-                var dayKey = $"{now:yyyy-MM-dd}";
+                DateTime now = DateTime.UtcNow;
+                string dayKey = $"{now:yyyy-MM-dd}";
 
                 // Get total and today's requests for the API key
-                RedisValue totalRequests = await db.StringGetAsync($"{API_KEY_REQUEST_KEY_PREFIX}{apiKey}");
+                RedisValue totalRequests = await db.StringGetAsync(API_KEY_REQUEST_KEY_PREFIX + apiKey);
                 RedisValue todayRequests = await db.StringGetAsync($"{API_KEY_REQUEST_KEY_PREFIX}{apiKey}:{dayKey}");
 
                 // Get response time for this key
-                RedisValue totalResponseTime = await db.StringGetAsync($"{API_KEY_RESPONSE_TIME_KEY_PREFIX}{apiKey}");
+                RedisValue totalResponseTime = await db.StringGetAsync(API_KEY_RESPONSE_TIME_KEY_PREFIX + apiKey);
                 RedisValue responseCount = await db.StringGetAsync($"{API_KEY_RESPONSE_TIME_KEY_PREFIX}{apiKey}:count");
-                
+
                 double avgResponseTime = 0;
                 if (responseCount.HasValue && (long)responseCount > 0)
                 {
@@ -219,16 +213,14 @@ namespace BusInfo.Services
                         TotalRequests = 0,
                         RequestsToday = 0,
                         AverageResponseTime = 0,
-                        StatusCodes = new Dictionary<int, int>(),
-                        RequestsTimeSeries = new List<TimeSeriesDataPoint>()
+                        StatusCodes = [],
+                        RequestsTimeSeries = []
                     };
                 }
 
                 // Get status codes used with this API key
-                var statusCodes = new Dictionary<int, int>();
-                var commonStatusCodes = new[] { 200, 201, 204, 400, 401, 403, 404, 500 };
-
-                foreach (var code in commonStatusCodes)
+                Dictionary<int, int> statusCodes = [];
+                foreach (int code in new[] { 200, 201, 204, 400, 401, 403, 404, 500 })
                 {
                     RedisValue codeCount = await db.StringGetAsync($"{API_KEY_REQUEST_KEY_PREFIX}{apiKey}:status:{code}");
                     if (codeCount.HasValue && (long)codeCount > 0)
@@ -238,23 +230,23 @@ namespace BusInfo.Services
                 }
 
                 // Get hourly data for time series
-                var hourlyData = await db.HashGetAllAsync($"{API_KEY_REQUEST_KEY_PREFIX}{apiKey}:hourly:{dayKey}");
-                var timeSeries = new List<TimeSeriesDataPoint>();
-                
-                foreach (var entry in hourlyData)
+                HashEntry[] hourlyData = await db.HashGetAllAsync($"{API_KEY_REQUEST_KEY_PREFIX}{apiKey}:hourly:{dayKey}");
+                List<TimeSeriesDataPoint> timeSeries = [];
+
+                foreach (HashEntry entry in hourlyData)
                 {
                     // Format: yyyy-MM-dd-HH
                     string hourStr = entry.Name.ToString().Split('-').Last();
-                    
+
                     timeSeries.Add(new TimeSeriesDataPoint
                     {
                         TimeLabel = $"{hourStr}:00",
                         Value = (int)(long)entry.Value
                     });
                 }
-                
+
                 // Sort by hour
-                timeSeries = timeSeries.OrderBy(p => p.TimeLabel).ToList();
+                timeSeries = [.. timeSeries.OrderBy(p => p.TimeLabel)];
 
                 return new ApiKeyMetrics
                 {
@@ -277,26 +269,25 @@ namespace BusInfo.Services
             try
             {
                 IDatabase db = _redis.GetDatabase();
-                var result = new Dictionary<string, long>();
-                var today = DateTime.UtcNow.ToString("yyyy-MM-dd");
+                Dictionary<string, long> result = [];
+                string today = DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
                 // Get all keys for endpoints
-                var server = _redis.GetServer(_redis.GetEndPoints().First());
-                var keys = server.Keys(pattern: $"{API_ENDPOINT_KEY_PREFIX}*").ToList();
+                IServer server = _redis.GetServer(_redis.GetEndPoints().First());
 
-                foreach (var key in keys)
+                await foreach (RedisKey key in server.KeysAsync(pattern: $"{API_ENDPOINT_KEY_PREFIX}*"))
                 {
                     string keyStr = key.ToString();
-                    string endpoint = keyStr.Replace(API_ENDPOINT_KEY_PREFIX, "");
-                    
+                    string endpoint = keyStr.Replace(API_ENDPOINT_KEY_PREFIX, "", StringComparison.Ordinal);
+
                     // Handle both total and daily metrics
-                    if (endpoint.Contains(':'))
+                    if (endpoint.Contains(':', StringComparison.Ordinal))
                     {
                         // Daily metric (format: endpoint:yyyy-MM-dd)
-                        var parts = endpoint.Split(':');
+                        string[] parts = endpoint.Split(':');
                         endpoint = parts[0];
-                        var date = parts[1];
-                        
+                        string date = parts[1];
+
                         // Only process if it's today's metric
                         if (date != today) continue;
                     }
@@ -314,20 +305,19 @@ namespace BusInfo.Services
                 }
 
                 // Convert to list and sort
-                return result
+                return [.. result
                     .Select(kvp => new EndpointMetrics
                     {
                         Endpoint = kvp.Key,
                         RequestCount = kvp.Value
                     })
                     .OrderByDescending(e => e.RequestCount)
-                    .Take(count)
-                    .ToList();
+                    .Take(count)];
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting top endpoints");
-                return new List<EndpointMetrics>();
+                return [];
             }
         }
 
@@ -336,12 +326,12 @@ namespace BusInfo.Services
             try
             {
                 IDatabase db = _redis.GetDatabase();
-                var result = new Dictionary<int, int>();
+                Dictionary<int, int> result = [];
 
                 // Get common status codes to check
-                var commonStatusCodes = new[] { 200, 201, 204, 400, 401, 403, 404, 429, 500, 503 };
+                int[] commonStatusCodes = new[] { 200, 201, 204, 400, 401, 403, 404, 429, 500, 503 };
 
-                foreach (var statusCode in commonStatusCodes)
+                foreach (int statusCode in commonStatusCodes)
                 {
                     // Get the total count for this status code
                     string totalKey = $"{API_STATUS_CODE_KEY_PREFIX}{statusCode}";
@@ -363,23 +353,18 @@ namespace BusInfo.Services
                 }
 
                 // If we got no results from common status codes, try scanning for any status code keys
-                if (!result.Any())
+                if (result.Count == 0)
                 {
-                    var server = _redis.GetServer(_redis.GetEndPoints().First());
-                    var allKeys = server.Keys(pattern: $"{API_STATUS_CODE_KEY_PREFIX}*").ToList();
-
-                    foreach (var key in allKeys)
+                    IServer server = _redis.GetServer(_redis.GetEndPoints().First());
+                    await foreach (RedisKey key in server.KeysAsync(pattern: $"{API_STATUS_CODE_KEY_PREFIX}*"))
                     {
                         string keyStr = key.ToString();
-                        if (!keyStr.Contains(':')) // Skip daily keys
+                        if (!keyStr.Contains(':', StringComparison.Ordinal) && int.TryParse(keyStr.Replace(API_STATUS_CODE_KEY_PREFIX, "", StringComparison.Ordinal), out int statusCode)) // Skip daily keys
                         {
-                            if (int.TryParse(keyStr.Replace(API_STATUS_CODE_KEY_PREFIX, ""), out int statusCode))
+                            RedisValue count = await db.StringGetAsync(key);
+                            if (count.HasValue)
                             {
-                                RedisValue count = await db.StringGetAsync(key);
-                                if (count.HasValue)
-                                {
-                                    result[statusCode] = (int)(long)count;
-                                }
+                                result[statusCode] = (int)(long)count;
                             }
                         }
                     }
@@ -390,25 +375,25 @@ namespace BusInfo.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting status code distribution");
-                return new Dictionary<int, int>();
+                return [];
             }
         }
 
-        public async Task<Dictionary<string, int>> GetHourlyRequestsAsync(string date = null)
+        public async Task<Dictionary<string, int>> GetHourlyRequestsAsync(string? date = null)
         {
             try
             {
                 IDatabase db = _redis.GetDatabase();
-                var result = new Dictionary<string, int>();
-                
-                var dayKey = string.IsNullOrEmpty(date) 
-                    ? $"{DateTime.UtcNow:yyyy-MM-dd}" 
+                Dictionary<string, int> result = [];
+
+                string dayKey = string.IsNullOrEmpty(date)
+                    ? $"{DateTime.UtcNow:yyyy-MM-dd}"
                     : date;
 
                 // Get hourly stats for the specified day
-                var hourlyStats = await db.HashGetAllAsync($"{API_HOURLY_STATS_KEY_PREFIX}{dayKey}");
-                
-                foreach (var entry in hourlyStats)
+                HashEntry[] hourlyStats = await db.HashGetAllAsync(API_HOURLY_STATS_KEY_PREFIX + dayKey);
+
+                foreach (HashEntry entry in hourlyStats)
                 {
                     // Just get hour from the key (format: yyyy-MM-dd-HH)
                     string hour = entry.Name.ToString().Split('-').Last();
@@ -420,7 +405,7 @@ namespace BusInfo.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting hourly requests");
-                return new Dictionary<string, int>();
+                return [];
             }
         }
     }

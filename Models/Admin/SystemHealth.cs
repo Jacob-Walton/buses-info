@@ -18,10 +18,22 @@ namespace BusInfo.Models.Admin
 
     public enum ServiceStatus
     {
-        Healthy, // Index 0
-        Degraded, // Index 1
-        Unhealthy, // Index 2
-        Unknown // Index 3
+        /// <summary>
+        /// Index 0
+        /// </summary>
+        Healthy = 0,
+        /// <summary>
+        /// Index 1
+        /// </summary>
+        Degraded = 1,
+        /// <summary>
+        /// Index 2
+        /// </summary>
+        Unhealthy = 2,
+        /// <summary>
+        /// Index 3
+        /// </summary>
+        Unknown = 3
     }
 
     public class PerformanceMetric
@@ -36,9 +48,21 @@ namespace BusInfo.Models.Admin
 
     public enum MetricType
     {
-        Counter, // Index 0
-        Gauge, // Index 1
-        Histogram, // Index 2
-        Timer // Index 3
+        /// <summary>
+        /// Index 0
+        /// </summary>
+        Counter = 0,
+        /// <summary>
+        /// Index 1
+        /// </summary>
+        Gauge = 1,
+        /// <summary>
+        /// Index 2
+        /// </summary>
+        Histogram = 2,
+        /// <summary>
+        /// Index 3
+        /// </summary>
+        Timer = 3
     }
 }

@@ -5,19 +5,15 @@ using System;
 
 namespace BusInfo.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-        {
-        }
-
-        public DbSet<BusStatus> BusStatuses { get; set; }
-        public DbSet<ApplicationUser> Users { get; set; }
-        public DbSet<ApiKeyRequest> ApiKeyRequests { get; set; }
-        public DbSet<AdminSettings> AdminSettings { get; set; }
-        public DbSet<BusArrival> BusArrivals { get; set; }
-        public DbSet<ApiKey> ApiKeys { get; set; }
-        public DbSet<AdminActivity> AdminActivities { get; set; }
+        public DbSet<BusStatus>? BusStatuses { get; set; }
+        public DbSet<ApplicationUser>? Users { get; set; }
+        public DbSet<ApiKeyRequest>? ApiKeyRequests { get; set; }
+        public DbSet<AdminSettings>? AdminSettings { get; set; }
+        public DbSet<BusArrival>? BusArrivals { get; set; }
+        public DbSet<ApiKey>? ApiKeys { get; set; }
+        public DbSet<AdminActivity>? AdminActivities { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -57,24 +53,21 @@ namespace BusInfo.Data
                     .HasColumnType("timestamp with time zone");
                 entity.Property(u => u.LockoutEnd)
                     .HasColumnType("timestamp with time zone");
-            });
-
-            modelBuilder.Entity<ApiKeyRequest>(entity =>
+            })
+                .Entity<ApiKeyRequest>(entity =>
             {
                 entity.HasOne(r => r.User)
                     .WithMany()
                     .HasForeignKey(r => r.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
-            });
-
-            modelBuilder.Entity<AdminSettings>(entity =>
+            })
+                .Entity<AdminSettings>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.LastModified).IsRequired();
                 entity.Property(e => e.ModifiedBy).IsRequired();
-            });
-
-            modelBuilder.Entity<BusArrival>(entity =>
+            })
+                .Entity<BusArrival>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Service).IsRequired().HasMaxLength(10);
@@ -83,9 +76,8 @@ namespace BusInfo.Data
                 entity.Property(e => e.Weather).HasMaxLength(50);
                 entity.Property(e => e.ArrivalTime)
                     .HasColumnType("timestamp with time zone");
-            });
-
-            modelBuilder.Entity<ApiKey>(entity =>
+            })
+                .Entity<ApiKey>(entity =>
             {
                 entity.HasKey(e => e.Key);
                 entity.Property(e => e.Key).HasMaxLength(100);
@@ -98,9 +90,8 @@ namespace BusInfo.Data
                     .WithMany()
                     .HasForeignKey(e => e.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
-            });
-
-            modelBuilder.Entity<AdminActivity>(entity =>
+            })
+                .Entity<AdminActivity>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Description).IsRequired();
@@ -113,7 +104,7 @@ namespace BusInfo.Data
 
                 entity.HasIndex(e => e.Timestamp);
                 entity.HasIndex(e => e.Type);
-                
+
                 entity.HasOne<ApplicationUser>()
                     .WithMany()
                     .HasForeignKey(e => e.UserId)

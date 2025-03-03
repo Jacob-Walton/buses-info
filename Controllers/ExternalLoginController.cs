@@ -8,26 +8,26 @@ using Microsoft.Extensions.Logging;
 
 namespace BusInfo.Controllers
 {
-    [Route("/")]
     [AllowAnonymous]
-    public class ExternalLoginController : ControllerBase
+    public class ExternalLoginController(ILogger<ExternalLoginController> logger) : ControllerBase
     {
-        private readonly ILogger<ExternalLoginController> _logger;
+        private static readonly Action<ILogger, string, string, Exception?> LogExternalAuthError =
+            LoggerMessage.Define<string, string>(
+                LogLevel.Warning,
+                new EventId(1, nameof(LogExternalAuthError)),
+                "External authentication error: {Error} ({Subcode})");
 
-        public ExternalLoginController(ILogger<ExternalLoginController> logger)
-        {
-            _logger = logger;
-        }
+        private readonly ILogger<ExternalLoginController> _logger = logger;
 
-        [HttpGet("signin/{provider}")]
+        [HttpGet("/signin/{provider}")]
         public IActionResult SignIn(string provider, string? returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
-            
-            var properties = new AuthenticationProperties
+
+            AuthenticationProperties properties = new()
             {
                 RedirectUri = "/signin-callback",
-                Items = 
+                Items =
                 {
                     { "returnUrl", returnUrl },
                     { "provider", provider }
@@ -37,7 +37,7 @@ namespace BusInfo.Controllers
             return Challenge(properties, provider);
         }
 
-        [HttpGet("signin-callback")]
+        [HttpGet("/signin-callback")]
         public IActionResult SignInCallback()
         {
             if (Request.Query.ContainsKey("error"))
@@ -45,7 +45,7 @@ namespace BusInfo.Controllers
                 string error = Request.Query["error"].ToString();
                 string errorSubcode = Request.Query["error_subcode"].ToString();
 
-                _logger.LogWarning("External authentication error: {Error} ({Subcode})", error, errorSubcode);
+                LogExternalAuthError(_logger, error, errorSubcode, null);
 
                 string message = error == "access_denied" && errorSubcode == "cancel"
                     ? "You cancelled the login process."
@@ -56,6 +56,11 @@ namespace BusInfo.Controllers
             }
 
             return LocalRedirect("/");
+        }
+
+        public IActionResult SignIn(string provider, Uri? returnUrl = null)
+        {
+            throw new NotImplementedException();
         }
     }
 }

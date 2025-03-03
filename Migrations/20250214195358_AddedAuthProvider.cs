@@ -42,7 +42,7 @@ namespace BusInfo.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_BusArrivals_Service_ArrivalTime",
                 table: "BusArrivals",
-                columns: new[] { "Service", "ArrivalTime" });
+                columns: ["Service", "ArrivalTime"]);
         }
     }
 }

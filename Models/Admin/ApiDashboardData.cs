@@ -10,8 +10,8 @@ namespace BusInfo.Models.Admin
         public long Requests24Hours { get; set; }
         public double AverageResponseTime { get; set; }
         public int ErrorCount { get; set; }
-        public Dictionary<int, int> StatusCodeDistribution { get; set; } = new();
-        public List<EndpointMetrics> TopEndpoints { get; set; } = new();
-        public Dictionary<string, int> HourlyRequests { get; set; } = new();
+        public Dictionary<int, int> StatusCodeDistribution { get; set; } = [];
+        public List<EndpointMetrics> TopEndpoints { get; set; } = [];
+        public Dictionary<string, int> HourlyRequests { get; set; } = [];
     }
 }

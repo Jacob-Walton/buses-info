@@ -16,16 +16,16 @@ namespace BusInfo.Authentication.RateLimiting
         private readonly string _keyPrefix = "client_rate_limit";
         private readonly ClientRateLimitOptions _options = options.Value;
 
-        public Task<bool> ExistsAsync(string id, CancellationToken cancellationToken = default)
+        public async Task<bool> ExistsAsync(string id, CancellationToken cancellationToken = default)
         {
             try
             {
                 IDatabase db = _redis.GetDatabase();
-                return db.KeyExistsAsync($"{_keyPrefix}:{id}");
+                return await db.KeyExistsAsync($"{_keyPrefix}:{id}");
             }
             catch (RedisException)
             {
-                return Task.FromResult(false);
+                return await Task.FromResult(false);
             }
         }
 
@@ -33,7 +33,6 @@ namespace BusInfo.Authentication.RateLimiting
         {
             try
             {
-
                 IDatabase db = _redis.GetDatabase();
                 RedisValue policy = await db.StringGetAsync($"{_keyPrefix}:{id}");
                 return policy.HasValue ? JsonSerializer.Deserialize<ClientRateLimitPolicy>(policy!) : null;
@@ -44,16 +43,18 @@ namespace BusInfo.Authentication.RateLimiting
             }
         }
 
-        public Task RemoveAsync(string id, CancellationToken cancellationToken = default)
+        public async Task RemoveAsync(string id, CancellationToken cancellationToken = default)
         {
             try
             {
                 IDatabase db = _redis.GetDatabase();
-                return db.KeyDeleteAsync($"{_keyPrefix}:{id}");
+                await db.KeyDeleteAsync($"{_keyPrefix}:{id}");
+                return;
             }
             catch (RedisException)
             {
-                return Task.CompletedTask;
+                await Task.CompletedTask;
+                return;
             }
         }
 
