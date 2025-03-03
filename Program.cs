@@ -37,6 +37,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Net.Http;
 using Microsoft.AspNetCore.ResponseCompression;
 using System.Linq;
+using Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation;
 using BusInfo.Services.BackgroundServices;
 using BusInfo.Authentication.Authorization;
 using Azure.Core;
@@ -233,8 +234,10 @@ namespace BusInfo
             builder.Services.AddRazorPages()
                 .AddRazorPagesOptions(options =>
                 {
-                    // existing options...
-                });
+                    options.Conventions.AuthorizeFolder("/Admin", "AdminOnly");
+                    options.Conventions.AuthorizeFolder("/Account", "RequireAuthenticatedUser");
+                })
+                .AddRazorRuntimeCompilation();
 
             // Configure Compression
             builder.Services.AddResponseCompression(options =>
@@ -300,7 +303,7 @@ namespace BusInfo
                 {
                     OnRedirectToLogin = context =>
                     {
-                        if (context.Request.Path.StartsWithSegments("/api"))
+                        if (context.Request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase))
                         {
                             context.Response.StatusCode = 401;
                         }
@@ -327,7 +330,11 @@ namespace BusInfo
                         try
                         {
                             IUserService userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
-                            ApplicationUser user = await userService.GetOrCreateUserAsync(context!.Principal);
+                            if (context?.Principal == null)
+                                throw new InvalidOperationException("Authentication principal not found");
+
+                            ApplicationUser? user = await userService.GetOrCreateUserAsync(context.Principal) ??
+                                throw new InvalidOperationException("User not found");
 
                             List<Claim> claims =
                             [
@@ -345,7 +352,7 @@ namespace BusInfo
                                 CookieAuthenticationDefaults.AuthenticationScheme);
                             context.Principal = new ClaimsPrincipal(identity);
                         }
-                        catch (InvalidOperationException ex) when (ex.Message.Contains("different authentication method"))
+                        catch (InvalidOperationException ex) when (ex.Message.Contains("different authentication method", StringComparison.OrdinalIgnoreCase))
                         {
                             context.Response.Redirect($"/login?error=wrong_provider&message={Uri.EscapeDataString(ex.Message)}");
                             context.HandleResponse();
@@ -375,7 +382,11 @@ namespace BusInfo
                         try
                         {
                             IUserService userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
-                            ApplicationUser user = await userService.GetOrCreateUserAsync(context!.Principal);
+                            if (context?.Principal == null)
+                                throw new InvalidOperationException("Authentication principal not found");
+
+                            ApplicationUser? user = await userService.GetOrCreateUserAsync(context.Principal) ??
+                                throw new InvalidOperationException("User not found");
 
                             List<Claim> claims =
                             [
@@ -393,7 +404,7 @@ namespace BusInfo
                                 CookieAuthenticationDefaults.AuthenticationScheme);
                             context.Principal = new ClaimsPrincipal(identity);
                         }
-                        catch (InvalidOperationException ex) when (ex.Message.Contains("different authentication method"))
+                        catch (InvalidOperationException ex) when (ex.Message.Contains("different authentication method", StringComparison.OrdinalIgnoreCase))
                         {
                             context.Response.Redirect($"/login?error=wrong_provider&message={Uri.EscapeDataString(ex.Message)}");
                             context.HandleResponse();
@@ -411,24 +422,18 @@ namespace BusInfo
             builder.Services.AddAuthentication()
                 .AddScheme<AuthenticationSchemeOptions, ApiKeyAuthenticationHandler>("ApiKey", null);
 
-            builder.Services.AddAuthorization(options =>
-            {
-                // Default policy for web routes uses only cookie authentication
-                options.DefaultPolicy = new AuthorizationPolicyBuilder()
+            builder.Services.AddAuthorizationBuilder()
+                .SetDefaultPolicy(new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
                     .AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme)
-                    .Build();
-
-                // API policy uses both cookie and API key authentication
-                options.AddPolicy("ApiPolicy", policy =>
+                    .Build())
+                .AddPolicy("ApiPolicy", policy =>
                     policy.RequireAuthenticatedUser()
-                         .AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme, "ApiKey"));
-
-                options.AddPolicy("RequireAuthenticatedUser", policy =>
-                    policy.RequireAuthenticatedUser());
-                options.AddPolicy("AdminOnly", policy =>
+                         .AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme, "ApiKey"))
+                .AddPolicy("RequireAuthenticatedUser", policy =>
+                    policy.RequireAuthenticatedUser())
+                .AddPolicy("AdminOnly", policy =>
                     policy.Requirements.Add(new AdminRequirement()));
-            });
 
             builder.Services.AddScoped<IAuthorizationHandler, AdminAuthorizationHandler>();
 
@@ -453,7 +458,7 @@ namespace BusInfo
             // Configure Rate Limiting
             builder.Services.AddMemoryCache();
             builder.Services.Configure<ClientRateLimitOptions>(config.GetSection("ClientRateLimiting"));
-            builder.Services.Configure<IpRateLimitOptions>(opt => { });
+            builder.Services.Configure<IpRateLimitOptions>(_ => { });
             builder.Services.AddSingleton<IClientPolicyStore, RedisClientPolicyStore>();
             builder.Services.AddSingleton<IRateLimitCounterStore, RedisRateLimitCounterStore>();
             builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
@@ -520,7 +525,7 @@ namespace BusInfo
             app.UseSerilogRequestLogging(options =>
             {
                 options.MessageTemplate = "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms";
-                options.GetLevel = (httpContext, elapsed, ex) => ex != null ? Serilog.Events.LogEventLevel.Error : Serilog.Events.LogEventLevel.Information;
+                options.GetLevel = (_, __, ex) => ex != null ? Serilog.Events.LogEventLevel.Error : Serilog.Events.LogEventLevel.Information;
                 options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
                 {
                     diagnosticContext.Set("RequestHost", httpContext.Request.Host);
