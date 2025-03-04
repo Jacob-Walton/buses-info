@@ -7,6 +7,7 @@
 - [ ] Implement full API
 - [x] Federated login
 - [x] Updated settings page
+- [ ] Remove watcher/dist/** from version control
 
 ## Medium Priority
 
