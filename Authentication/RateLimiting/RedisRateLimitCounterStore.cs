@@ -13,7 +13,6 @@ namespace BusInfo.Authentication.RateLimiting
         private readonly IConnectionMultiplexer _redis = redis;
         private readonly string _keyPrefix = "counter";
 
-
         public Task<bool> ExistsAsync(string id, CancellationToken cancellationToken = default)
         {
             IDatabase db = _redis.GetDatabase();
@@ -32,7 +31,6 @@ namespace BusInfo.Authentication.RateLimiting
             IDatabase db = _redis.GetDatabase();
             return db.KeyDeleteAsync($"{_keyPrefix}:{id}");
         }
-
 
         public async Task SetAsync(string id, RateLimitCounter? entry, TimeSpan? expirationTime = null, CancellationToken cancellationToken = default)
         {

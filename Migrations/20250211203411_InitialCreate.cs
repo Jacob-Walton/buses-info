@@ -25,10 +25,7 @@ namespace BusInfo.Migrations
                     AutomaticMaintenance = table.Column<bool>(type: "boolean", nullable: false),
                     ModifiedBy = table.Column<string>(type: "text", nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AdminSettings", x => x.LastModified);
-                });
+                constraints: table => table.PrimaryKey("PK_AdminSettings", x => x.LastModified));
 
             migrationBuilder.CreateTable(
                 name: "BusArrivals",
@@ -46,10 +43,7 @@ namespace BusInfo.Migrations
                     WeekOfYear = table.Column<int>(type: "integer", nullable: false),
                     IsSchoolTerm = table.Column<bool>(type: "boolean", nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_BusArrivals", x => x.Id);
-                });
+                constraints: table => table.PrimaryKey("PK_BusArrivals", x => x.Id));
 
             migrationBuilder.CreateTable(
                 name: "BusStatuses",
@@ -60,10 +54,7 @@ namespace BusInfo.Migrations
                     Status = table.Column<string>(type: "text", nullable: true),
                     Bay = table.Column<string>(type: "text", nullable: true)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_BusStatuses", x => x.Id);
-                });
+                constraints: table => table.PrimaryKey("PK_BusStatuses", x => x.Id));
 
             migrationBuilder.CreateTable(
                 name: "ApiKeyRequests",
@@ -80,10 +71,7 @@ namespace BusInfo.Migrations
                     ReviewedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     ReviewNotes = table.Column<string>(type: "text", nullable: true)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ApiKeyRequests", x => x.Id);
-                });
+                constraints: table => table.PrimaryKey("PK_ApiKeyRequests", x => x.Id));
 
             migrationBuilder.CreateTable(
                 name: "ApiKeys",
@@ -94,10 +82,7 @@ namespace BusInfo.Migrations
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ApiKeys", x => x.Key);
-                });
+                constraints: table => table.PrimaryKey("PK_ApiKeys", x => x.Key));
 
             migrationBuilder.CreateTable(
                 name: "Users",
@@ -156,7 +141,7 @@ namespace BusInfo.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_BusArrivals_Service_ArrivalTime",
                 table: "BusArrivals",
-                columns: new[] { "Service", "ArrivalTime" });
+                columns: ["Service", "ArrivalTime"]);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_ActiveApiKeyKey",

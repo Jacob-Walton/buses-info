@@ -1,0 +1,130 @@
+@page "/terms"
+@model TermsModel
+@{
+    ViewData["Title"] = "Terms and Conditions";
+}
+
+<div class="content-page">
+    <div class="page-container">
+        <div class="page-content">
+            <div class="page-header">
+                <h1>Terms and Conditions</h1>
+                <div class="last-updated">Last updated: 1 February 2025</div>
+            </div>
+
+            <div class="notice-box primary">
+                <i class="fas fa-info-circle"></i>
+                <div class="notice-content">
+                    <p>Please read these terms carefully. By using our service, you agree to be bound by these Terms and Conditions.</p>
+                </div>
+            </div>
+
+            <div class="page-toc"></div>
+
+            <div class="content-section" id="agreement">
+                <h2>Agreement to Terms</h2>
+                <p>These Terms and Conditions constitute a legally binding agreement between you and Runshaw Buses regarding your use of our service. By accessing or using our service, you agree to be bound by these Terms. If you disagree with any part of these terms, you may not access the service.</p>
+            </div>
+
+            <div class="content-section" id="description">
+                <h2>Service Description</h2>
+                <p>Runshaw Buses is an independent service that provides bus arrival information and bay allocation details for Runshaw College buses. This service is provided for informational purposes only.</p>
+                <p>We explicitly state that this service is:</p>
+                <ul>
+                    <li>Not affiliated with Runshaw College</li>
+                    <li>Not endorsed by Runshaw College</li>
+                    <li>Not officially connected to Runshaw College in any way</li>
+                    <li>An independent project created to assist the college community</li>
+                </ul>
+            </div>
+
+            <div class="content-section" id="accounts">
+                <h2>User Accounts</h2>
+                <p>When you create an account with us, you must provide accurate, complete, and up-to-date information. Failure to do so constitutes a breach of these Terms, which may result in immediate termination of your account.</p>
+                <p>You are responsible for:</p>
+                <ul>
+                    <li>Maintaining the confidentiality of your account credentials</li>
+                    <li>All activities that occur under your account</li>
+                    <li>Notifying us immediately of any unauthorised access</li>
+                </ul>
+            </div>
+
+            <div class="content-section" id="api">
+                <h2>API Usage</h2>
+                <p>If you are granted API access to our service, you agree to:</p>
+                <ul>
+                    <li>Use the API in accordance with our documentation and guidelines</li>
+                    <li>Not share or transfer your API credentials to any third party</li>
+                    <li>Respect rate limits and other technical restrictions</li>
+                    <li>Only use the API for its intended purpose</li>
+                </ul>
+                <p>We reserve the right to revoke API access at any time, with or without notice, for any reason.</p>
+            </div>
+
+            <div class="content-section" id="ip">
+                <h2>Intellectual Property</h2>
+                <p>The service and its original content, features, and functionality are owned by Runshaw Buses and are protected by international copyright, trademark, patent, trade secret, and other intellectual property laws.</p>
+            </div>
+
+            <div class="content-section" id="disclaimer">
+                <h2>Disclaimer</h2>
+                <p>Your use of our service is at your sole risk. The service is provided on an "AS IS" and "AS AVAILABLE" basis. We expressly disclaim all warranties of any kind, whether express or implied.</p>
+                <p>We do not warrant that:</p>
+                <ul>
+                    <li>The service will be uninterrupted or error-free</li>
+                    <li>The results that may be obtained from the use of the service will be accurate or reliable</li>
+                    <li>The quality of any information obtained through the service will meet your expectations</li>
+                </ul>
+            </div>
+
+            <div class="content-section" id="liability">
+                <h2>Limitation of Liability</h2>
+                <p>In no event shall Runshaw Buses, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of or inability to use the service.</p>
+            </div>
+
+            <div class="content-section" id="changes">
+                <h2>Changes to Terms</h2>
+                <p>We reserve the right to modify or replace these Terms at any time. If a revision is material, we will provide at least 30 days' notice prior to any new terms taking effect. What constitutes a material change will be determined at our sole discretion.</p>
+            </div>
+
+            <div class="content-section" id="termination">
+                <h2>Termination</h2>
+                <p>We may terminate or suspend your account and access to the service immediately, without prior notice or liability, for any reason whatsoever, including without limitation if you breach the Terms.</p>
+            </div>
+
+            <div class="content-section" id="law">
+                <h2>Governing Law</h2>
+                <p>These Terms shall be governed by and construed in accordance with the laws of England and Wales, without regard to its conflict of law provisions.</p>
+            </div>
+
+            <div class="content-section" id="contact">
+                <h2>Contact Us</h2>
+                <p>If you have any questions about these Terms, please contact us:</p>
+                <div class="card-grid contact-grid">
+                    <div class="card">
+                        <div class="card-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <h3 class="card-title">Email</h3>
+                        <p class="card-content">
+                            <a href="mailto:support@konpeki.co.uk">support@konpeki.co.uk</a>
+                        </p>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">
+                            <i class="fas fa-paper-plane"></i>
+                        </div>
+                        <h3 class="card-title">Contact Form</h3>
+                        <p class="card-content">
+                            <a href="/contact">Visit our contact page</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="/js/contentPages.js"></script>
+}

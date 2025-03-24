@@ -33,6 +33,11 @@
       position: absolute;
       background-repeat: no-repeat;
       background-position: center;
+      background-image: url("https://d1tl6qv7xwsvxx.cloudfront.net/assets/landscape-filled.png");
+      // Anti-aliasing fix
+      transform: translateZ(0);
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
     }
 
     &.simple::after {
@@ -43,7 +48,6 @@
       background-size: contain;
       height: 50px;
       aspect-ratio: 21 / 9;
-      filter: hue-rotate(213.66deg) saturate(51.9%) brightness(15.49%);
       background-size: 80% auto;
       box-sizing: border-box;
     }
@@ -51,10 +55,23 @@
     &.expanded::after {
       background-color: $primary;
       background-size: 80% auto;
-      aspect-ratio: 10 / 9;
-      width: clamp(100px, 20vw, 150px);
-      padding: 10px;
+      aspect-ratio: auto; // Changed from fixed aspect-ratio
+      width: clamp(120px, 20vw, 180px);
+      height: 42px;
+      padding: 8px 12px;
       box-sizing: border-box;
+      border-radius: 6px;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    &.expanded:hover::after {
+      background-color: darken($primary, 5%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
     &:hover {
@@ -344,6 +361,70 @@
       transform: translateX(0);
     }
   }
+
+  // Improved mobile menu trigger
+  .mobile-menu-trigger {
+    @include reset-button;
+    display: none;
+    width: 36px;
+    height: 36px;
+    position: relative;
+    z-index: 1002;
+    border-radius: 50%;
+    transition: background-color 0.3s ease;
+    
+    &:hover {
+      background-color: rgba($primary, 0.1);
+    }
+
+    span {
+      display: block;
+      position: absolute;
+      width: 22px;
+      height: 2px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: $text;
+      transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+      
+      &:nth-child(1) {
+        top: 12px;
+      }
+      
+      &:nth-child(2) {
+        top: 18px;
+        opacity: 1;
+      }
+      
+      &:nth-child(3) {
+        top: 24px;
+      }
+    }
+
+    &.active {
+      span {
+        background-color: $primary;
+        
+        &:nth-child(1) {
+          top: 18px;
+          transform: translateX(-50%) rotate(45deg);
+        }
+        
+        &:nth-child(2) {
+          opacity: 0;
+        }
+        
+        &:nth-child(3) {
+          top: 18px;
+          transform: translateX(-50%) rotate(-45deg);
+        }
+      }
+    }
+
+    @media (max-width: 768px) {
+      display: block;
+    }
+  }
 }
 
 body.menu-open {
@@ -417,61 +498,71 @@ body.nav-open {
   }
 }
 
+// Modern mobile navbar
 .mobile-navbar {
   display: none;
   position: fixed;
   top: 0;
-  left: 0;
-  width: 100%;
+  right: 0;
+  width: 85%;
+  max-width: 360px;
   height: 100%;
   background-color: $background;
   z-index: 1001;
   transform: translateX(100%);
-  transition: transform 0.3s ease-in-out;
+  transition: transform 0.35s cubic-bezier(0.215, 0.61, 0.355, 1);
+  box-shadow: -5px 0 30px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
 
+  &:not(.active) {
+    pointer-events: none;
+  }
+  
   &.active {
     transform: translateX(0);
+    pointer-events: auto;
   }
 
   .mobile-navbar-header {
-    height: $navbar-height;
-    padding: 0 $spacing-unit;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    padding: 1rem;
     border-bottom: 1px solid $border;
-    background-color: $background;
-    position: relative;
-    z-index: 1002;
+    min-height: 70px;
 
     .mobile-logo {
-      a {
-        display: flex;
-        align-items: center;
-        text-decoration: none;
-        color: $primary;
-        font-weight: 600;
-        font-size: 1.25rem;
-
-        &.simple::after {
+      a.simple {
+        display: block;
+        height: 40px;
+        
+        &::after {
           content: "";
           background-repeat: no-repeat;
           background-position: center;
           background-size: contain;
-          width: 100px;
+          width: 120px;
           height: 40px;
-          filter: hue-rotate(213.66deg) saturate(51.9%) brightness(15.49%);
+          display: block;
+          background-image: url("https://d1tl6qv7xwsvxx.cloudfront.net/assets/landscape-filled.png");
+          transform: translateZ(0);
+          -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
         }
       }
     }
   }
 
   .mobile-navbar-content {
-    height: calc(100% - #{$navbar-height});
+    flex: 1;
     overflow-y: auto;
-    padding: $spacing-unit;
+    padding: 1rem;
     display: flex;
     flex-direction: column;
+    -webkit-overflow-scrolling: touch; // Smooth scrolling on iOS
 
     .mobile-nav-items {
       list-style: none;
@@ -479,41 +570,91 @@ body.nav-open {
       margin: 0;
 
       .mobile-nav-item {
-        margin-bottom: $spacing-unit;
+        margin-bottom: 0.5rem;
         opacity: 0;
-        transform: translateX(20px);
-        transition: all 0.3s ease;
-
-        @for $i from 1 through 5 {
-          &:nth-child(#{$i}) {
-            transition-delay: #{$i * 0.1}s;
-          }
-        }
-
+        transform: translateY(10px);
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        
         &.animate {
           opacity: 1;
-          transform: translateX(0);
+          transform: translateY(0);
         }
 
         a {
           display: flex;
           align-items: center;
-          padding: $spacing-unit;
+          padding: 1rem;
           color: $text;
           text-decoration: none;
-          font-weight: 500;
-          font-size: 1.1rem;
-          @include alternating-border-radius($button-border-radius);
+          font-weight: 600;
+          font-size: 1rem;
+          border-radius: 8px;
           transition: all 0.2s ease;
-
+          position: relative;
+          
+          &::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 1rem;
+            width: 0;
+            height: 2px;
+            background-color: $primary;
+            transition: width 0.3s ease;
+          }
+          
           &.active {
             color: $primary;
-            background-color: $primary-hover;
+            background-color: rgba($primary, 0.08);
+            
+            &::after {
+              width: calc(100% - 2rem);
+            }
           }
 
           &:hover {
             color: $primary;
-            background-color: $primary-hover;
+            background-color: rgba($primary, 0.05);
+          }
+          
+          i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+          }
+        }
+        
+        // Submenu styles
+        &.has-submenu {
+          position: relative;
+          
+          > a::before {
+            content: '\f107';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 1rem;
+            transition: transform 0.3s ease;
+          }
+          
+          &[aria-expanded="true"] > a::before {
+            transform: rotate(180deg);
+          }
+          
+          .submenu {
+            max-height: 0;
+            overflow: hidden;
+            margin-left: 1rem;
+            transition: max-height 0.3s ease;
+            
+            &.open {
+              max-height: 500px; // Large enough to accommodate content
+            }
+            
+            a {
+              padding: 0.75rem 1rem;
+              font-size: 0.95rem;
+            }
           }
         }
       }
@@ -521,72 +662,50 @@ body.nav-open {
 
     .mobile-auth-section {
       margin-top: auto;
-      padding-top: $spacing-unit;
+      padding-top: 1rem;
+      padding-bottom: 1rem; // Add bottom padding for breathing room
       border-top: 1px solid $border;
+      
+      .mobile-profile-items {
+        list-style: none;
+        padding: 0;
+        margin: 0;
 
-      .mobile-sign-in {
-        width: 100%;
-        padding: $spacing-unit;
-        background-color: $primary;
-        color: white;
-        text-align: center;
-        text-decoration: none;
-        font-weight: 500;
-        @include alternating-border-radius($button-border-radius);
-        transition: background-color 0.2s ease;
-
-        &:hover {
-          background-color: $primary-dark;
-        }
-      }
-
-      .mobile-profile-menu {
-        .mobile-profile-items {
-          list-style: none;
-          padding: 0;
-          margin: 0;
-
-          .mobile-profile-item {
-            a,
-            button {
-              @include reset-button;
-              width: 100%;
-              display: flex;
-              align-items: center;
-              padding: $spacing-unit;
-              color: $text;
-              text-decoration: none;
-              font-weight: 500;
-              gap: $spacing-unit;
-              @include alternating-border-radius($button-border-radius);
-              transition: all 0.2s ease;
-
-              i {
-                width: 20px;
-                color: $dark-grey;
-              }
-
-              &:hover {
-                color: $primary;
-                background-color: $primary-hover;
-
-                i {
-                  color: $primary;
-                }
-              }
-
-              &.danger {
-                color: $status-not-arrived;
-
-                i {
-                  color: $status-not-arrived;
-                }
-
-                &:hover {
-                  background-color: rgba($status-not-arrived, 0.1);
-                }
-              }
+        .mobile-profile-item {
+          margin-bottom: 0.75rem; // Increased bottom margin
+          width: 100%; // Ensure full width
+          
+          // Fix form element to avoid any layout issues
+          form {
+            width: 100%;
+            margin: 0;
+          }
+          
+          a, button {
+            @include reset-button;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            padding: 0.875rem; // Slightly reduced padding
+            color: $text;
+            text-decoration: none;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            text-align: left;
+            overflow: hidden; // Prevent overflow of text
+            text-overflow: ellipsis; // Add ellipsis for overflow text
+            white-space: nowrap; // Keep text on one line
+            
+            i {
+              margin-right: 0.75rem;
+              min-width: 20px; // Use min-width to prevent shrinking
+              text-align: center;
+              color: $dark-grey;
+              transition: color 0.2s ease;
             }
+
+            // ...existing hover/danger/highlight styles...
           }
         }
       }
@@ -594,6 +713,7 @@ body.nav-open {
   }
 }
 
+// Improved overlay
 .mobile-navbar-overlay {
   position: fixed;
   top: 0;
@@ -601,14 +721,49 @@ body.nav-open {
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
   z-index: 1000;
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s ease;
+  will-change: opacity; // Optimization for animations
 
   &.active {
     opacity: 1;
     visibility: visible;
+  }
+}
+
+// Edge swipe indicator - remove since it was causing confusion
+.edge-swipe-indicator {
+  display: none; // Hide this completely
+}
+
+// Touch-specific optimizations
+@media (pointer: coarse) {
+  .mobile-navbar {
+    // Better touch scrolling
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  // Add active state for touch feedback instead of hover
+  .mobile-nav-item a {
+    &:hover {
+      background-color: transparent; // Remove hover on touch
+    }
+    
+    &:active {
+      background-color: rgba($primary, 0.1);
+    }
+  }
+  
+  .mobile-profile-item {
+    a, button {
+      &:active {
+        background-color: rgba($primary, 0.1);
+      }
+    }
   }
 }
 
@@ -629,8 +784,17 @@ body.nav-open {
     .navbar-brand {
       font-size: 1.5rem;
 
-      &.expanded::after {
+      &.simple::after {
         width: 100px;
+        height: 40px;
+        background-size: contain;
+      }
+
+      &.expanded::after {
+        width: 110px;
+        height: 38px;
+        padding: 6px 10px;
+        border-radius: 5px;
       }
     }
 
@@ -696,6 +860,59 @@ body.nav-open {
       .navbar-nav .nav-item {
         opacity: 1;
         transform: translateY(0);
+      }
+    }
+  }
+
+  // Mobile-specific overrides
+  body.menu-open {
+    overflow: hidden;
+    touch-action: none; // Prevents scrolling on touch devices
+    position: fixed;
+    width: 100%;
+  }
+
+  .navbar {
+    .navbar-brand {
+      // Improved mobile logo size
+      &.simple::after {
+        width: 100px;
+        height: 40px;
+        background-size: contain;
+      }
+    }
+  }
+
+  .mobile-navbar {
+    display: flex;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar {
+    .navbar-brand {
+      &.expanded::after {
+        width: 100px;
+        height: 34px;
+        padding: 5px 8px;
+      }
+    }
+  }
+
+  .mobile-navbar {
+    .mobile-navbar-content {
+      padding: 0.75rem; // Smaller padding on very small screens
+      
+      .mobile-auth-section {
+        .mobile-profile-item {
+          a, button {
+            padding: 0.8rem 0.75rem; // Adjust padding for small screens
+            
+            i {
+              margin-right: 0.5rem; // Smaller icon margin
+            }
+          }
+        }
       }
     }
   }

@@ -149,7 +149,7 @@ namespace BusInfo.Services.BackgroundServices
             CancellationToken cancellationToken)
         {
             DateTime today = DateTime.UtcNow.Date;
-            return dbContext.BusArrivals.AnyAsync(
+            return dbContext!.BusArrivals.AnyAsync(
                 x => x.Service == service &&
                      x.Bay == bay &&
                      x.ArrivalTime.Date == today,

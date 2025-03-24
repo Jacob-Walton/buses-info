@@ -18,39 +18,10 @@ namespace BusInfo.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.1")
+                .HasAnnotation("ProductVersion", "9.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("BusInfo.Models.AdminSettings", b =>
-                {
-                    b.Property<DateTime>("LastModified")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("ApiKeyExpirationDays")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("ApiRateLimit")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("ArchivedDataRetentionDays")
-                        .HasColumnType("integer");
-
-                    b.Property<bool>("AutomaticMaintenance")
-                        .HasColumnType("boolean");
-
-                    b.Property<int>("MaintenanceWindow")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("ModifiedBy")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("LastModified");
-
-                    b.ToTable("AdminSettings");
-                });
 
             modelBuilder.Entity("BusInfo.Models.ApiKey", b =>
                 {
@@ -63,6 +34,9 @@ namespace BusInfo.Migrations
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
+
+                    b.Property<DateTime>("LastUsed")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -83,11 +57,21 @@ namespace BusInfo.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime?>("DismissedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("DismissedByUser")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("IntendedUse")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Reason")
                         .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("RejectionReason")
                         .HasColumnType("text");
 
                     b.Property<DateTime>("RequestedAt")
@@ -105,6 +89,9 @@ namespace BusInfo.Migrations
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -124,6 +111,9 @@ namespace BusInfo.Migrations
 
                     b.Property<string>("ActiveApiKeyKey")
                         .HasColumnType("character varying(100)");
+
+                    b.Property<int>("AuthProvider")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -150,6 +140,9 @@ namespace BusInfo.Migrations
 
                     b.Property<bool>("EnableEmailNotifications")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("ExternalId")
+                        .HasColumnType("text");
 
                     b.Property<int>("FailedLoginAttempts")
                         .HasColumnType("integer");
@@ -267,8 +260,6 @@ namespace BusInfo.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Service", "ArrivalTime");
-
                     b.ToTable("BusArrivals");
                 });
 
@@ -296,7 +287,7 @@ namespace BusInfo.Migrations
                     b.HasOne("BusInfo.Models.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.SetNull)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("User");

@@ -1,0 +1,27 @@
+root = true
+
+[*.{cs,vb}]
+dotnet_analyzer_diagnostic.severity = warning
+dotnet_analyzer_diagnostic.category-Style.severity = warning
+dotnet_analyzer_diagnostic.category-Performance.severity = warning
+dotnet_analyzer_diagnostic.category-Reliability.severity = warning
+
+# Code Style
+dotnet_style_qualification_for_field = false:warning
+dotnet_style_qualification_for_property = false:warning
+dotnet_style_qualification_for_method = false:warning
+dotnet_style_qualification_for_event = false:warning
+
+# Null-checking preferences
+dotnet_style_coalesce_expression = true:warning
+dotnet_style_null_propagation = true:warning
+dotnet_style_prefer_is_null_check_over_reference_equality_method = true:warning
+
+# IDE Analyzers
+dotnet_diagnostic.IDE0005.severity = warning # Remove unnecessary imports
+dotnet_diagnostic.IDE0058.severity = none    # Remove unnecessary value assignment
+
+# CA Analyzers
+dotnet_diagnostic.CA1062.severity = none     # Validate arguments of public methods
+dotnet_diagnostic.CA2007.severity = none     # Consider calling ConfigureAwait on awaited task
+dotnet_diagnostic.CA1515.severity = none     # Keep previously disabled warnings off

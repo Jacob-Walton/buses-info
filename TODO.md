@@ -2,13 +2,13 @@
 
 ## High Priority
 
-- [x] Reevaluate whether or not to host on heroku. If not, find a new method. (Decided not to)
 - [ ] Implement Razor pages
 - [ ] Implement full API
+- [ ] Remove watcher/dist/** from version control
 
 ## Medium Priority
 
-- None
+- Cleanup the codebase for this branch
 
 ## Low Priority
 
@@ -18,6 +18,9 @@
 ## Completed
 
 - [x] Initial project setup
+- [x] Federated login
+- [x] Updated settings page
+- [x] Reevaluate whether or not to host on heroku. If not, find a new method. (Decided not to)
 
 ## Notes
 

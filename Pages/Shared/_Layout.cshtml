@@ -9,8 +9,11 @@
     <link rel="stylesheet" cdn href="/css/site.css" />
 
     <!-- Defer non-critical CSS -->
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></noscript>
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" as="style"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    </noscript>
 
     @* Disallow scraping *@
     <meta name="robots" content="noindex, nofollow" />
@@ -62,10 +65,10 @@
     <nav class="navbar">
         <div class="container">
             <div class="navbar-brand-container">
-                <a class="navbar-brand simple" asp-page="/Index"></a>
+                <a class="navbar-brand simple" asp-page="/Index" aria-label="Bus Info Home" title="Bus Info Home"></a>
             </div>
 
-            <button id="mobileMenuTrigger" class="mobile-menu-trigger">
+            <button id="mobileMenuTrigger" class="mobile-menu-trigger" aria-label="Toggle navigation menu" aria-expanded="false">
                 <span></span>
                 <span></span>
                 <span></span>
@@ -81,110 +84,114 @@
                         <a class="nav-link @(ViewContext.RouteData.Values["Page"]?.ToString() == "/BusInfo" ? "active" : "")"
                             asp-page="/BusInfo">Bus Information</a>
                     </li>
-                </ul>
 
-                @if (User.Identity?.IsAuthenticated != true)
-                {
-                    <a class="nav-link nav-link__bold" asp-page="/Login">Sign In</a>
-                }
-                else
-                {
-                    <div class="profile-menu">
-                        <button class="profile-trigger" id="profileTrigger">
-                            <i class="fas fa-user"></i>
-                            <i class="fas fa-chevron-down"></i>
-                        </button>
-                        <div class="profile-dropdown" id="profileDropdown">
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <a class="dropdown-item" asp-page="/Admin/Index">
-                                    <i class="fas fa-shield-alt"></i>
-                                    Admin
+                    @if (User.Identity?.IsAuthenticated != true)
+                    {
+                        <a class="nav-link nav-link__bold" asp-page="/Login">Sign In</a>
+                    }
+                    else
+                    {
+                        <div class="profile-menu">
+                            <button class="profile-trigger" id="profileTrigger">
+                                <i class="fas fa-user"></i>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <a class="dropdown-item" asp-page="/Admin/Index">
+                                        <i class="fas fa-shield-alt"></i>
+                                        Admin
+                                    </a>
+                                }
+                                <a class="dropdown-item" asp-page="/Account/Settings">
+                                    <i class="fas fa-cog"></i>
+                                    Settings
                                 </a>
-                            }
-                            <a class="dropdown-item" asp-page="/Account/Settings">
-                                <i class="fas fa-cog"></i>
-                                Settings
-                            </a>
-                            <form method="post" action="/api/accounts/logout">
-                                <button type="submit" class="dropdown-item danger">
-                                    <i class="fas fa-sign-out-alt"></i>
-                                    Sign Out
-                                </button>
-                            </form>
+                                <form method="post" action="/api/accounts/logout">
+                                    <button type="submit" class="dropdown-item danger">
+                                        <i class="fas fa-sign-out-alt"></i>
+                                        Sign Out
+                                    </button>
+                                </form>
+                            </div>
                         </div>
-                    </div>
-                }
+                    }
+                </ul>
             </div>
         </div>
     </nav>
 
-    <div class="mobile-navbar" id="mobileNavbar">
+    <!-- Improved mobile navigation structure -->
+    <div class="mobile-navbar" id="mobileNavbar" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Mobile navigation">
         <div class="mobile-navbar-header">
             <div class="mobile-logo">
-                <a class="simple" asp-page="/Index"></a>
+                <a class="simple" asp-page="/Index" aria-label="Bus Info Home" title="Bus Info Home"></a>
             </div>
-            <button id="mobileMenuClose" class="mobile-menu-trigger active">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
         </div>
         <div class="mobile-navbar-content">
             <ul class="mobile-nav-items">
                 <li class="mobile-nav-item">
-                    <a class="@(ViewContext.RouteData.Values["Page"]?.ToString() == "/Index" ? "active" : "")"
-                        asp-page="/Index">Home</a>
+                    <a class="mobile-nav-link @(ViewContext.RouteData.Values["Page"]?.ToString() == "/Index" ? "active" : "")"
+                        asp-page="/Index">
+                        <i class="fas fa-home"></i>
+                        Home
+                    </a>
                 </li>
                 <li class="mobile-nav-item">
-                    <a class="@(ViewContext.RouteData.Values["Page"]?.ToString() == "/BusInfo" ? "active" : "")"
-                        asp-page="/BusInfo">Bus Information</a>
+                    <a class="mobile-nav-link @(ViewContext.RouteData.Values["Page"]?.ToString() == "/BusInfo" ? "active" : "")"
+                        asp-page="/BusInfo">
+                        <i class="fas fa-bus"></i>
+                        Bus Information
+                    </a>
                 </li>
             </ul>
 
             <div class="mobile-auth-section">
                 @if (User.Identity?.IsAuthenticated != true)
                 {
-                    <div class="mobile-profile-menu">
-                        <ul class="mobile-profile-items">
-                            <li class="mobile-profile-item">
-                                <a class="danger" asp-page="/Login">
-                                    <i class="fas fa-sign-in-alt"></i>
-                                    Sign In
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
+                    <ul class="mobile-profile-items">
+                        <li class="mobile-profile-item">
+                            <a class="highlight" asp-page="/Login">
+                                <i class="fas fa-sign-in-alt"></i>
+                                Sign In
+                            </a>
+                        </li>
+                    </ul>
                 }
                 else
                 {
-                    <div class="mobile-profile-menu">
-                        <ul class="mobile-profile-items">
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <li class="mobile-profile-item">
-                                    <a asp-page="/Admin/Index">
-                                        <i class="fas fa-shield-alt"></i>
-                                        Admin
-                                    </a>
-                                </li>
-                            }
+                    <ul class="mobile-profile-items">
+                        <li class="mobile-profile-item">
+                            <a asp-page="/Account/Profile">
+                                <i class="fas fa-user-circle"></i>
+                                My Profile
+                            </a>
+                        </li>
+                        @if (User.IsInRole("Admin"))
+                        {
                             <li class="mobile-profile-item">
-                                <a asp-page="/Account/Settings">
-                                    <i class="fas fa-cog"></i>
-                                    Settings
+                                <a asp-page="/Admin/Index">
+                                    <i class="fas fa-shield-alt"></i>
+                                    Admin
                                 </a>
                             </li>
-                            <li class="mobile-profile-item">
-                                <form method="post" action="/signout/local">
-                                    <button type="submit" class="danger">
-                                        <i class="fas fa-sign-out-alt"></i>
-                                        Sign Out
-                                    </button>
-                                </form>
-                            </li>
-                        </ul>
-                    </div>
+                        }
+                        <li class="mobile-profile-item">
+                            <a asp-page="/Account/Settings">
+                                <i class="fas fa-cog"></i>
+                                Settings
+                            </a>
+                        </li>
+                        <li class="mobile-profile-item">
+                            <form method="post" action="/api/accounts/logout" style="width: 100%;">
+                                <button type="submit" class="danger">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    Sign Out
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
                 }
             </div>
         </div>

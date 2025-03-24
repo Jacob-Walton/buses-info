@@ -15,6 +15,12 @@ namespace BusInfo.Controllers.Api.V1
     /// <summary>
     /// Bus Information API Controller
     /// </summary>
+    /// <param name="logger">The logger instance used for logging controller operations</param>
+    /// <param name="busInfoService">The service responsible for retrieving bus information</param>
+    /// <remarks>
+    /// This controller handles bus information related requests and requires either Cookie or ApiKey authentication.
+    /// It provides endpoints to retrieve bus information.
+    /// </remarks>
     [ApiController]
     [Route("api/v1/businfo")]
     [Authorize(AuthenticationSchemes = "Cookies,ApiKey")]

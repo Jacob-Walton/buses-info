@@ -1,189 +1,133 @@
-.settings-wrapper {
-  padding-top: calc(70px + ($spacing-unit * 2));
+.settings-page {
   min-height: 100vh;
   background-color: $surface;
+  padding-bottom: 70px;
 }
 
-.settings-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 $spacing-unit * 2;
-  display: grid;
-  grid-template-columns: 280px minmax(0, 1fr); // Prevent content overflow
-  gap: $spacing-unit * 2;
+.settings-header {
+  background-color: $background;
+  border-bottom: 1px solid $border;
+  padding: $spacing-unit * 2;
+  margin-bottom: $spacing-unit * 2;
 
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    padding: 0 $spacing-unit;
-    gap: $spacing-unit * 1.5;
+  h1 {
+    max-width: 1200px;
+    margin: 0 auto;
+    font-size: 2rem;
+    color: $secondary;
+    font-weight: 600;
   }
 }
 
-.settings-nav {
-  position: sticky;
-  top: calc(70px + $spacing-unit);
-  height: fit-content;
+.settings-navigation {
+  max-width: 1200px;
+  margin: 0 auto;
+  margin-bottom: $spacing-unit * 2;
+  padding: 0 $spacing-unit * 2;
 
-  ul {
+  .current-tab {
+    display: none;
+  }
+
+  .nav-tabs {
+    display: flex;
+    gap: $spacing-unit;
     list-style: none;
     padding: 0;
     margin: 0;
-    background-color: $background;
-    border: 1px solid $border;
-    @include box-shadow(0 2px 4px rgba($shadow-color, 0.08));
-    @include alternating-border-radius($regular-border-radius);
-    overflow: hidden;
+    border-bottom: 1px solid $border;
+
+    .nav-item {
+      margin-bottom: -1px;
+
+      .nav-link {
+        display: flex;
+        align-items: center;
+        gap: $spacing-unit;
+        padding: $spacing-unit $spacing-unit * 1.5;
+        color: $dark-grey;
+        text-decoration: none;
+        font-weight: 500;
+        border-bottom: 2px solid transparent;
+        @include transition(all, 0.2s);
+
+        i {
+          font-size: 1rem;
+        }
+
+        &:hover {
+          color: $primary;
+        }
+      }
+
+      &.active .nav-link {
+        color: $primary;
+        border-bottom-color: $primary;
+        position: relative;
+        z-index: 2;
+      }
+    }
   }
 
-  li {
-    &:not(:last-child) {
-      border-bottom: 1px solid $border;
+  &.open {
+    .current-tab i {
+      transform: rotate(180deg);
     }
 
-    a {
-      display: flex;
-      align-items: center;
-      padding: $spacing-unit $spacing-unit * 1.5;
-      color: $text;
-      text-decoration: none;
-      font-weight: 500;
-      @include transition(all, 0.2s);
-      position: relative;
-      overflow: hidden;
-
-      &::before {
-        content: "";
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 3px;
-        background-color: $primary;
-        transform: scaleY(0);
-        @include transition(transform, 0.2s);
-      }
-
-      i {
-        width: 20px;
-        margin-right: $spacing-unit;
-        color: $dark-grey;
-        font-size: 1rem;
-        @include transition(color, 0.2s);
-      }
-
-      span {
-        font-size: 0.9375rem;
-        white-space: nowrap;
-      }
-
-      &:hover {
-        background-color: $primary-hover;
-        color: $primary;
-
-        i {
-          color: $primary;
-        }
-      }
-
-      &.active {
-        background-color: $primary-hover;
-        color: $primary;
-        font-weight: 600;
-
-        &::before {
-          transform: scaleY(1);
-        }
-
-        i {
-          color: $primary;
-        }
-      }
+    .nav-tabs {
+      position: absolute;
+      top: calc(100% - 1px);
+      left: $spacing-unit;
+      right: $spacing-unit;
+      background: $background;
+      border: 1px solid $border;
+      box-shadow: 0 4px 12px rgba($shadow-color, 0.1);
+      z-index: 100;
+      display: block;
+      @include alternating-border-radius($button-border-radius);
     }
   }
 }
 
 .settings-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 $spacing-unit * 2;
+}
+
+.settings-panel {
   background-color: $background;
   border: 1px solid $border;
-  @include box-shadow(0 2px 4px rgba($shadow-color, 0.08));
+  height: 100%;
   @include alternating-border-radius($regular-border-radius);
-  padding: $spacing-unit * 2;
-  min-height: 600px; // Ensure consistent height
-}
+  @include box-shadow(0 2px 4px rgba($shadow-color, 0.08));
 
-.settings-section {
-  h2 {
-    color: $secondary;
-    margin-bottom: $spacing-unit * 2;
-    font-size: 1.375rem;
-    font-weight: 600;
-  }
-}
+  .panel-header {
+    padding: $spacing-unit * 2;
+    border-bottom: 1px solid $border;
 
-.settings-row {
-  margin-bottom: $spacing-unit * 2;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-}
-
-.settings-field {
-  input {
-    font-family: inherit;
-    border-radius: 0;
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 1px solid $border;
-    background-color: $background;
-    color: $text;
-    font-size: 0.9375rem;
-    @include alternating-border-radius($button-border-radius);
-    @include transition(all, 0.2s);
-
-    &:hover:not([readonly]) {
-      border-color: darken($border, 10%);
-    }
-
-    &:focus {
-      outline: none;
-      border-color: $primary;
-      @include box-shadow(0 0 0 3px rgba($primary, 0.1));
-    }
-
-    &[readonly] {
-      background-color: $light-grey;
-      color: $dark-grey;
-      cursor: not-allowed;
+    h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: $secondary;
+      font-weight: 600;
     }
   }
 
-  label {
-    display: block;
-    margin-bottom: calc($spacing-unit / 2);
-    font-weight: 500;
-    font-size: 0.875rem;
-    color: $dark-grey;
-  }
+  .panel-body {
+    padding: $spacing-unit * 2;
 
-  &.full-width {
-    width: 100%;
-  }
-
-  .form-group {
     textarea {
       width: 100%;
-      padding: 0.75rem 1rem;
+      min-height: 100px;
+      padding: $spacing-unit;
       border: 1px solid $border;
       background-color: $background;
       color: $text;
       font-size: 0.9375rem;
-      max-width: 100%;
-      min-height: 75px;
-      min-width: 100%;
-      font-family: "Ubuntu", sans-serif;
+      resize: vertical;
       @include alternating-border-radius($button-border-radius);
-      transition: border-color 0.2s, box-shadow 0.2s;
+      @include transition(all, 0.2s);
 
       &:hover:not([readonly]) {
         border-color: darken($border, 10%);
@@ -202,74 +146,155 @@
       }
     }
   }
+
+  &.loading {
+    position: relative;
+    min-height: 200px;
+    
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba($background, 0.7);
+      backdrop-filter: blur(2px);
+    }
+  }
 }
 
-.api-key-group {
-  display: flex;
-  gap: $spacing-unit;
-  align-items: center;
+.settings-form {
+  .form-group {
+    margin-bottom: $spacing-unit * 2;
 
-  input {
-    flex: 1;
-    font-family: "Fira Code", monospace;
-    font-size: 0.875rem;
-    letter-spacing: 0.5px;
+    label:not(.switch-label):not(.option) {
+      display: block;
+      margin-bottom: $spacing-unit;
+      font-weight: 500;
+      color: $dark-grey;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: $spacing-unit;
+      border: 1px solid $border;
+      background-color: $background;
+      color: $text;
+      font-size: 0.9375rem;
+      @include alternating-border-radius($button-border-radius);
+      @include transition(all, 0.2s);
+
+      &:hover:not([readonly]) {
+        border-color: darken($border, 10%);
+      }
+
+      &:focus {
+        outline: none;
+        border-color: $primary;
+        @include box-shadow(0 0 0 3px rgba($primary, 0.1));
+      }
+
+      &[readonly] {
+        background-color: $light-grey;
+        color: $dark-grey;
+        cursor: not-allowed;
+      }
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: $spacing-unit;
+      border: 1px solid $border;
+      background-color: $background;
+      color: $text;
+      resize: vertical;
+      @include alternating-border-radius($button-border-radius);
+      @include transition(all, 0.2s);
+
+      &:focus {
+        outline: none;
+        border-color: $primary;
+        @include box-shadow(0 0 0 3px rgba($primary, 0.1));
+      }
+    }
+  }
+}
+
+.settings-save-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: $background;
+  border-top: 1px solid $border;
+  padding: $spacing-unit;
+  transform: translateY(100%);
+  @include transition(transform, 0.3s);
+  @include box-shadow(0 -2px 4px rgba($shadow-color, 0.08));
+  z-index: 1000;
+
+  &.visible {
+    transform: translateY(0);
   }
 
-  .btn-icon {
-    @include reset-button;
-    width: 42px;
-    height: 42px;
+  .save-bar-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: $spacing-unit * 2;
+  }
+
+  .save-message {
     display: flex;
     align-items: center;
-    justify-content: center;
-    background-color: $light-grey;
+    gap: $spacing-unit;
     color: $dark-grey;
-    @include alternating-border-radius($button-border-radius);
-    @include transition(all, 0.2s);
-
-    &:hover {
-      background-color: $primary-hover;
-      color: $primary;
-      transform: translateY(-1px);
-    }
-
-    &:active {
-      transform: translateY(0);
-    }
 
     i {
-      font-size: 1rem;
-    }
-
-    &:first-of-type {
-      margin-left: -$spacing-unit * 3;
+      color: $status-not-arrived;
+      animation: pulse 2s infinite;
     }
   }
 }
 
-.field-hint {
-  margin-top: calc($spacing-unit / 2);
-  color: $dark-grey;
-  font-size: 0.8125rem;
-  line-height: 1.4;
+.api-key-display {
+  .api-key-field {
+    display: flex;
+    gap: $spacing-unit;
+    margin-top: $spacing-unit;
+
+    input {
+      flex: 1;
+      font-family: monospace;
+    }
+
+    button {
+      @include reset-button;
+      width: 42px;
+      height: 42px;
+      background-color: $light-grey;
+      color: $dark-grey;
+      @include alternating-border-radius($button-border-radius);
+      @include transition(all, 0.2s);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        background-color: $primary-hover;
+        color: $primary;
+      }
+    }
+  }
 }
 
-.field-warning {
-  margin-top: calc($spacing-unit / 2);
-  padding: calc($spacing-unit / 2) $spacing-unit;
-  background-color: rgba($status-not-arrived, 0.1);
-  border-left: 3px solid $status-not-arrived;
-  color: darken($status-not-arrived, 10%);
-  font-size: 0.8125rem;
-  display: flex;
-  align-items: center;
-  gap: calc($spacing-unit / 2);
-  @include alternating-border-radius(calc($button-border-radius / 2));
-
-  i {
-    font-size: 0.875rem;
-  }
+@keyframes pulse {
+  0% { opacity: 0.4; }
+  50% { opacity: 1; }
+  100% { opacity: 0.4; }
 }
 
 .toggle-switch {
@@ -322,7 +347,7 @@
       border: 2px solid $border;
       @include transition;
       @include alternating-border-radius(calc($button-border-radius / 2));
-      box-sizing: border-box; // Ensure border is included in size
+      box-sizing: border-box;
     }
 
     &:hover {
@@ -350,303 +375,490 @@
   }
 }
 
-.settings-save-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background-color: $background;
-  border-top: 1px solid $border;
-  padding: $spacing-unit;
-  transform: translateY(100%);
-  @include transition(all, 0.3s);
-  @include box-shadow(0 -4px 6px rgba($shadow-color, 0.1));
-  z-index: 1000;
-
-  &.visible {
-    transform: translateY(0);
+@media (max-width: 768px) {
+  .settings-layout {
+    padding-top: 56px;
   }
 
-  .save-bar-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 $spacing-unit * 2;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: $spacing-unit * 2;
+  .settings-header {
+    margin-top: $spacing-unit;
 
-    @media (max-width: 768px) {
+    h1 {
+      font-size: 1.5rem;
       padding: 0 $spacing-unit;
     }
   }
 
-  .save-message {
-    display: flex;
-    align-items: center;
-    gap: calc($spacing-unit / 2);
-    color: $status-not-arrived;
-    font-size: 0.875rem;
-    font-weight: 500;
-
-    i {
-      font-size: 0.75rem;
-      animation: pulse 2s infinite;
-    }
-  }
-}
-
-.alert {
-  margin-bottom: $spacing-unit * 2;
-  padding: $spacing-unit $spacing-unit * 1.5;
-  @include alternating-border-radius($button-border-radius);
-  display: flex;
-  align-items: center;
-  gap: $spacing-unit;
-  font-size: 0.9375rem;
-  animation: slideIn 0.3s ease-out;
-
-  &.alert-success {
-    background-color: rgba($status-arrived, 0.1);
-    color: $status-arrived;
-    border: 1px solid rgba($status-arrived, 0.2);
-  }
-
-  i {
-    font-size: 1.125rem;
-  }
-}
-
-.api-status-banner {
-  margin-bottom: $spacing-unit * 2;
-  padding: $spacing-unit * 1.5;
-  display: flex;
-  gap: $spacing-unit * 1.5;
-  align-items: flex-start;
-  @include alternating-border-radius($regular-border-radius);
-
-  i {
-    font-size: 1.5rem;
-    margin-top: 0.2rem;
-  }
-
-  .status-content {
-    flex: 1;
-
-    h4 {
-      margin: 0 0 0.5rem;
-      font-size: 1.1rem;
-      font-weight: 600;
-    }
-
-    p {
-      margin: 0;
-      color: currentColor;
-      opacity: 0.9;
-    }
-
-    .review-notes {
-      margin-top: $spacing-unit;
-      padding: $spacing-unit;
-      background-color: $surface-alt;
-      border: 1px solid $border;
-      @include alternating-border-radius($regular-border-radius);
-
-      h5 {
-        margin: 0 0 $spacing-unit;
-        color: $secondary;
-      }
-
-      textarea {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        border: 1px solid $border;
-        background-color: $background;
-        color: $text;
-        font-size: 0.9375rem;
-        min-height: 75px;
-        font-family: "Ubuntu", sans-serif;
-        @include alternating-border-radius($button-border-radius);
-        transition: border-color 0.2s, box-shadow 0.2s;
-
-        &:hover:not([readonly]) {
-          border-color: darken($border, 10%);
-        }
-
-        &:focus {
-          outline: none;
-          border-color: $primary;
-          @include box-shadow(0 0 0 3px rgba($primary, 0.1));
-        }
-
-        &[readonly] {
-          background-color: transparent;
-          color: $dark-grey;
-          cursor: default;
-          resize: none;
-          border: none;
-          padding: 0;
-          height: auto;
-          min-height: 0;
-          &::-webkit-input-placeholder {
-            color: transparent;
-          }
-          &::-moz-placeholder {
-            color: transparent;
-          }
-        }
-
-        &[readonly]:hover {
-          border-color: transparent;
-        }
-
-        &[readonly]:focus {
-          border-color: transparent;
-          @include box-shadow(none);
-        }
-      }
-    }
-  }
-
-  &.pending {
-    background-color: rgba($status-not-arrived, 0.1);
-    border: 1px solid rgba($status-not-arrived, 0.2);
-    border-left: 5px solid $status-not-arrived;
-    color: darken($status-not-arrived, 10%);
-  }
-
-  &.approved {
-    background-color: rgba($status-arrived, 0.1);
-    border: 1px solid rgba($status-arrived, 0.2);
-    border-left: 5px solid $status-arrived;
-    color: $status-arrived;
-  }
-
-  &.rejected {
-    background-color: rgba($accent, 0.1);
-    border: 1px solid rgba($accent, 0.2);
-    border-left: 5px solid $accent;
-    color: $accent;
-
-    .btn-secondary {
-      margin-top: $spacing-unit;
-    }
-  }
-
-  // Add position relative to handle dismiss button
-  position: relative;
-
-  // Add transition properties
-  transition: all 0.3s ease;
-
-  .banner-dismiss {
-    @include reset-button;
-    position: absolute;
-    top: $spacing-unit;
-    right: $spacing-unit;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    opacity: 0.6;
-    transition: all 0.2s ease;
-
-    &:hover {
-      opacity: 1;
-      background-color: rgba(0, 0, 0, 0.1);
-    }
-
-    i {
-      font-size: 14px;
-    }
-  }
-
-  // Adjust content padding for dismiss button
-  .status-content {
-    padding-right: $spacing-unit * 2;
-  }
-}
-
-.password-form {
-  background-color: $surface;
-  padding: $spacing-unit * 1.5;
-  border: 1px solid $border;
-  @include alternating-border-radius($button-border-radius);
-
-  .form-group {
+  .settings-navigation {
+    padding: 0 $spacing-unit;
     margin-bottom: $spacing-unit;
+    position: relative;
 
-    &:last-child {
-      margin-bottom: $spacing-unit * 1.5;
-    }
-
-    label {
-      display: block;
-      margin-bottom: calc($spacing-unit / 2);
-      font-weight: 500;
-      font-size: 0.875rem;
-      color: $dark-grey;
-    }
-
-    input[type="password"] {
-      width: 100%;
-      padding: 0.75rem 1rem;
+    .current-tab {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: $spacing-unit $spacing-unit * 1.5;
+      background: $background;
       border: 1px solid $border;
-      background-color: $background;
-      color: $text;
-      font-size: 0.9375rem;
       @include alternating-border-radius($button-border-radius);
+      cursor: pointer;
       @include transition(all, 0.2s);
+      margin-bottom: $spacing-unit;
 
-      &:hover:not([readonly]) {
+      span {
+        font-weight: 500;
+        color: $text;
+        margin-right: $spacing-unit * 2;
+      }
+
+      i {
+        color: $dark-grey;
+        @include transition(transform, 0.2s);
+        font-size: 0.875rem;
+      }
+
+      &:hover {
         border-color: darken($border, 10%);
       }
 
-      &:focus {
-        outline: none;
+      &.active {
         border-color: $primary;
-        @include box-shadow(0 0 0 3px rgba($primary, 0.1));
+        
+        i {
+          color: $primary;
+        }
+      }
+    }
+
+    .nav-tabs {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: $spacing-unit;
+      right: $spacing-unit;
+      background: $background;
+      border: 1px solid $border;
+      @include alternating-border-radius($button-border-radius);
+      @include box-shadow(0 4px 12px rgba($shadow-color, 0.1));
+      z-index: 100;
+
+      .nav-item {
+        margin: 0;
+        border-bottom: 1px solid $border;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .nav-link {
+          padding: $spacing-unit $spacing-unit * 1.5;
+          border: none;
+          display: flex;
+          align-items: center;
+          gap: $spacing-unit;
+
+          &:hover {
+            background-color: $light-grey;
+          }
+
+          i {
+            font-size: 1rem;
+            color: $dark-grey;
+            @include transition(color, 0.2s);
+          }
+        }
+
+        &.active .nav-link {
+          border: none;
+          color: $primary;
+          background-color: rgba($primary, 0.1);
+
+          i {
+            color: $primary;
+          }
+        }
+      }
+    }
+
+    &.open {
+      .current-tab i {
+        transform: rotate(180deg);
+      }
+
+      .nav-tabs {
+        display: block;
+        margin-top: $spacing-unit;
+        @include box-shadow(0 6px 16px rgba($shadow-color, 0.15));
       }
     }
   }
 
-  button[type="submit"] {
-    width: 100%;
+  .settings-content {
+    padding: 0 $spacing-unit;
+  }
+
+  .settings-panel {
+    .panel-header {
+      padding: $spacing-unit;
+
+      h2 {
+        font-size: 1.25rem;
+      }
+    }
+
+    .panel-body {
+      padding: $spacing-unit;
+    }
+  }
+
+  .settings-save-bar {
+    .save-bar-content {
+      padding: 0 $spacing-unit;
+      flex-direction: column;
+      gap: $spacing-unit;
+
+      .save-message {
+        order: 2;
+        justify-content: center;
+      }
+
+      .btn-primary {
+        order: 1;
+        width: 100%;
+      }
+    }
+  }
+
+  .settings-form {
+    .form-group {
+      margin-bottom: $spacing-unit;
+    }
+  }
+
+  .custom-dropdown {
+    .selected-options {
+      padding: $spacing-unit;
+    }
+
+    .dropdown-options {
+      max-height: 60vh;
+    }
+
+    .search-box {
+      position: sticky;
+      top: 0;
+      background: $background;
+      padding: $spacing-unit;
+      border-bottom: 1px solid $border;
+      z-index: 1;
+
+      input {
+        width: 100%;
+      }
+    }
+  }
+
+  .api-key-display {
+    .api-key-field {
+      flex-direction: column;
+      gap: $spacing-unit;
+
+      input {
+        width: 100%;
+      }
+
+      button {
+        width: 100%;
+        height: 42px;
+      }
+    }
+  }
+
+  .api-request-form {
+    .form-actions {
+      flex-direction: column;
+      gap: $spacing-unit;
+
+      button {
+        width: 100%;
+      }
+    }
+  }
+
+  .toggle-switch {
+    width: 42px;
+    height: 24px;
+
+    .slider:before {
+      height: 16px;
+      width: 16px;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(18px);
+    }
+  }
+
+  .switch-label {
+    padding: $spacing-unit;
+  }
+}
+
+@media (max-width: 480px) {
+  .settings-header h1 {
+    font-size: 1.25rem;
+  }
+
+  .settings-panel {
+    .panel-header h2 {
+      font-size: 1.125rem;
+    }
+  }
+
+  .settings-form {
+    label {
+      font-size: 0.875rem;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    textarea {
+      font-size: 1rem;
+      padding: $spacing-unit;
+    }
+  }
+}
+
+.api-request-rejected {
+  background-color: rgba($status-not-arrived, 0.05);
+  border: 1px solid rgba($status-not-arrived, 0.3);
+  border-radius: $button-border-radius;
+  padding: $spacing-unit * 1.5;
+  margin-bottom: $spacing-unit * 2;
+
+  .rejection-header {
+    display: flex;
+    align-items: center;
+    gap: $spacing-unit;
+    margin-bottom: $spacing-unit;
+
+    i {
+      color: $status-not-arrived;
+      font-size: 1.5rem;
+    }
+
+    h3 {
+      margin: 0;
+      color: $status-not-arrived;
+      font-weight: 600;
+      font-size: 1.125rem;
+    }
+  }
+
+  .rejection-reason {
+    margin-bottom: $spacing-unit;
+    
+    strong {
+      display: block;
+      margin-bottom: $spacing-unit / 2;
+    }
+    
+    p {
+      margin: 0;
+      color: $text;
+    }
+  }
+
+  .rejection-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $spacing-unit;
     margin-top: $spacing-unit;
   }
 }
 
-.settings-section {
-  h3 {
-    color: $secondary;
-    font-size: 1.125rem;
-    font-weight: 600;
-    margin-bottom: $spacing-unit;
+.api-request-pending {
+  background-color: rgba($primary, 0.05);
+  border: 1px solid rgba($primary, 0.3);
+  border-radius: $button-border-radius;
+  padding: $spacing-unit * 1.5;
+  margin-bottom: $spacing-unit * 2;
+  
+  p {
+    margin: 0;
+    
+    &:first-child {
+      font-weight: 600;
+      margin-bottom: $spacing-unit / 2;
+    }
+  }
+}
+
+.api-request-intro,
+.api-request-form {
+  margin-top: $spacing-unit * 2;
+}
+
+.api-request-form {
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $spacing-unit;
+    margin-top: $spacing-unit * 1.5;
   }
 }
 
 @media (max-width: 768px) {
-  .settings-container {
-    padding: 0 $spacing-unit;
+  .api-request-rejected,
+  .api-request-pending {
+    padding: $spacing-unit;
   }
-
-  .settings-content {
-    padding: $spacing-unit * 1.5;
-  }
-
-  .settings-section h2 {
-    font-size: 1.25rem;
-  }
-
-  .save-bar-content {
-    flex-direction: column;
-    gap: $spacing-unit;
-    align-items: stretch;
-
-    .btn-primary {
-      width: 100%;
+  
+  .api-request-form {
+    .form-actions {
+      flex-direction: column;
+      
+      button {
+        width: 100%;
+      }
     }
+  }
+}
+
+.api-key-display {
+  margin-bottom: $spacing-unit * 2;
+  
+  label {
+    display: block;
+    margin-bottom: $spacing-unit;
+    font-weight: 500;
+    color: $dark-grey;
+  }
+}
+
+.api-documentation {
+  margin-top: $spacing-unit * 3;
+  
+  h3 {
+    font-size: 1.125rem;
+    margin-bottom: $spacing-unit;
+    color: $secondary;
+  }
+  
+  p {
+    color: $text;
+    margin-bottom: $spacing-unit;
+  }
+  
+  .api-endpoints {
+    margin-top: $spacing-unit;
+    
+    .endpoint {
+      background-color: $light-grey;
+      border-radius: $button-border-radius;
+      padding: $spacing-unit;
+      margin-bottom: $spacing-unit;
+      font-family: monospace;
+      
+      .method {
+        display: inline-block;
+        padding: 2px 6px;
+        background: $primary;
+        color: white;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        margin-right: $spacing-unit / 2;
+      }
+    }
+  }
+}
+
+.api-request-rejected {
+  background-color: rgba($status-not-arrived, 0.05);
+  border: 1px solid rgba($status-not-arrived, 0.2);
+  border-radius: $button-border-radius;
+  padding: $spacing-unit * 1.5;
+  margin-bottom: $spacing-unit * 2;
+
+  .rejection-header {
+    display: flex;
+    align-items: center;
+    gap: $spacing-unit;
+    margin-bottom: $spacing-unit;
+
+    i {
+      color: $status-not-arrived;
+      font-size: 1.25rem;
+    }
+
+    h3 {
+      margin: 0;
+      color: darken($status-not-arrived, 10%);
+      font-weight: 600;
+      font-size: 1.125rem;
+    }
+  }
+
+  .rejection-reason {
+    margin-bottom: $spacing-unit;
+    
+    strong {
+      display: block;
+      margin-bottom: $spacing-unit / 2;
+      color: $dark-grey;
+    }
+    
+    p {
+      margin: 0;
+      color: $text;
+    }
+  }
+
+  .rejection-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $spacing-unit;
+    margin-top: $spacing-unit * 1.5;
+  }
+}
+
+.api-request-pending {
+  background-color: rgba($primary, 0.05);
+  border: 1px solid rgba($primary, 0.2);
+  border-radius: $button-border-radius;
+  padding: $spacing-unit * 1.5;
+  margin-bottom: $spacing-unit * 2;
+  
+  p {
+    margin: 0;
+    
+    &:first-child {
+      font-weight: 600;
+      color: darken($primary, 10%);
+      margin-bottom: $spacing-unit / 2;
+    }
+  }
+}
+
+.api-request-intro {
+  margin-top: $spacing-unit;
+  margin-bottom: $spacing-unit * 2;
+  
+  p {
+    margin-bottom: $spacing-unit * 1.5;
+    line-height: 1.5;
+  }
+}
+
+.api-request-form {
+  margin-top: $spacing-unit * 2;
+  
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $spacing-unit;
+    margin-top: $spacing-unit * 1.5;
   }
 }

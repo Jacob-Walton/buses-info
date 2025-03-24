@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using BusInfo.Models;
 using BusInfo.Services;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -32,10 +34,21 @@ namespace BusInfo.Pages
         [TempData]
         public bool IsSubmitting { get; set; }
 
-        public IActionResult OnGet(Uri? returnUrl = null)
+        public IActionResult OnGet(Uri? returnUrl = null, string? error = null, string? message = null)
         {
             if (User.Identity?.IsAuthenticated == true)
                 return Redirect("/");
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                ModelState.AddModelError(string.Empty, message ?? "Authentication failed.");
+            }
+
+            if (HttpContext.Session.Keys.Contains("LoginErrorMessage"))
+            {
+                ModelState.AddModelError(string.Empty, HttpContext.Session.GetString("LoginErrorMessage")!);
+                HttpContext.Session.Remove("LoginErrorMessage");
+            }
 
             if (returnUrl != null && Url.IsLocalUrl(returnUrl.ToString()))
                 ReturnUrl = returnUrl;

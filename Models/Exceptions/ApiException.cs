@@ -6,7 +6,7 @@ namespace BusInfo.Exceptions
     public sealed class ApiException : Exception
     {
         public HttpStatusCode StatusCode { get; }
-        public ApiException() : base()
+        public ApiException()
         {
         }
 

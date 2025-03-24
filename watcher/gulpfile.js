@@ -19,279 +19,269 @@ const { nodeResolve } = require("@rollup/plugin-node-resolve");
 const source = require("vinyl-source-stream");
 const buffer = require("vinyl-buffer");
 const { rimraf } = require('rimraf');
-const { CloudFront } = require("@aws-sdk/client-cloudfront");
+const path = require('path');
+const commonjs = require('@rollup/plugin-commonjs');
 
-/**
- * Environment configuration flag
- * @type {boolean}
- */
-// Production mode detection
-const isProd = process.env.NODE_ENV === "production";
-
-/**
- * Build configuration object
- * @type {Object}
- * @property {string[]} entryPoints - JavaScript entry point files
- * @property {string} modulesDir - Directory containing JavaScript modules
- * @property {string} outputDir - Output directory for processed files
- */
-// Build paths and entry points configuration
-const config = {
-	entryPoints: ["js/site.js", "js/businfo.js", "js/settings.js"],
-	scssEntryPoints: ["styles/site.scss"],
-	modulesDir: "js/modules",
-	outputDir: "dist",
-	devOutputDirs: {
-		js: "../wwwroot/js",
-		css: "../wwwroot/css"
-	},
-	s3: {
-		bucket: process.env.BUCKET, // e.g. "my-bucket-name"
-		region: process.env.REGION // e.g. "uk-west-1"
-	},
-	cloudfront: {
-		distributionId: 'EPH6L1KTA2E87'
-	}
-};
-
-const s3 = require("gulp-s3-upload")({
-	accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-	secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-});
-
-/**
- * Uploads files to an S3 bucket
- */
-function uploadToS3(cb) {
-    const jsUpload = src(`${config.outputDir}/js/**/*.js`, { base: config.outputDir })
-        .pipe(s3({
-            Bucket: config.s3.bucket,
-            ACL: "public-read",
-            keyTransform: function(relative_filename) {
-                return relative_filename;
-            }
-        }));
-
-    const cssUpload = src(`${config.outputDir}/css/**/*.css`, { base: config.outputDir })
-        .pipe(s3({
-            Bucket: config.s3.bucket,
-            ACL: "public-read",
-            keyTransform: function(relative_filename) {
-                return relative_filename;
-            }
-        }));
-
-    return merge(jsUpload, cssUpload)
-        .on('error', function(err) {
-            console.error('Upload error:', err);
-            cb(err);
-        })
-        .on('end', function() {
-            console.log('Upload complete');
-            cb();
-        });
-}
-
-/**
- * Invalidates CloudFront cache
- */
-function invalidateCache(cb) {
-    const cloudfront = new CloudFront({
-        region: config.s3.region,
-        credentials: {
-            accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-        }
-    });
-
-    const params = {
-        DistributionId: config.cloudfront.distributionId,
-        InvalidationBatch: {
-            CallerReference: Date.now().toString(),
-            Paths: {
-                Quantity: 2,
-                Items: ['/js/*', '/css/*']
-            }
-        }
-    };
-
-    cloudfront.createInvalidation(params)
-        .then(() => {
-            console.log('CloudFront cache invalidation initiated');
-            cb();
-        })
-        .catch(err => {
-            console.error('CloudFront invalidation error:', err);
-            cb(err);
-        });
-}
+// Import local utilities
+const config = require('./config/build-config');
+const { createDebugStream, createBufferingStream } = require('./utils/stream-utils');
+const { ensureDirectoryExists, verifyEntryPoints, printValidationSummary } = require('./utils/file-utils');
+const { uploadToS3, invalidateCache } = require('./utils/deploy-utils');
 
 /**
  * Processes SCSS files into optimized CSS
- * - Compiles SCSS to CSS
- * - Adds vendor prefixes
- * - Minifies output
- * - Handles sourcemaps based on environment
- * @returns {NodeJS.ReadWriteStream} Gulp stream
+ * @param {Function} cb - Callback function
  */
-function buildStyles() {
-    const tasks = config.scssEntryPoints.map(entry => {
-        // Initialize stream
-        let stream = src(`src/${entry}`, { sourcemaps: !isProd })
-            // Error handling to prevent watch task from breaking
-            .pipe(
-                plumber({
+function buildStyles(cb) {
+    try {
+        // Verify files exist
+        const validation = verifyEntryPoints(false);
+        
+        if (validation.results.scss.missing.length === config.entryPoints.scss.length) {
+            console.error('No valid SCSS files found');
+            return cb();
+        }
+        
+        const tasks = [];
+        let completedTasks = 0;
+        const validEntries = config.entryPoints.scss.filter(
+            entry => !validation.results.scss.missing.includes(entry)
+        );
+        const totalTasks = validEntries.length;
+
+        for (const entry of validEntries) {
+            // Extract filename and directory structure
+            const pathParts = entry.split("/");
+            const filename = pathParts.pop();
+            const subdirs = pathParts.slice(1).join("/");
+
+            // Determine output path
+            const outputPath = config.isProd 
+                ? path.join(config.outputDir, 'css', subdirs)
+                : path.join(config.devOutputDirs.css, subdirs);
+
+            ensureDirectoryExists(outputPath);
+            
+            console.log(`Processing SCSS: ${entry} to ${outputPath}`);
+
+            // Create stream with proper error handling and buffering
+            const stream = src(config.getSourcePath(entry), { sourcemaps: !config.isProd })
+                .pipe(createDebugStream(`SCSS-${filename}`))
+                .pipe(plumber({
                     errorHandler: function (err) {
-                        console.log(err);
+                        console.error(`SCSS Error (${entry}):`, err);
                         this.emit("end");
                     },
-                }),
-            )
-            // Process SCSS
-            .pipe(
-                sass({
-                    outputStyle: "compressed",
-                    includePaths: ["node_modules", "src/styles"],
-                }).on("error", sass.logError),
-            )
-            // Apply vendor prefixes via autoprefixer
-            .pipe(postcss([autoprefixer()]));
-
-        // Strip sourcemaps in production mode
-        if (isProd) {
-            stream = stream.pipe(removeSourcemaps());
-            return stream.pipe(dest(config.outputDir + "/css", { sourcemaps: false }));
+                }))
+                .pipe(createBufferingStream())
+                .pipe(
+                    sass({
+                        outputStyle: "compressed",
+                        includePaths: ["node_modules", config.getSourcePath("styles")],
+                    }).on("error", sass.logError),
+                )
+                .pipe(postcss([autoprefixer()]))
+                .pipe(config.isProd ? removeSourcemaps() : buffer())
+                .pipe(createDebugStream(`SCSS-${filename}-output`))
+                .pipe(dest(outputPath, { sourcemaps: !config.isProd ? "." : false }))
+                .on('end', () => {
+                    completedTasks++;
+                    if (completedTasks === totalTasks) {
+                        console.log('All SCSS tasks completed');
+                        cb();
+                    }
+                });
+            
+            tasks.push(stream);
         }
 
-        // Output to destination
-        return stream.pipe(dest(config.devOutputDirs.css, { sourcemaps: "." }));
-    });
+        // If no tasks, just return
+        if (tasks.length === 0) {
+            console.log('No SCSS files to process');
+            return cb();
+        }
 
-    return merge(...tasks);
+        // Process streams sequentially to avoid write-after-end errors
+        return tasks.reduce((promise, stream) => {
+            return promise.then(() => new Promise(resolve => {
+                stream.on('end', resolve);
+            }));
+        }, Promise.resolve());
+    } catch (err) {
+        console.error('buildStyles error:', err);
+        cb(err);
+    }
 }
 
 /**
  * Bundles and optimizes JavaScript files
- * - Bundles modules using Rollup
- * - Minifies code in production
- * - Applies obfuscation in production
- * - Handles sourcemaps based on environment
- * @returns {Promise<void[]>} Promise that resolves when all files are processed
+ * @returns {Promise<void>} Promise that resolves when all files are processed
  */
 async function minifyJs() {
-    const tasks = config.entryPoints.map(async (entry) => {
-        // Bundle using Rollup
-        const bundle = await rollup.rollup({
-            input: entry,
-            plugins: [nodeResolve()],
-        });
+    try {
+        // Verify files exist
+        const validation = verifyEntryPoints(false);
+        
+        if (validation.results.js.missing.length === config.entryPoints.js.length) {
+            console.error('No valid JavaScript files found');
+            return;
+        }
+        
+        const validEntries = config.entryPoints.js.filter(
+            entry => !validation.results.js.missing.includes(entry)
+        );
+        
+        const results = [];
 
-        // Extract filename from entry path
-        const filename = entry.split("/").pop();
-        const outputPath = isProd 
-            ? `${config.outputDir}/js/${filename}`
-            : `${config.devOutputDirs.js}/${filename}`;
+        for (const entry of validEntries) {
+            try {
+                console.log(`Loading JS entry: ${entry}`);
+                
+                const bundle = await rollup.rollup({
+                    input: config.getSourcePath(entry),
+                    plugins: [
+                        nodeResolve(), 
+                        commonjs()
+                    ],
+                    onwarn: (warning, warn) => {
+                        console.log(`Rollup warning for ${entry}:`, warning.message);
+                    }
+                });
 
-        // Generate bundle in IIFE format
-        await bundle.write({
-            file: outputPath,
-            format: "iife",
-            name: filename.replace(".js", ""),
-            sourcemap: !isProd,
-        });
+                // Extract filename and directory structure
+                const pathParts = entry.split("/");
+                const filename = pathParts.pop();
+                const subdirs = pathParts.slice(1).join("/"); // Remove 'js/' prefix
+                
+                // Construct output path
+                const outputPath = config.isProd 
+                    ? path.join(config.outputDir, 'js', subdirs)
+                    : path.join(config.devOutputDirs.js, subdirs);
+                
+                const outputFile = path.join(outputPath, filename);
+                
+                // Ensure directory exists
+                ensureDirectoryExists(outputPath);
+                
+                console.log(`Bundling JS: ${entry} to ${outputFile}`);
+                
+                // Generate bundle in IIFE format
+                await bundle.write({
+                    file: outputFile,
+                    format: "iife",
+                    name: filename.replace(".js", ""),
+                    sourcemap: !config.isProd,
+                });
 
-        if (isProd) {
-            // Return a promise for the production processing
-            return new Promise((resolve, reject) => {
-                src(outputPath)
-                    .pipe(buffer())
-                    .pipe(terser({
-                        compress: {
-                            drop_console: true,
-                            drop_debugger: true,
-                        },
-                    }))
-                    .pipe(javascriptObfuscator({
-                        compact: true,
-                        controlFlowFlattening: false,
-                        deadCodeInjection: false,
-                        debugProtection: false,
-                        disableConsoleOutput: true,
-                        identifierNamesGenerator: "hexadecimal",
-                        renameGlobals: false,
-                        rotateStringArray: true,
-                        selfDefending: false,
-                        shuffleStringArray: true,
-                        splitStrings: true,
-                        splitStringsChunkLength: 5,
-                        stringArray: true,
-                        stringArrayEncoding: ["base64"],
-                        stringArrayThreshold: 0.5,
-                        transformObjectKeys: false,
-                        unicodeEscapeSequence: false,
-                    }))
-                    .pipe(removeSourcemaps())
-                    .pipe(dest(config.outputDir + "/js"))
-                    .on('end', resolve)
-                    .on('error', reject);
-            });
+                if (config.isProd) {
+                    results.push(new Promise((resolve, reject) => {
+                        src(outputFile)
+                            .pipe(plumber({
+                                errorHandler: function(err) {
+                                    console.error(`JS processing error (${entry}):`, err);
+                                    this.emit('end');
+                                }
+                            }))
+                            .pipe(buffer())
+                            .pipe(terser(config.js.minifyOptions))
+                            .pipe(javascriptObfuscator(config.js.obfuscateOptions))
+                            .pipe(removeSourcemaps())
+                            .pipe(dest(outputPath))
+                            .on('error', reject)
+                            .on('end', resolve);
+                    }));
+                }
+            } catch (err) {
+                console.error(`JS processing error for ${entry}:`, err);
+            }
         }
 
-        return Promise.resolve();
-    });
-
-    return Promise.all(tasks);
+        await Promise.all(results);
+        console.log("JavaScript processing complete");
+        return;
+    } catch (err) {
+        console.error('minifyJs error:', err);
+        throw err;
+    }
 }
 
 /**
  * Watches for file changes and triggers rebuilds
- * - Monitors SCSS files for style changes
- * - Monitors JS files and modules for script changes
- * @returns {void}
+ * @param {Function} cb - Callback function
  */
-function watchTask() {
+function watchTask(cb) {
     // Watch all SCSS files but only rebuild entry points
-    watch(["src/styles/**/*.scss"], function(cb) {
-        buildStyles();
-        cb();
+    watch([`${config.sourceDir}/styles/**/*.scss`], function(changedCb) {
+        buildStyles(() => changedCb());
     })
         .on("change", (path) => console.log(`SCSS: ${path} changed`))
         .on("error", (err) => console.log(`SCSS Error: ${err}`));
 
-	// Watch JS files including modules directory
-	watch([...config.entryPoints, `${config.modulesDir}/**/*.js`], minifyJs)
-		.on("change", (path) => console.log(`JS: ${path} changed`))
-		.on("error", (err) => console.log(`JS Error: ${err}`));
+    // Watch JS files including modules directory
+    watch([
+        ...config.entryPoints.js.map(entry => config.getSourcePath(entry)),
+        `${config.getSourcePath(config.js.modulesDir)}/**/*.js`
+    ], minifyJs)
+        .on("change", (path) => console.log(`JS: ${path} changed`))
+        .on("error", (err) => console.log(`JS Error: ${err}`));
+    
+    cb();
 }
 
 /**
- * Cleans up the output directory in production
+ * Cleans up the output directory
  * @returns {Promise<void>}
  */
 async function cleanup() {
-    if (isProd) {
+    if (config.isProd) {
         return rimraf(config.outputDir);
     }
     return Promise.resolve();
 }
 
 /**
+ * Verifies that all paths and files exist before building
+ * @param {Function} cb - Callback function
+ */
+function verifyPaths(cb) {
+    try {
+        const validation = verifyEntryPoints(false);
+        printValidationSummary(validation);
+        
+        // In production, fail if any required files are missing
+        if (config.isProd && !validation.valid) {
+            return cb(new Error('Missing required files in production build'));
+        }
+        
+        // Create necessary directories
+        ensureDirectoryExists(config.outputDir);
+        ensureDirectoryExists(path.join(config.outputDir, 'js'));
+        ensureDirectoryExists(path.join(config.outputDir, 'css'));
+        
+        cb();
+    } catch (err) {
+        cb(err);
+    }
+}
+
+/**
  * Export build tasks
- * @property {Function} styles - Builds CSS files
- * @property {Function} scripts - Builds JavaScript files
- * @property {Function} watch - Starts file watching
- * @property {Function} build - Builds all assets
- * @property {Function} default - Builds assets and starts watching
  */
 exports.styles = buildStyles;
 exports.scripts = minifyJs;
 exports.watch = watchTask;
-exports.build = isProd 
+exports.verify = verifyPaths;
+exports.build = config.isProd 
     ? series(
+        cleanup, 
+        verifyPaths,
         parallel(buildStyles, minifyJs),
-        cb => uploadToS3(cb),
-        cb => invalidateCache(cb),
-        cleanup
+        uploadToS3,
+        invalidateCache
     )
     : parallel(buildStyles, minifyJs);
-exports.default = series(parallel(buildStyles, minifyJs), watchTask);
+exports.default = series(
+    verifyPaths,
+    parallel(buildStyles, minifyJs), 
+    watchTask
+);

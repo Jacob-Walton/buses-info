@@ -30,9 +30,9 @@
 
 .btn {
   display: inline-block;
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 500;
+  padding: 0.625rem 1rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
   text-align: center;
   text-decoration: none;
   border: none;
@@ -42,7 +42,7 @@
   justify-content: center;
   align-items: center;
   color: white;
-  @include alternating-border-radius($button-border-radius);
+  @include alternating-border-radius(0.75rem);
   @include transition;
 
   &:hover,
@@ -51,8 +51,8 @@
   }
 
   i {
-    font-size: 1rem !important;
-    margin-right: 0.5rem;
+    font-size: 0.9375rem !important;
+    margin-right: 0.375rem;
     margin-bottom: 0 !important;
   }
 }
@@ -102,5 +102,24 @@
 
   &:focus {
     @include box-shadow(0 0 0 3px rgba($accent, 0.2));
+  }
+}
+
+.btn-google, .btn-microsoft {
+  @extend .btn;
+  background-color: #ffffff;
+  color: #333333;
+  border: 1.5px solid rgba(0, 0, 0, 0.1);
+  
+  &:hover, &:focus {
+    background-color: rgba(0, 0, 0, 0.03);
+    color: #333333;
+  }
+  
+  img {
+    width: 18px;
+    height: 18px;
+    margin-right: 0.5rem;
+    object-fit: contain;
   }
 }

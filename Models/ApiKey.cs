@@ -9,5 +9,6 @@ namespace BusInfo.Models
         public ApplicationUser? User { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public bool IsActive { get; set; } = true;
+        public DateTime LastUsed { get; set; } = DateTime.UtcNow;
     }
 }

@@ -13,28 +13,21 @@ using Microsoft.Extensions.Logging;
 
 namespace BusInfo.Services.BackgroundServices
 {
-    public class BusMapGeneratorService : BackgroundService
+    public class BusMapGeneratorService(
+        IServiceScopeFactory scopeFactory,
+        IMemoryCache cache,
+        ILogger<BusMapGeneratorService> logger) : BackgroundService
     {
         private static readonly Action<ILogger, Exception> _logGenerateError =
             LoggerMessage.Define(LogLevel.Error,
                                new EventId(1, nameof(ExecuteAsync)),
                                "Error generating bus lane map");
 
-        private readonly IServiceScopeFactory _scopeFactory;
-        private readonly IMemoryCache _cache;
-        private readonly ILogger<BusMapGeneratorService> _logger;
-        private const string MAP_CACHE_KEY_PREFIX = "BusLaneMap_";
+        private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
+        private readonly IMemoryCache _cache = cache;
+        private readonly ILogger<BusMapGeneratorService> _logger = logger;
+        private const string MAP_CACHE_KEY_PREFIX = "BusMapData_";
         private const int UPDATE_INTERVAL_MINUTES = 5;
-
-        public BusMapGeneratorService(
-            IServiceScopeFactory scopeFactory,
-            IMemoryCache cache,
-            ILogger<BusMapGeneratorService> logger)
-        {
-            _scopeFactory = scopeFactory;
-            _cache = cache;
-            _logger = logger;
-        }
 
         public override void Dispose()
         {

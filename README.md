@@ -258,6 +258,10 @@ This project is under active development. Contributions must follow established 
 
 This project is an independent project and is not affiliated with any external organisations.
 
+## Attributions
+
+For attributions, see the [ATTRIBUTIONS](ATTRIBUTIONS) file.
+
 ## License
 
 This project is licensed under the License for Buses-Info. For more details, see the [LICENCE](LICENCE) file.

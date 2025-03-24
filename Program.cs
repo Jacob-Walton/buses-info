@@ -37,13 +37,18 @@ using System.Security.Cryptography.X509Certificates;
 using System.Net.Http;
 using Microsoft.AspNetCore.ResponseCompression;
 using System.Linq;
+using Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation;
 using BusInfo.Services.BackgroundServices;
 using BusInfo.Authentication.Authorization;
 using Azure.Core;
+using Microsoft.AspNetCore.Authentication.OAuth;
+using Microsoft.Extensions.Logging;
+using BusInfo.Middleware;
+using Npgsql;
 
 namespace BusInfo
 {
-    public class Marker { }
+    public class Marker;
 
     public class KeyVaultSecretNameFormatter : KeyVaultSecretManager
     {
@@ -179,10 +184,10 @@ namespace BusInfo
                 .WriteTo.File(new CompactJsonFormatter(),
                               Path.Combine("logs", "log-.ndjson"),
                               fileSizeLimitBytes: 10_000_000,
+                              flushToDiskInterval: TimeSpan.FromSeconds(2),
                               rollingInterval: RollingInterval.Day,
                               rollOnFileSizeLimit: true,
-                              retainedFileCountLimit: 7,
-                              flushToDiskInterval: TimeSpan.FromSeconds(2))
+                              retainedFileCountLimit: 7)
             );
         }
 
@@ -229,8 +234,10 @@ namespace BusInfo
             builder.Services.AddRazorPages()
                 .AddRazorPagesOptions(options =>
                 {
-                    // existing options...
-                });
+                    options.Conventions.AuthorizeFolder("/Admin", "AdminOnly");
+                    options.Conventions.AuthorizeFolder("/Account", "RequireAuthenticatedUser");
+                })
+                .AddRazorRuntimeCompilation();
 
             // Configure Compression
             builder.Services.AddResponseCompression(options =>
@@ -240,88 +247,191 @@ namespace BusInfo
                 options.Providers.Add<GzipCompressionProvider>();
             });
 
+            // Configure Npgsql before setting up DbContext pass through data context
+            NpgsqlConfiguration.Configure();
+
             // Configure DB Context
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(config.GetConnectionString("DefaultConnection")));
+            {
+                string? connectionString = config.GetConnectionString("DefaultConnection");
+                NpgsqlDataSourceBuilder dataSourceBuilder = new(connectionString);
+                NpgsqlConfiguration.ConfigureDataSource(dataSourceBuilder);
+                NpgsqlDataSource dataSource = dataSourceBuilder.Build();
+
+                options.UseNpgsql(dataSource, npgsqlOptions =>
+                    npgsqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+            });
 
             // Configure Bus Info Services
             builder.Services.AddScoped<IBusInfoService, BusInfoService>();
             builder.Services.AddScoped<IBusLaneService, BusLaneService>();
             builder.Services.AddHttpClient();
 
+            // Add session support
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            });
+
             // Configure Authentication
             builder.Services.AddScoped<ClaimsRefreshService>();
 
-            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(options =>
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            })
+            .AddCookie(options =>
+            {
+                options.LoginPath = "/login";  // Changed from /signin/Google
+                options.LogoutPath = "/logout";
+                options.AccessDeniedPath = "/accessdenied";
+                options.ExpireTimeSpan = TimeSpan.FromDays(30);
+                options.SlidingExpiration = true;
+                options.Cookie.Name = "BusInfo.Auth";
+                options.Cookie.HttpOnly = true;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                options.Cookie.SameSite = SameSiteMode.Lax;
+
+                options.Events = new CookieAuthenticationEvents
                 {
-                    options.LoginPath = "/login";
-                    options.LogoutPath = "/logout";
-                    options.AccessDeniedPath = "/accessdenied";
-                    options.ExpireTimeSpan = TimeSpan.FromDays(30);
-                    options.SlidingExpiration = true;
-                    options.Cookie.Name = "BusInfo.Auth";
-                    options.Cookie.HttpOnly = true;
-                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-                    options.Cookie.SameSite = SameSiteMode.Strict;
-
-                    options.Events = new CookieAuthenticationEvents
+                    OnRedirectToLogin = context =>
                     {
-                        OnValidatePrincipal = async context =>
+                        if (context.Request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase))
                         {
-                            ClaimsRefreshService claimsRefreshService = context.HttpContext.RequestServices
-                                .GetRequiredService<ClaimsRefreshService>();
-
-                            if (context.Principal != null && claimsRefreshService.ShouldRefreshClaims(context.Principal))
-                            {
-                                ClaimsPrincipal newPrincipal = await claimsRefreshService.RefreshClaimsAsync(context.Principal);
-                                context.ReplacePrincipal(newPrincipal);
-                                context.ShouldRenew = true;
-                            }
-                        },
-                        OnSigningIn = async context =>
-                        {
-                            if (context.Principal?.Identity is ClaimsIdentity claimsIdentity)
-                            {
-                                IUserService userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
-                                await userService.GetOrCreateUserAsync(context.Principal);
-                                claimsIdentity.AddClaim(new Claim("claims_last_refresh", System.DateTimeOffset.UtcNow.ToString("o")));
-                            }
-                        },
-                        OnRedirectToLogin = context =>
-                        {
-                            if (context.Request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase))
-                            {
-                                context.Response.StatusCode = 401;
-                                return Task.CompletedTask;
-                            }
-                            context.Response.Redirect(context.RedirectUri);
-                            return Task.CompletedTask;
+                            context.Response.StatusCode = 401;
                         }
-                    };
-                });
+                        else
+                        {
+                            context.Response.Redirect($"/login?returnUrl={Uri.EscapeDataString(context.Request.Path)}");
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
+            })
+            .AddGoogle(options =>
+            {
+                options.ClientId = config["Authentication:Google:ClientId"] ?? throw new InvalidOperationException("Google Client ID not configured");
+                options.ClientSecret = config["Authentication:Google:ClientSecret"] ?? throw new InvalidOperationException("Google Client Secret not configured");
+                options.SaveTokens = true;
+                options.CallbackPath = "/signin-google";
+                options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+
+                options.Events = new OAuthEvents
+                {
+                    OnTicketReceived = async context =>
+                    {
+                        try
+                        {
+                            IUserService userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
+                            if (context?.Principal == null)
+                                throw new InvalidOperationException("Authentication principal not found");
+
+                            ApplicationUser? user = await userService.GetOrCreateUserAsync(context.Principal) ??
+                                throw new InvalidOperationException("User not found");
+
+                            List<Claim> claims =
+                            [
+                                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                                new Claim(ClaimTypes.Email, user.Email),
+                                new Claim("claims_last_refresh", DateTimeOffset.UtcNow.ToString("o")),
+                                new Claim("provider", user.AuthProvider.ToString()),
+                                new Claim("auth_provider", user.AuthProvider.ToString())
+                            ];
+
+                            if (user.IsAdmin)
+                                claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+
+                            ClaimsIdentity identity = new(claims, context.Principal.Identity?.AuthenticationType ??
+                                CookieAuthenticationDefaults.AuthenticationScheme);
+                            context.Principal = new ClaimsPrincipal(identity);
+                        }
+                        catch (InvalidOperationException ex) when (ex.Message.Contains("different authentication method", StringComparison.OrdinalIgnoreCase))
+                        {
+                            context.Response.Redirect($"/login?error=wrong_provider&message={Uri.EscapeDataString(ex.Message)}");
+                            context.HandleResponse();
+                        }
+                    },
+                    OnRemoteFailure = context =>
+                    {
+                        context.Response.Redirect($"/signin-callback?error={context.Failure?.Message}&provider=Google");
+                        return Task.CompletedTask;
+                    }
+                };
+            })
+            .AddMicrosoftAccount(options =>
+            {
+                options.ClientId = config["Authentication:Microsoft:ClientId"] ??
+                    throw new InvalidOperationException("Microsoft Client ID not configured");
+                options.ClientSecret = config["Authentication:Microsoft:ClientSecret"] ??
+                    throw new InvalidOperationException("Microsoft Client Secret not configured");
+                options.SaveTokens = true;
+                options.CallbackPath = "/signin-microsoft";
+                options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+
+                options.Events = new OAuthEvents
+                {
+                    OnTicketReceived = async context =>
+                    {
+                        try
+                        {
+                            IUserService userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
+                            if (context?.Principal == null)
+                                throw new InvalidOperationException("Authentication principal not found");
+
+                            ApplicationUser? user = await userService.GetOrCreateUserAsync(context.Principal) ??
+                                throw new InvalidOperationException("User not found");
+
+                            List<Claim> claims =
+                            [
+                                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                                new Claim(ClaimTypes.Email, user.Email),
+                                new Claim("claims_last_refresh", DateTimeOffset.UtcNow.ToString("o")),
+                                new Claim("provider", user.AuthProvider.ToString()),
+                                new Claim("auth_provider", user.AuthProvider.ToString())
+                            ];
+
+                            if (user.IsAdmin)
+                                claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+
+                            ClaimsIdentity identity = new(claims, context.Principal.Identity?.AuthenticationType ??
+                                CookieAuthenticationDefaults.AuthenticationScheme);
+                            context.Principal = new ClaimsPrincipal(identity);
+                        }
+                        catch (InvalidOperationException ex) when (ex.Message.Contains("different authentication method", StringComparison.OrdinalIgnoreCase))
+                        {
+                            context.Response.Redirect($"/login?error=wrong_provider&message={Uri.EscapeDataString(ex.Message)}");
+                            context.HandleResponse();
+                        }
+                    },
+                    OnRemoteFailure = context =>
+                    {
+                        context.HandleResponse();
+                        context.Response.Redirect($"/login?error=access_denied&message={Uri.EscapeDataString("Authentication was cancelled.")}");
+                        return Task.CompletedTask;
+                    }
+                };
+            });
 
             builder.Services.AddAuthentication()
                 .AddScheme<AuthenticationSchemeOptions, ApiKeyAuthenticationHandler>("ApiKey", null);
 
-            builder.Services.AddAuthorization(options =>
-            {
-                // Default policy for web routes uses only cookie authentication
-                options.DefaultPolicy = new AuthorizationPolicyBuilder()
+            builder.Services.AddAuthorizationBuilder()
+                .SetDefaultPolicy(new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
                     .AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme)
-                    .Build();
-
-                // API policy uses both cookie and API key authentication
-                options.AddPolicy("ApiPolicy", policy =>
+                    .Build())
+                .AddPolicy("ApiPolicy", policy =>
                     policy.RequireAuthenticatedUser()
-                         .AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme, "ApiKey"));
-
-                options.AddPolicy("RequireAuthenticatedUser", policy =>
-                    policy.RequireAuthenticatedUser());
-                options.AddPolicy("AdminOnly", policy =>
+                         .AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme, "ApiKey"))
+                .AddPolicy("RequireAuthenticatedUser", policy =>
+                    policy.RequireAuthenticatedUser())
+                .AddPolicy("AdminOnly", policy =>
                     policy.Requirements.Add(new AdminRequirement()));
-            });
 
             builder.Services.AddScoped<IAuthorizationHandler, AdminAuthorizationHandler>();
 
@@ -346,7 +456,7 @@ namespace BusInfo
             // Configure Rate Limiting
             builder.Services.AddMemoryCache();
             builder.Services.Configure<ClientRateLimitOptions>(config.GetSection("ClientRateLimiting"));
-            builder.Services.Configure<IpRateLimitOptions>(opt => { });
+            builder.Services.Configure<IpRateLimitOptions>(_ => { });
             builder.Services.AddSingleton<IClientPolicyStore, RedisClientPolicyStore>();
             builder.Services.AddSingleton<IRateLimitCounterStore, RedisRateLimitCounterStore>();
             builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
@@ -377,7 +487,24 @@ namespace BusInfo
             }
             else
             {
-                app.UseExceptionHandler("/error");
+                // Update error handling for auth failures
+                app.UseExceptionHandler(errorApp =>
+                {
+                    errorApp.Run(context =>
+                    {
+                        Microsoft.AspNetCore.Diagnostics.IExceptionHandlerPathFeature? exceptionHandlerPathFeature = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerPathFeature>();
+                        Exception? exception = exceptionHandlerPathFeature?.Error;
+
+                        if (exception is AuthenticationFailureException)
+                        {
+                            context.Response.Redirect("/login");
+                            return Task.CompletedTask;
+                        }
+
+                        context.Response.Redirect("/error");
+                        return Task.CompletedTask;
+                    });
+                });
                 app.UseHsts();
             }
 
@@ -386,13 +513,17 @@ namespace BusInfo
 
             app.UseCors();
 
+            app.UseSession();
+            app.UseMiddleware<ApiRequestTrackingMiddleware>();
             app.UseAuthentication();
+
+            app.UseMiddleware<ClaimsRefreshMiddleware>();
             app.UseAuthorization();
 
             app.UseSerilogRequestLogging(options =>
             {
                 options.MessageTemplate = "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms";
-                options.GetLevel = (httpContext, elapsed, ex) => ex != null ? Serilog.Events.LogEventLevel.Error : Serilog.Events.LogEventLevel.Information;
+                options.GetLevel = (_, __, ex) => ex != null ? Serilog.Events.LogEventLevel.Error : Serilog.Events.LogEventLevel.Information;
                 options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
                 {
                     diagnosticContext.Set("RequestHost", httpContext.Request.Host);
@@ -485,5 +616,5 @@ namespace BusInfo
             return Task.FromResult(string.Empty);
         }
     }
-    #endregion
+    #endregion Rate Limiting
 }

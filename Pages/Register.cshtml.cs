@@ -58,7 +58,7 @@ namespace BusInfo.Pages
         public string Email { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Password is required")]
-        [StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be at least 6 characters long")]
+        [StringLength(24, MinimumLength = 6, ErrorMessage = "Password must be at least 6 characters long and no more than 24 characters long")]
         [DataType(DataType.Password)]
         public string Password { get; set; } = string.Empty;
 

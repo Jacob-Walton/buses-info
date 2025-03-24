@@ -5,33 +5,39 @@
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   z-index: 9999;
   padding: 1rem;
   animation: modalFadeIn 0.2s ease-out;
 
+  &.active {
+    display: flex;
+  }
+
   .custom-modal-content {
     background-color: #ffffff;
-    padding: 2rem;
+    padding: 1.5rem;
     border-radius: 0 1rem 0 1rem;
-    max-width: 500px;
+    max-width: 400px;
     width: 100%;
     position: relative;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     animation: modalSlideIn 0.2s ease-out;
+    @include alternating-border-radius(1.25rem);
 
     h2 {
-      margin: 0 0 1rem;
+      margin: 0 0 0.75rem;
       color: #13253c;
-      font-size: 1.5rem;
+      font-size: 1.25rem;
       font-weight: 600;
     }
 
     p {
-      margin: 0 0 1.5rem;
+      margin: 0 0 1.25rem;
       color: #495057;
+      font-size: 0.9375rem;
     }
 
     .modal-input {
@@ -56,11 +62,13 @@
 
     .modal-actions {
       display: flex;
-      gap: 1rem;
+      gap: 0.75rem;
       justify-content: flex-end;
 
       button {
-        min-width: 100px;
+        min-width: 90px;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
       }
     }
   }
