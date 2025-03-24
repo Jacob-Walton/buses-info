@@ -25,13 +25,10 @@ const config = {
             "js/site.js", 
             "js/businfo.js", 
             "js/settings.js", 
-            "js/admin/dashboard.js", 
-            "js/admin/apiManagement.js",
             "js/authTransitions.js"
         ],
         scss: [
-            "styles/site.scss",
-            "styles/admin/admin.scss"
+            "styles/site.scss"
         ]
     },
     

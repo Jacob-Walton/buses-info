@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using BusInfo.Models;
-using BusInfo.Models.Admin;
 using System;
 
 namespace BusInfo.Data
@@ -10,10 +9,8 @@ namespace BusInfo.Data
         public DbSet<BusStatus>? BusStatuses { get; set; }
         public DbSet<ApplicationUser>? Users { get; set; }
         public DbSet<ApiKeyRequest>? ApiKeyRequests { get; set; }
-        public DbSet<AdminSettings>? AdminSettings { get; set; }
         public DbSet<BusArrival>? BusArrivals { get; set; }
         public DbSet<ApiKey>? ApiKeys { get; set; }
-        public DbSet<AdminActivity>? AdminActivities { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -61,12 +58,6 @@ namespace BusInfo.Data
                     .HasForeignKey(r => r.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
             })
-                .Entity<AdminSettings>(entity =>
-            {
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.LastModified).IsRequired();
-                entity.Property(e => e.ModifiedBy).IsRequired();
-            })
                 .Entity<BusArrival>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -90,30 +81,6 @@ namespace BusInfo.Data
                     .WithMany()
                     .HasForeignKey(e => e.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
-            })
-                .Entity<AdminActivity>(entity =>
-            {
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.Description).IsRequired();
-                entity.Property(e => e.Timestamp)
-                    .HasColumnType("timestamp with time zone");
-                entity.Property(e => e.Icon).IsRequired();
-                entity.Property(e => e.Type).IsRequired();
-                entity.Property(e => e.Metadata)
-                    .HasColumnType("jsonb");
-
-                entity.HasIndex(e => e.Timestamp);
-                entity.HasIndex(e => e.Type);
-
-                entity.HasOne<ApplicationUser>()
-                    .WithMany()
-                    .HasForeignKey(e => e.UserId)
-                    .OnDelete(DeleteBehavior.SetNull);
-
-                entity.HasOne<ApplicationUser>()
-                    .WithMany()
-                    .HasForeignKey(e => e.AdminId)
-                    .OnDelete(DeleteBehavior.SetNull);
             });
         }
     }

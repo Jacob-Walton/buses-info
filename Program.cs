@@ -276,8 +276,6 @@ namespace BusInfo
                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
             });
 
-            builder.Services.AddScoped<IHealthCheckService, HealthCheckService>();
-
             // Configure Authentication
             builder.Services.AddScoped<ClaimsRefreshService>();
 
