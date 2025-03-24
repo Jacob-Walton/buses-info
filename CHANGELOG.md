@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.1.3] - 2025-03-24
+
+### Added
+
+- .NET 9.0 backwards compatibility.
+
+---
+
 ## [v0.1.2] - 2025-03-24
 
 ### Added
