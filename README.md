@@ -1,6 +1,6 @@
 # Bus Info
 
-![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
+![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17.2-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-Stack-DC382D?style=for-the-badge&logo=redis&logoColor=white)
 
@@ -12,7 +12,7 @@ This repository contains the source code for my Bus Info project. It provides al
 
 ### Core Technologies
 
-- ASP.NET Core 9.0
+- ASP.NET Core 10.0
 - PostgreSQL 17.2
 - Redis Stack
 - Prediction system (WIP)
@@ -23,7 +23,7 @@ The application utilises a layered approach:
 
 1. Data Storage: PostgreSQL 17.2
 2. Cache System: Redis Stack
-3. Processing Layer: ASP.NET Core 9.0
+3. Processing Layer: ASP.NET Core 10.0
 4. Interface Layer: Web-based presentation
 
 ### Primary Components
