@@ -21,3 +21,4 @@ wwwroot/**/*.css
 *.yml
 *.log
 !Scripts/*.py
+.DS_Store
