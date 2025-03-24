@@ -1,9 +1,0 @@
-services:
-  bus-info:
-    build: .
-    ports:
-      - "${PORT:-3001}:443"
-    environment:
-      - ASPNETCORE_URLS=https://*:443
-      - ASPNETCORE_ENVIRONMENT=Production
-    restart: unless-stopped

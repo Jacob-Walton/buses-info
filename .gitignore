@@ -25,3 +25,4 @@ wwwroot/**/*.css
 watcher/dist/**.js
 watcher/dist/**.map
 watcher/dist/**.css
+certs/**
