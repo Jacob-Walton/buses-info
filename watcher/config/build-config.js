@@ -26,7 +26,7 @@ const config = {
             "js/businfo.js", 
             "js/settings.js", 
             "js/authTransitions.js",
-            "js/content-pages.js",
+            "js/contentPages.js",
             "js/navbar.js"
         ],
         scss: [
