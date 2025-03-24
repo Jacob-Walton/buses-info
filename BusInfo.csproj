@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <AssemblyName>BusInfo</AssemblyName>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFrameworks>net9.0;net10.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
@@ -13,35 +13,23 @@
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <RunAnalyzersDuringLiveAnalysis>true</RunAnalyzersDuringLiveAnalysis>
     <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
-    <NoWarn>$(NoWarn);CA1515;IDE0005;IDE0058;SYSLIB0057;CA2007;IDE0130;IDE0011;CA1062;IDE0022</NoWarn>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <Version>0.1.2</Version>
     <AssemblyVersion>0.1.2</AssemblyVersion>
     <FileVersion>0.1.2</FileVersion>
   </PropertyGroup>
 
+  <!-- Common packages for both frameworks -->
   <ItemGroup>
     <PackageReference Include="ConfigCat.Client" Version="9.3.2" />
     <PackageReference Include="CsvHelper" Version="33.0.1" />
     <PackageReference Include="Humanizer.Core" Version="3.0.0-beta.54" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="10.0.0-preview.2.25164.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0-preview.2.25164.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="10.0.0-preview.2.25164.1" />
-    <PackageReference Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" Version="10.0.0-preview.2.25164.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="10.0.0-preview.2.25164.1" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.0-preview.2.25163.2" />
-    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.0-preview.2.25164.1" />
     <PackageReference Include="MongoDB.Driver" Version="3.2.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
-    <PackageReference Include="SkiaSharp" Version="3.116.1" />
+    <PackageReference Include="SkiaSharp" Version="3.118.0-preview.2.3" />
     <PackageReference Include="StackExchange.Redis" Version="2.8.31" />
-    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="10.0.0-preview.2.25163.2" />
-    <PackageReference Include="System.Drawing.Common" Version="10.0.0-preview.2.25163.9" />
-    <PackageReference Include="System.IO.Hashing" Version="10.0.0-preview.2.25163.2" />
     <PackageReference Include="System.Private.Uri" Version="4.3.2" />
     <PackageReference Include="System.Runtime" Version="4.3.1" />
-    <PackageReference Include="System.Text.Json" Version="10.0.0-preview.2.25163.2" />
     <PackageReference Include="Serilog" Version="4.2.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
     <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
@@ -56,18 +44,54 @@
     <PackageReference Include="Serilog.Sinks.Seq" Version="9.0.0" />
     <PackageReference Include="AspNetCoreRateLimit" Version="5.0.0" />
     <PackageReference Include="BCrypt.NET-Next" Version="4.0.3" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.11.72" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.12.0" />
+    <PackageReference Include="NodaTime" Version="3.2.2" />
+    <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.4.0" />
+    <PackageReference Include="Microsoft.Identity.Web" Version="3.8.1" />
+    <PackageReference Include="Microsoft.Identity.Web.UI" Version="3.8.1" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.116.1" />
+  </ItemGroup>
+
+  <!-- .NET 9.0 specific packages -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="9.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" Version="9.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="9.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.3" />
+    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="9.0.3" />
+    <PackageReference Include="System.Drawing.Common" Version="9.0.3" />
+    <PackageReference Include="System.IO.Hashing" Version="9.0.3" />
+    <PackageReference Include="System.Text.Json" Version="9.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.3">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.0" />
+  </ItemGroup>
+
+  <!-- .NET 10.0 specific packages -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="10.0.0-preview.2.25164.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0-preview.2.25164.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="10.0.0-preview.2.25164.1" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" Version="10.0.0-preview.2.25164.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="10.0.0-preview.2.25164.1" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.0-preview.2.25163.2" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.0-preview.2.25164.1" />
+    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="10.0.0-preview.2.25163.2" />
+    <PackageReference Include="System.Drawing.Common" Version="10.0.0-preview.2.25163.9" />
+    <PackageReference Include="System.IO.Hashing" Version="10.0.0-preview.2.25163.2" />
+    <PackageReference Include="System.Text.Json" Version="10.0.0-preview.2.25163.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.0-preview.2.25163.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.0-preview.2.25163.8">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="NodaTime" Version="3.2.2" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0-preview.2" />
-    <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.4.0" />
-    <PackageReference Include="Microsoft.Identity.Web" Version="3.8.1" />
-    <PackageReference Include="Microsoft.Identity.Web.UI" Version="3.8.1" />
-    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.116.1" />
   </ItemGroup>
 
   <ItemGroup>
