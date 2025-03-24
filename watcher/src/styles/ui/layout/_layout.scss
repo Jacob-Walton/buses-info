@@ -2,6 +2,8 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 $spacing-unit;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .home-container {
@@ -9,17 +11,35 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding-top: 70px;
 }
 
 .content-container {
   max-width: 1600px;
   margin: 0 auto;
   padding: 0 $spacing-unit;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.content-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding-top: 70px; // Account for fixed navbar
+}
+
+main {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 @media (max-width: 768px) {
   .container {
     padding: 0 calc($spacing-unit / 2);
+  }
+
+  .content-wrapper {
+    padding-top: 0;
   }
 }

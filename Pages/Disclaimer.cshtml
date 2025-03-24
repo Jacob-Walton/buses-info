@@ -1,0 +1,117 @@
+@page "/disclaimer"
+@model DisclaimerModel
+@{
+    ViewData["Title"] = "Independence Disclaimer";
+}
+
+<div class="content-page">
+    <div class="page-container">
+        <div class="page-content">
+            <div class="page-header">
+                <h1>Independence Disclaimer</h1>
+                <div class="last-updated">Last reviewed: February 2025</div>
+            </div>
+
+            <div class="notice-box warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div class="notice-content">
+                    <p>This service is an <strong>independent project</strong> and is not affiliated with, endorsed by, or officially connected to Runshaw College in any way.</p>
+                </div>
+            </div>
+
+            <div class="content-section" id="development">
+                <h2>Independent Development</h2>
+                <p>The Runshaw Buses service has been developed as an independent project by students, for students. We want to be absolutely clear about our position:</p>
+                <ul>
+                    <li>This is a personal project developed independently</li>
+                    <li>We are not affiliated with Runshaw College</li>
+                    <li>We do not represent Runshaw College in any official capacity</li>
+                    <li>This service is not endorsed by Runshaw College</li>
+                    <li>We operate independently of any educational institution</li>
+                </ul>
+            </div>
+
+            <div class="content-section" id="purpose">
+                <h2>Purpose of Service</h2>
+                <p>Our service aims to provide a convenient way for students to access bus information. While we strive to maintain accuracy:</p>
+                <ul>
+                    <li>All information should be verified against official sources</li>
+                    <li>The official Runshaw College website and staff are the authoritative sources</li>
+                    <li>This service is provided for informational purposes only</li>
+                    <li>Users should not rely solely on this service for critical travel decisions</li>
+                </ul>
+            </div>
+
+            <div class="content-section" id="contact">
+                <h2>Contact Information</h2>
+                <p>For any questions about this disclaimer or our service, please contact us through:</p>
+                <div class="card-grid">
+                    <div class="card">
+                        <div class="card-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <h3 class="card-title">Email Us</h3>
+                        <p class="card-content">
+                            <a href="mailto:support@konpeki.co.uk">support@konpeki.co.uk</a>
+                        </p>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">
+                            <i class="fas fa-paper-plane"></i>
+                        </div>
+                        <h3 class="card-title">Contact Form</h3>
+                        <p class="card-content">
+                            <a href="/contact">Use our contact form</a>
+                        </p>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">
+                            <i class="fab fa-github"></i>
+                        </div>
+                        <h3 class="card-title">GitHub</h3>
+                        <p class="card-content">
+                            <a href="https://github.com/Jacob-Walton/bus-info" target="_blank" rel="noopener noreferrer">View our repository</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section" id="official">
+                <h2>Official Sources</h2>
+                <p>For official information about Runshaw College bus services, please refer to:</p>
+                
+                <div class="notice-box info">
+                    <i class="fas fa-info-circle"></i>
+                    <div class="notice-content">
+                        <p>Always verify bus information with official sources before making travel plans.</p>
+                    </div>
+                </div>
+                
+                <ul class="resource-links">
+                    <li>
+                        <a href="https://www.runshaw.ac.uk" target="_blank" rel="noopener noreferrer" class="resource-link">
+                            <i class="fas fa-external-link-alt"></i>
+                            <span>Runshaw College Official Website</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.runshaw.ac.uk/travel-information/" target="_blank" rel="noopener noreferrer" class="resource-link">
+                            <i class="fas fa-bus"></i>
+                            <span>Runshaw College Transportation Page</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.runshaw.ac.uk/contact-us/" target="_blank" rel="noopener noreferrer" class="resource-link">
+                            <i class="fas fa-phone"></i>
+                            <span>Runshaw College Contact Information</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="/js/content-pages.js"></script>
+}

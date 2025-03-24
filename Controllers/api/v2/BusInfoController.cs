@@ -88,14 +88,14 @@ namespace BusInfo.Controllers.Api.V2
         public async Task<IActionResult> GetBusLaneMapAsync()
         {
             // Ensure the Accept header includes image/png or */*
-            if (!Request.Headers.Accept.ToString().Contains("image/png") && 
+            if (!Request.Headers.Accept.ToString().Contains("image/png") &&
                 !Request.Headers.Accept.ToString().Contains("*/*") &&
                 !string.IsNullOrEmpty(Request.Headers.Accept))
             {
-                return StatusCode(StatusCodes.Status406NotAcceptable, 
+                return StatusCode(StatusCodes.Status406NotAcceptable,
                     "This endpoint only produces image/png content");
             }
-            
+
             try
             {
                 BusInfoResponse busInfo = await _busInfoService.GetBusInfoAsync();
@@ -120,9 +120,9 @@ namespace BusInfo.Controllers.Api.V2
                 // No map available in cache, trigger generation
                 using IServiceScope scope = HttpContext.RequestServices.CreateScope();
                 IBusLaneService busLaneService = scope.ServiceProvider.GetRequiredService<IBusLaneService>();
-                
+
                 byte[] generatedImageData = await busLaneService.GenerateBusLaneMapAsync(bayServiceMap);
-                
+
                 return File(generatedImageData, "image/png");
             }
             catch (ApiException ex)

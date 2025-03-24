@@ -37,32 +37,41 @@ namespace BusInfo.Services
         /// <param name="bayServiceMap">Dictionary mapping bay number to bus number</param>
         /// <returns>Byte array containing the generated PNG image</returns>
         /// <exception cref="ArgumentNullException">Thrown when bayServiceMap is null</exception>
+        /// <exception cref="InvalidOperationException">Thrown when an error occurs during image generation</exception>
         public async Task<byte[]> GenerateBusLaneMapAsync(Dictionary<string, string> bayServiceMap)
         {
-            ArgumentNullException.ThrowIfNull(bayServiceMap, nameof(bayServiceMap));
+            try
+            {
+                ArgumentNullException.ThrowIfNull(bayServiceMap, nameof(bayServiceMap));
 
-            // Load the base map image and font resources
-            string mapPath = Path.Combine(_environment.WebRootPath, "images", "buslanemap.png");
-            string fontPath = Path.Combine(_environment.WebRootPath, "fonts", "Ubuntu", "Ubuntu-Bold.ttf");
+                // Load the base map image and font resources
+                string mapPath = Path.Combine(_environment.WebRootPath, "images", "buslanemap.png");
+                string fontPath = Path.Combine(_environment.WebRootPath, "fonts", "Ubuntu", "Ubuntu-Bold.ttf");
 
-            // Read and decode the base map image
-            byte[] imageBytes = await File.ReadAllBytesAsync(mapPath);
-            using SKBitmap bitmap = SKBitmap.Decode(imageBytes);
-            using SKSurface surface = SKSurface.Create(new SKImageInfo(bitmap.Width, bitmap.Height));
-            SKCanvas canvas = surface.Canvas;
+                // Read and decode the base map image
+                byte[] imageBytes = await File.ReadAllBytesAsync(mapPath);
+                using SKBitmap bitmap = SKBitmap.Decode(imageBytes);
+                using SKSurface surface = SKSurface.Create(new SKImageInfo(bitmap.Width, bitmap.Height));
+                SKCanvas canvas = surface.Canvas;
 
-            // Draw the background image
-            canvas.DrawBitmap(bitmap, 0, 0);
+                // Draw the background image
+                canvas.DrawBitmap(bitmap, 0, 0);
 
-            // Add bay numbers and service information to each lane section
-            AddBayNumbers(LaneASymbol, "A", canvas, bayServiceMap, fontPath);
-            AddBayNumbers(LaneBSymbol, "B", canvas, bayServiceMap, fontPath);
-            AddBayNumbers(LaneCSymbol, "C", canvas, bayServiceMap, fontPath);
+                // Add bay numbers and service information to each lane section
+                AddBayNumbers(LaneASymbol, "A", canvas, bayServiceMap, fontPath);
+                AddBayNumbers(LaneBSymbol, "B", canvas, bayServiceMap, fontPath);
+                AddBayNumbers(LaneCSymbol, "C", canvas, bayServiceMap, fontPath);
 
-            // Encode the final image as PNG and return the byte array
-            using SKImage image = surface.Snapshot();
-            using SKData data = image.Encode(SKEncodedImageFormat.Png, 100);
-            return data.ToArray();
+                // Encode the final image as PNG and return the byte array
+                using SKImage image = surface.Snapshot();
+                using SKData data = image.Encode(SKEncodedImageFormat.Png, 100);
+                return data.ToArray();
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (if a logger is available) and rethrow
+                throw new InvalidOperationException("Failed to generate bus lane map", ex);
+            }
         }
 
         /// <summary>

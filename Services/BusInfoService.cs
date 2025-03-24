@@ -50,23 +50,30 @@ namespace BusInfo.Services
 
         public async Task<BusInfoResponse> GetBusInfoAsync()
         {
-            string? cachedData = await _cache.GetStringAsync(CACHE_KEY);
-            if (!string.IsNullOrEmpty(cachedData))
+            try
             {
-                return JsonSerializer.Deserialize<BusInfoResponse>(cachedData) ?? await FetchBusInfoAsync();
-            }
-
-            BusInfoResponse busInfo = await FetchBusInfoAsync();
-
-            await _cache.SetStringAsync(
-                CACHE_KEY,
-                JsonSerializer.Serialize(busInfo),
-                new DistributedCacheEntryOptions
+                string? cachedData = await _cache.GetStringAsync(CACHE_KEY);
+                if (!string.IsNullOrEmpty(cachedData))
                 {
-                    AbsoluteExpirationRelativeToNow = CACHE_EXPIRATION
-                });
+                    return JsonSerializer.Deserialize<BusInfoResponse>(cachedData) ?? await FetchBusInfoAsync();
+                }
 
-            return busInfo;
+                BusInfoResponse busInfo = await FetchBusInfoAsync();
+
+                await _cache.SetStringAsync(
+                    CACHE_KEY,
+                    JsonSerializer.Serialize(busInfo),
+                    new DistributedCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow = CACHE_EXPIRATION
+                    });
+
+                return busInfo;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Failed to fetch bus info", ex);
+            }
         }
 
         private async Task<BusInfoResponse> FetchBusInfoAsync()
@@ -203,82 +210,92 @@ namespace BusInfo.Services
         /// </remarks>
         public async Task<BusPredictionResponse> GetBusPredictionsAsync()
         {
-            string cacheKey = $"{PREDICTION_CACHE_KEY}_{DateTime.UtcNow:yyyyMMddHHmm}";
-            string? cached = await _cache.GetStringAsync(cacheKey);
-            if (cached != null)
-                return JsonSerializer.Deserialize<BusPredictionResponse>(cached) ?? new BusPredictionResponse();
-
-            BusInfoResponse currentInfo = await GetBusInfoAsync();
-            List<string> candidateServices = [.. currentInfo.BusData.Select(kv => kv.Key)];
-
-            BusPredictionResponse response = await GetBusPredictionDataAsync(candidateServices);
-            response.LastUpdated = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture);
-
-            await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(response), new DistributedCacheEntryOptions
+            try
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(45)
-            });
+                string cacheKey = $"{PREDICTION_CACHE_KEY}_{DateTime.UtcNow:yyyyMMddHHmm}";
+                string? cached = await _cache.GetStringAsync(cacheKey);
+                if (cached != null)
+                    return JsonSerializer.Deserialize<BusPredictionResponse>(cached) ?? new BusPredictionResponse();
 
-            return response;
+                BusInfoResponse currentInfo = await GetBusInfoAsync();
+                List<string> candidateServices = [.. currentInfo.BusData.Select(kv => kv.Key)];
+
+                BusPredictionResponse response = await GetBusPredictionDataAsync(candidateServices);
+                response.LastUpdated = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture);
+
+                await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(response), new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(45)
+                });
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Failed to fetch bus predictions", ex);
+            }
         }
 
         /// <summary>
         /// Computes predictions using historical data.
         /// </summary>
         /// <param name="services">List of bus services to generate predictions for.</param>
+        /// <exception cref="InvalidOperationException"></exception>
         private async Task<BusPredictionResponse> GetBusPredictionDataAsync(List<string> services)
         {
-            BusPredictionResponse response = new()
+            try
             {
-                Predictions = []
-            };
+                BusPredictionResponse response = new()
+                {
+                    Predictions = []
+                };
 
-            if (services.Count == 0 || IsWeekend())
-                return HandleSpecialCases(services, response);
+                if (services.Count == 0 || IsWeekend())
+                    return HandleSpecialCases(services, response);
 
-            DateTime now = DateTime.UtcNow;
-            int currentDayOfWeek = (int)now.DayOfWeek;
+                DateTime now = DateTime.UtcNow;
+                int currentDayOfWeek = (int)now.DayOfWeek;
 
-            var historicalData = await _dbContext!.BusArrivals
-                .AsNoTracking()
-                .Where(ba => services.Contains(ba.Service) &&
-                            ba.ArrivalTime >= now.AddDays(-28) &&
-                            ba.DayOfWeek == currentDayOfWeek &&
-                            !string.IsNullOrEmpty(ba.Bay))
-                .Select(ba => new { ba.Service, ba.Bay, ba.ArrivalTime })
-                .ToListAsync();
-
-            if (historicalData.Count == 0)
-            {
-                historicalData = await _dbContext.BusArrivals
+                var historicalData = await _dbContext!.BusArrivals
                     .AsNoTracking()
                     .Where(ba => services.Contains(ba.Service) &&
+                                ba.ArrivalTime >= now.AddDays(-28) &&
+                                ba.DayOfWeek == currentDayOfWeek &&
                                 !string.IsNullOrEmpty(ba.Bay))
                     .Select(ba => new { ba.Service, ba.Bay, ba.ArrivalTime })
-                    .Take(1000)
                     .ToListAsync();
-            }
 
-            if (historicalData.Count == 0)
-                return HandleSpecialCases(services, response);
-
-            // Process services sequentially
-            foreach (string service in services)
-            {
-                if (string.IsNullOrEmpty(service)) continue;
-
-                var serviceData = historicalData.Where(h => h.Service == service).ToList();
-                if (serviceData.Count == 0)
+                if (historicalData.Count == 0)
                 {
-                    response.Predictions[service] = new PredictionInfo
-                    {
-                        Predictions = [new() { Bay = "No historical data", Probability = 0 }]
-                    };
-                    continue;
+                    historicalData = await _dbContext.BusArrivals
+                        .AsNoTracking()
+                        .Where(ba => services.Contains(ba.Service) &&
+                                    !string.IsNullOrEmpty(ba.Bay))
+                        .Select(ba => new { ba.Service, ba.Bay, ba.ArrivalTime })
+                        .Take(1000)
+                        .ToListAsync();
                 }
 
-                // Group and calculate probabilities
-                List<BayPrediction> bayGroups = [.. serviceData
+                if (historicalData.Count == 0)
+                    return HandleSpecialCases(services, response);
+
+                // Process services sequentially
+                foreach (string service in services)
+                {
+                    if (string.IsNullOrEmpty(service)) continue;
+
+                    var serviceData = historicalData.Where(h => h.Service == service).ToList();
+                    if (serviceData.Count == 0)
+                    {
+                        response.Predictions[service] = new PredictionInfo
+                        {
+                            Predictions = [new() { Bay = "No historical data", Probability = 0 }]
+                        };
+                        continue;
+                    }
+
+                    // Group and calculate probabilities
+                    List<BayPrediction> bayGroups = [.. serviceData
                     .GroupBy(x => x.Bay)
                     .Select(g =>
                     {
@@ -295,14 +312,19 @@ namespace BusInfo.Services
                     .OrderByDescending(x => x.Probability)
                     .Take(3)];
 
-                response.Predictions[service] = new PredictionInfo
-                {
-                    Predictions = bayGroups,
-                    OverallConfidence = CalculateOverallConfidence(bayGroups)
-                };
-            }
+                    response.Predictions[service] = new PredictionInfo
+                    {
+                        Predictions = bayGroups,
+                        OverallConfidence = CalculateOverallConfidence(bayGroups)
+                    };
+                }
 
-            return response;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Failed to fetch bus predictions", ex);
+            }
         }
 
         private static BusPredictionResponse HandleSpecialCases(List<string> services, BusPredictionResponse response)
