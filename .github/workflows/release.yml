@@ -42,10 +42,10 @@ jobs:
         run: dotnet build --configuration Release --no-restore
         
       - name: Publish Windows
-        run: dotnet publish --configuration Release --runtime win-x64 --self-contained false --output ./publish-win
+        run: dotnet publish --configuration Release --runtime win-x64 --self-contained false --output ./publish-win --framework net10.0
 
       - name: Publish Linux
-        run: dotnet publish --configuration Release --runtime linux-x64 --self-contained false --output ./publish-linux
+        run: dotnet publish --configuration Release --runtime linux-x64 --self-contained false --output ./publish-linux --framework net10.0
 
       - name: Create Zips
         run: |
