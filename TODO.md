@@ -4,6 +4,7 @@
 
 - [ ] Implement Razor pages
 - [ ] Implement full API
+- [ ] Remove watcher/dist/** from version control
 
 ## Medium Priority
 
