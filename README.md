@@ -51,7 +51,7 @@ The application utilises a layered approach:
 ### Requirements
 
 ```plaintext
-- .NET 9.0 SDK
+- .NET 10.0 SDK
 - PostgreSQL 17.2
 - Redis Stack
 - Node.js
