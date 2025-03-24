@@ -1,0 +1,70 @@
+name: Create Release
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Get Version
+        id: version
+        run: |
+          version=$(grep -oPm1 "(?<=<Version>)[^<]+" BusInfo.csproj)
+          echo "version=$version" >> $GITHUB_OUTPUT
+
+      - name: Get Latest Changelog
+        id: changelog
+        run: |
+          commit_date=$(git log -1 --format=%cd --date=short)
+          expected_version="${{ steps.version.outputs.version }}"
+          changelog=$(sed -n "/^## \\[v${expected_version}\\]/,/^---/p" CHANGELOG.md)
+          changelog=$(echo "$changelog" | sed "s/^## \\[v${expected_version}\\] - .*/## [v${expected_version}] - ${commit_date}/")
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$changelog" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Restore dependencies
+        run: dotnet restore
+        
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+        
+      - name: Publish Windows
+        run: dotnet publish --configuration Release --runtime win-x64 --self-contained false --output ./publish-win
+
+      - name: Publish Linux
+        run: dotnet publish --configuration Release --runtime linux-x64 --self-contained false --output ./publish-linux
+
+      - name: Create Zips
+        run: |
+          cd publish-win
+          zip -r "../businfo-${{ steps.version.outputs.version }}-windows-x64.zip" *
+          cd ../publish-linux
+          zip -r "../businfo-${{ steps.version.outputs.version }}-linux-x64.zip" *
+          cd ..
+        
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        if: success()
+        with:
+          files: |
+            businfo-${{ steps.version.outputs.version }}-windows-x64.zip
+            businfo-${{ steps.version.outputs.version }}-linux-x64.zip
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Release v${{ steps.version.outputs.version }}
+          generate_release_notes: false
+          body: ${{ steps.changelog.outputs.changelog }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
