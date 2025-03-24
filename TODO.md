@@ -4,7 +4,7 @@
 
 - [ ] Implement Razor pages
 - [ ] Implement full API
-- [ ] Remove watcher/dist/** from version control
+- [x] Remove watcher/dist/** from version control
 
 ## Medium Priority
 
@@ -26,4 +26,4 @@
 
 - None
 
-*Last updated: [2025-02-04]*
+*Last updated: [2025-03-24]*

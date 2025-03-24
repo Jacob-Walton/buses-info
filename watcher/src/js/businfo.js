@@ -148,10 +148,12 @@ const BusInfoModule = (() => {
 		if (isCollapsed) {
 			mapContent.classList.add("collapsed");
 			mapContent.style.maxHeight = "0px";
-			mapHeader.querySelector(".section-toggle").style.transform = "rotate(0deg)";
+			mapHeader.querySelector(".section-toggle").style.transform =
+				"rotate(0deg)";
 		} else {
 			mapContent.style.maxHeight = "500px";
-			mapHeader.querySelector(".section-toggle").style.transform = "rotate(180deg)";
+			mapHeader.querySelector(".section-toggle").style.transform =
+				"rotate(180deg)";
 		}
 
 		state.mapDisplayed = true;
@@ -263,11 +265,11 @@ const BusInfoModule = (() => {
 							<h3>Preferred Routes</h3>
 							<span class="bus-count">${preferredBuses.length} buses</span>
 						</div>
-						<button class="section-toggle" aria-label="Toggle section" style="transform: ${isCollapsed ? 'rotate(0)' : 'rotate(180deg)'}">
+						<button class="section-toggle" aria-label="Toggle section" style="transform: ${isCollapsed ? "rotate(0)" : "rotate(180deg)"}">
 							<i class="fas fa-chevron-up"></i>
 						</button>
 					</div>
-					<div class="bus-section-content ${isCollapsed ? 'collapsed' : ''}" style="max-height: ${isCollapsed ? '0px' : 'none'}">
+					<div class="bus-section-content ${isCollapsed ? "collapsed" : ""}" style="max-height: ${isCollapsed ? "0px" : "none"}">
 						${renderBusCards(preferredBuses, preferences)}
 					</div>
 				`;
@@ -296,11 +298,11 @@ const BusInfoModule = (() => {
 							<h3>All Routes</h3>
 							<span class="bus-count">${otherBuses.length} buses</span>
 						</div>
-						<button class="section-toggle" aria-label="Toggle section" style="transform: ${isCollapsed ? 'rotate(0deg)' : 'rotate(180deg)'}">
+						<button class="section-toggle" aria-label="Toggle section" style="transform: ${isCollapsed ? "rotate(0deg)" : "rotate(180deg)"}">
 							<i class="fas fa-chevron-up"></i>
 						</button>
 					</div>
-					<div class="bus-section-content ${isCollapsed ? 'collapsed' : ''}" style="max-height: ${isCollapsed ? '0px' : 'none'}">
+					<div class="bus-section-content ${isCollapsed ? "collapsed" : ""}" style="max-height: ${isCollapsed ? "0px" : "none"}">
 						${renderBusCards(otherBuses, preferences)}
 					</div>
 				`;
@@ -336,7 +338,7 @@ const BusInfoModule = (() => {
             <div class="star-badge" 
                  role="button"
                  tabindex="0"
-                 aria-label="${isPreferred ? 'Remove from' : 'Add to'} preferred routes"
+                 aria-label="${isPreferred ? "Remove from" : "Add to"} preferred routes"
                  aria-pressed="${isPreferred}">
               <i class="fas fa-star" aria-hidden="true"></i>
             </div>
@@ -366,7 +368,7 @@ const BusInfoModule = (() => {
 			...state.preferences,
 			preferredRoutes: isPreferred
 				? state.preferences.preferredRoutes.filter((r) => r !== route)
-				: [...state.preferences.preferredRoutes, route]
+				: [...state.preferences.preferredRoutes, route],
 		};
 
 		try {
@@ -374,7 +376,9 @@ const BusInfoModule = (() => {
 				method: "PUT",
 				headers: {
 					"Content-Type": "application/json",
-					RequestVerificationToken: document.querySelector('input[name="__RequestVerificationToken"]').value,
+					RequestVerificationToken: document.querySelector(
+						'input[name="__RequestVerificationToken"]',
+					).value,
 				},
 				body: JSON.stringify(updatedPreferences),
 			});
@@ -386,9 +390,13 @@ const BusInfoModule = (() => {
 
 			displayBusInfo();
 
-			Logger.debug(`Route ${route} ${isPreferred ? "removed from" : "added to"} preferred routes`);
+			Logger.debug(
+				`Route ${route} ${isPreferred ? "removed from" : "added to"} preferred routes`,
+			);
 		} catch (error) {
-			Logger.error("Failed to update preferred routes", { error: error.message });
+			Logger.error("Failed to update preferred routes", {
+				error: error.message,
+			});
 			displayError("Failed to update preferred routes. Please try again.");
 		}
 	}
@@ -405,8 +413,16 @@ const BusInfoModule = (() => {
 			dateToFormat < new Date(today.getTime() + 24 * 60 * 60 * 1000);
 
 		return isToday
-			? dateToFormat.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })
-			: dateToFormat.toLocaleString("en-GB", { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" });
+			? dateToFormat.toLocaleTimeString("en-GB", {
+					hour: "2-digit",
+					minute: "2-digit",
+				})
+			: dateToFormat.toLocaleString("en-GB", {
+					day: "numeric",
+					month: "numeric",
+					hour: "2-digit",
+					minute: "2-digit",
+				});
 	}
 
 	/**
@@ -420,7 +436,10 @@ const BusInfoModule = (() => {
 		elements.error.style.display = "block";
 		clearTimeout(state.errorTimeout);
 		if (critical) return;
-		state.errorTimeout = setTimeout(() => hideError(), CONFIG.ERROR_DISPLAY_DURATION);
+		state.errorTimeout = setTimeout(
+			() => hideError(),
+			CONFIG.ERROR_DISPLAY_DURATION,
+		);
 	}
 
 	/**
@@ -451,12 +470,14 @@ const BusInfoModule = (() => {
 		);
 
 		window.addEventListener("online", fetchBusInfo);
-		window.addEventListener("offline", () => displayError("No internet connection", true));
+		window.addEventListener("offline", () =>
+			displayError("No internet connection", true),
+		);
 
 		// Remove all other section toggle handlers - we'll use one central handler
 		document.addEventListener("click", (event) => {
 			// Don't handle if clicking an input
-			if (event.target.tagName === 'INPUT') return;
+			if (event.target.tagName === "INPUT") return;
 
 			// Find the closest header that was clicked
 			const header = event.target.closest(".bus-section-header");
@@ -464,7 +485,7 @@ const BusInfoModule = (() => {
 
 			// Find the section and toggle it
 			const section = header.closest(".bus-section");
-			if (section && section.id) {
+			if (section?.id) {
 				toggleSection(section.id);
 			}
 		});
@@ -502,7 +523,9 @@ const BusInfoModule = (() => {
 				if (starBadge) {
 					event.preventDefault();
 					const busItem = starBadge.closest(".bus-item");
-					const busNumber = busItem.querySelector(".bus-number").textContent.trim();
+					const busNumber = busItem
+						.querySelector(".bus-number")
+						.textContent.trim();
 					togglePreferredRoute(busNumber, starBadge);
 				}
 			}
@@ -520,7 +543,10 @@ const BusInfoModule = (() => {
 		sections.forEach((section) => {
 			const buses = section.querySelectorAll(".bus-item");
 			buses.forEach((bus) => {
-				const number = bus.querySelector(".bus-number").textContent.trim().toLowerCase();
+				const number = bus
+					.querySelector(".bus-number")
+					.textContent.trim()
+					.toLowerCase();
 				bus.style.display = number.includes(query) ? "flex" : "none";
 			});
 		});
@@ -564,7 +590,9 @@ const BusInfoModule = (() => {
 			const sections = localStorage.getItem(CONFIG.SECTION_STORAGE_KEY);
 			return sections ? JSON.parse(sections) : [];
 		} catch (error) {
-			Logger.error("Failed to fetch collapsed sections", { error: error.message });
+			Logger.error("Failed to fetch collapsed sections", {
+				error: error.message,
+			});
 			return [];
 		}
 	}
@@ -574,9 +602,14 @@ const BusInfoModule = (() => {
 	 */
 	function saveCollapsedSections() {
 		try {
-			localStorage.setItem(CONFIG.SECTION_STORAGE_KEY, JSON.stringify(Array.from(state.collapsedSections)));
+			localStorage.setItem(
+				CONFIG.SECTION_STORAGE_KEY,
+				JSON.stringify(Array.from(state.collapsedSections)),
+			);
 		} catch (error) {
-			Logger.error("Failed to save collapsed sections", { error: error.message });
+			Logger.error("Failed to save collapsed sections", {
+				error: error.message,
+			});
 		}
 	}
 
@@ -596,7 +629,8 @@ const BusInfoModule = (() => {
 		const content = section.querySelector(".bus-section-content");
 		const toggle = section.querySelector(".section-toggle");
 		const isCollapsed = !content.classList.contains("collapsed");
-		const isSpecialSection = sectionId === "bus-map-section" || sectionId === "predictions-section";
+		const isSpecialSection =
+			sectionId === "bus-map-section" || sectionId === "predictions-section";
 
 		if (isCollapsed) {
 			state.collapsedSections.add(sectionId);
@@ -606,7 +640,9 @@ const BusInfoModule = (() => {
 		} else {
 			state.collapsedSections.delete(sectionId);
 			content.classList.remove("collapsed");
-			content.style.maxHeight = isSpecialSection ? "500px" : `${content.scrollHeight}px`;
+			content.style.maxHeight = isSpecialSection
+				? "500px"
+				: `${content.scrollHeight}px`;
 			toggle.style.transform = "rotate(180deg)";
 		}
 
@@ -654,15 +690,22 @@ const BusInfoModule = (() => {
 			clearInterval(state.refreshInterval);
 			clearInterval(state.updateTimeInterval);
 
-			state.refreshInterval = setInterval(fetchBusInfo, CONFIG.REFRESH_INTERVAL);
+			state.refreshInterval = setInterval(
+				fetchBusInfo,
+				CONFIG.REFRESH_INTERVAL,
+			);
 			state.updateTimeInterval = setInterval(updateLastFetchedTime, 1000);
 
-			state.collapsedSections.forEach((sectionId) => applySectionState(sectionId));
+			state.collapsedSections.forEach((sectionId) =>
+				applySectionState(sectionId),
+			);
 
 			state.initialized = true;
 			Logger.info("BusInfoModule initialized successfully");
 		} catch (error) {
-			Logger.error("Failed to initialize BusInfoModule", { error: error.message });
+			Logger.error("Failed to initialize BusInfoModule", {
+				error: error.message,
+			});
 		}
 	}
 
@@ -695,7 +738,11 @@ const BusInfoModule = (() => {
 			}
 
 			const predictions = await response.json();
-			if (!predictions || typeof predictions !== "object" || !predictions.predictions) {
+			if (
+				!predictions ||
+				typeof predictions !== "object" ||
+				!predictions.predictions
+			) {
 				throw new Error("Invalid API response");
 			}
 
@@ -715,12 +762,12 @@ const BusInfoModule = (() => {
 		try {
 			const response = await fetch(`${CONFIG.API_ENDPOINT}/map`);
 			if (!response.ok) {
-				throw new Error('Failed to fetch map');
+				throw new Error("Failed to fetch map");
 			}
 
 			const blob = await response.blob();
 			if (blob.size === 0) {
-				throw new Error('Empty map image received');
+				throw new Error("Empty map image received");
 			}
 
 			displayBusMap(blob);
@@ -739,7 +786,8 @@ const BusInfoModule = (() => {
 
 		const predictionsSection = document.createElement("div");
 		predictionsSection.id = "predictions-section"; // Add ID for state management
-		predictionsSection.className = "bus-section map-section predictions-section";
+		predictionsSection.className =
+			"bus-section map-section predictions-section";
 
 		const predictionsHeader = document.createElement("div");
 		predictionsHeader.className = "bus-section-header";
@@ -814,10 +862,12 @@ const BusInfoModule = (() => {
 	 * @param {Object} predictions - Bus predictions data
 	 */
 	function updatePredictionsDisplay(predictions) {
-		if (!predictions ||
+		if (
+			!predictions ||
 			typeof predictions !== "object" ||
 			!predictions.predictions ||
-			Object.keys(predictions.predictions).length === 0) {
+			Object.keys(predictions.predictions).length === 0
+		) {
 			// Remove predictions section if it exists but there's no data
 			const existingSection = document.querySelector(".predictions-section");
 			if (existingSection) {
@@ -857,14 +907,15 @@ const BusInfoModule = (() => {
 					</div>
 					<div class="prediction-content">
 						${info.predictions
-						.map(
-							(pred) => `
+							.map(
+								(pred) => `
 								<div class="predicted-bay">
 									${pred.bay === "No historical data" ? "No historical data" : `Bay ${pred.bay}`}
 									<span class="probability">${pred.probability}%</span>
 								</div>
-								`
-						).join("")}
+								`,
+							)
+							.join("")}
 					</div>
 				`;
 
@@ -896,8 +947,7 @@ const BusInfoModule = (() => {
 		refreshBusInfo: fetchBusInfo,
 		refreshPreferences: fetchPreferences,
 		cleanup: cleanup,
-	}
-
+	};
 })();
 
 document.addEventListener("DOMContentLoaded", BusInfoModule.init);

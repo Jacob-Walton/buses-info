@@ -22,3 +22,6 @@ wwwroot/**/*.css
 *.log
 !Scripts/*.py
 .DS_Store
+watcher/dist/**.js
+watcher/dist/**.map
+watcher/dist/**.css
