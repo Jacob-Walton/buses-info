@@ -69,9 +69,7 @@ CERT_PASSWORD=$password
     Write-Host "An error occurred: $_" -ForegroundColor Red
     exit 1
 }
-exit
-#>
-
+#> 
 # Bash implementation
 echo -e "\033[0;32mGenerating self-signed certificate for HTTPS using Bash...\033[0m"
 
