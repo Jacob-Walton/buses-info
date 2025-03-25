@@ -1,0 +1,93 @@
+<header class="navbar-container">
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/" class="navbar-brand">Bus Info</a>
+            <div class="nav-links">
+                <a href="/" class="nav-item">Home</a>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a href="/buses" class="nav-item">Bus Information</a>
+                }
+                <a href="/about" class="nav-item">About</a>
+                <a href="/api-docs" class="nav-item">API</a>
+            </div>
+        </div>
+
+        <div class="nav-right">
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <div class="profile-dropdown">
+                    <button id="profileButton" class="profile-dropdown-toggle">
+                        <i class="fas fa-user-circle"></i>
+                        <span class="username">@User.Identity.Name</span>
+                        <i class="fas fa-caret-down"></i>
+                    </button>
+                    <div id="profileDropdown" class="profile-dropdown-menu">
+                        <div class="dropdown-header">
+                            <p>Signed in as</p>
+                            <p class="dropdown-username">@User.Identity.Name</p>
+                        </div>
+                        <a href="/Identity/Account/Manage" class="dropdown-item">
+                            <i class="fas fa-cog"></i> Account Settings
+                        </a>
+                        @if (User.IsInRole("Administrator"))
+                        {
+                            <a href="/Admin" class="dropdown-item admin-link">
+                                <i class="fas fa-shield-alt"></i> Admin Panel
+                            </a>
+                        }
+                        <div class="dropdown-divider"></div>
+                        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post">
+                            <button type="submit" class="dropdown-item">
+                                <i class="fas fa-sign-out-alt"></i> Sign out
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="auth-buttons">
+                    <a href="/Register" class="button tertiary">Sign up</a>
+                    <a href="/Login" class="button primary">Sign in</a>
+                </div>
+            }
+            <button id="mobileNavToggle" class="mobile-nav-toggle">
+                <span class="hamburger"></span>
+            </button>
+        </div>
+    </nav>
+
+    <div id="mobileNavPanel" class="mobile-nav-panel">
+        <div class="mobile-nav-content">
+            <div class="mobile-nav-links">
+                <a href="/" class="mobile-nav-item">Home</a>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a href="/buses" class="mobile-nav-item">Bus Information</a>
+                }
+                <a href="/about" class="mobile-nav-item">About</a>
+                <a href="/api-docs" class="mobile-nav-item">API</a>
+                
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a href="/Identity/Account/Manage" class="mobile-nav-item">Account Settings</a>
+                    
+                    @if (User.IsInRole("Administrator"))
+                    {
+                        <a href="/Admin" class="mobile-nav-item admin-link">Admin Panel</a>
+                    }
+                    
+                    <form class="form-inline logout-form" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post">
+                        <button type="submit" class="mobile-nav-item logout-button">Sign out</button>
+                    </form>
+                }
+                else
+                {
+                    <a href="/Login" class="mobile-nav-item">Sign in</a>
+                    <a href="/Register" class="mobile-nav-item">Sign up</a>
+                }
+            </div>
+        </div>
+    </div>
+</header>

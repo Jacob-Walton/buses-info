@@ -1,0 +1,62 @@
+@page
+@model AdminDashboardModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "_AdminLayout";
+}
+
+<div class="admin-dashboard">
+    <div class="dashboard-header">
+        <h1>Admin Dashboard</h1>
+        <div class="refresh-btn">
+            <button id="refreshDashboard" class="button secondary">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+        </div>
+    </div>
+
+    <div class="dashboard-metrics">
+        <div class="metric-card">
+            <i class="fas fa-users"></i>
+            <div class="metric-content">
+                <h3>Total Users</h3>
+                <div class="metric-value" id="userCount">Loading...</div>
+            </div>
+        </div>
+        <div class="metric-card">
+            <i class="fas fa-key"></i>
+            <div class="metric-content">
+                <h3>API Keys</h3>
+                <div class="metric-value" id="apiKeyCount">Loading...</div>
+            </div>
+        </div>
+        <div class="metric-card">
+            <i class="fas fa-clock"></i>
+            <div class="metric-content">
+                <h3>Pending Requests</h3>
+                <div class="metric-value" id="pendingRequestCount">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-actions">
+        <div class="action-card">
+            <h3>API Key Management</h3>
+            <p>Review and manage API key requests and active keys.</p>
+            <a href="/Admin/ApiKeys" class="button primary">Manage API Keys</a>
+        </div>
+        <div class="action-card">
+            <h3>User Management</h3>
+            <p>View and manage user accounts.</p>
+            <a href="/Admin/Users" class="button primary">Manage Users</a>
+        </div>
+    </div>
+
+    <div class="dashboard-footer">
+        <div id="lastUpdated">Last updated: Never</div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/admin.js" asp-append-version="true"></script>
+}

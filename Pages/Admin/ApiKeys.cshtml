@@ -1,0 +1,194 @@
+@page
+@model ApiKeysModel
+@{
+    ViewData["Title"] = "API Key Management";
+    Layout = "_AdminLayout";
+}
+
+<div class="admin-api-keys">
+    <div class="page-header">
+        <h1>API Key Management</h1>
+        <a href="/Admin" class="button secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-button active" data-tab="requests">API Key Requests</button>
+        <button class="tab-button" data-tab="active">Active API Keys</button>
+    </div>
+
+    <div class="tab-content active" id="requests-tab">
+        <div class="filter-bar">
+            <select id="requestStatusFilter" class="form-select">
+                <option value="all">All Requests</option>
+                <option value="Pending">Pending</option>
+                <option value="Approved">Approved</option>
+                <option value="Rejected">Rejected</option>
+            </select>
+            <div class="count-info">
+                <span id="requestCount">0</span> requests found
+            </div>
+        </div>
+
+        <div class="data-container">
+            <div id="apiKeyRequestsLoading" class="loading-spinner">
+                <div class="spinner"></div>
+                <p>Loading API key requests...</p>
+            </div>
+            <div id="apiKeyRequestsError" class="error-message hidden">
+                <i class="fas fa-exclamation-circle"></i>
+                <p>Failed to load API key requests. Please try again.</p>
+            </div>
+            <div id="apiKeyRequestsEmpty" class="empty-state hidden">
+                <i class="fas fa-inbox"></i>
+                <p>No API key requests found.</p>
+            </div>
+            <div id="apiKeyRequestsList" class="requests-list hidden"></div>
+        </div>
+    </div>
+
+    <div class="tab-content" id="active-tab">
+        <div class="filter-bar">
+            <input type="text" id="apiKeySearch" class="form-input" placeholder="Search by user or key...">
+            <div class="count-info">
+                <span id="apiKeyCount">0</span> active keys
+            </div>
+        </div>
+
+        <div class="data-container">
+            <div id="apiKeysLoading" class="loading-spinner">
+                <div class="spinner"></div>
+                <p>Loading API keys...</p>
+            </div>
+            <div id="apiKeysError" class="error-message hidden">
+                <i class="fas fa-exclamation-circle"></i>
+                <p>Failed to load API keys. Please try again.</p>
+            </div>
+            <div id="apiKeysEmpty" class="empty-state hidden">
+                <i class="fas fa-key"></i>
+                <p>No API keys found.</p>
+            </div>
+            <div id="apiKeysList" class="api-keys-list hidden"></div>
+        </div>
+    </div>
+</div>
+
+<!-- API Key Request Review Modal -->
+<div id="reviewModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Review API Key Request</h2>
+            <button class="close-button">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="request-details">
+                <div class="detail-row">
+                    <div class="detail-label">User:</div>
+                    <div class="detail-value" id="reviewUserName"></div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Email:</div>
+                    <div class="detail-value" id="reviewUserEmail"></div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Reason:</div>
+                    <div class="detail-value" id="reviewReason"></div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Intended Use:</div>
+                    <div class="detail-value" id="reviewIntendedUse"></div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Requested:</div>
+                    <div class="detail-value" id="reviewRequestedAt"></div>
+                </div>
+            </div>
+
+            <div class="review-form">
+                <input type="hidden" id="reviewRequestId">
+                
+                <div class="form-group">
+                    <label for="reviewNotes">Review Notes:</label>
+                    <textarea id="reviewNotes" class="form-input" rows="3" placeholder="Optional notes about this request..."></textarea>
+                </div>
+                
+                <div id="rejectionReasonContainer" class="form-group hidden">
+                    <label for="rejectionReason">Rejection Reason:</label>
+                    <textarea id="rejectionReason" class="form-input" rows="3" placeholder="Explain why this request is being rejected..."></textarea>
+                </div>
+                
+                <div class="review-actions">
+                    <button id="approveButton" class="button primary">
+                        <i class="fas fa-check"></i> Approve
+                    </button>
+                    <button id="rejectButton" class="button danger">
+                        <i class="fas fa-times"></i> Reject
+                    </button>
+                    <button id="cancelButton" class="button secondary">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- API Key Metrics Modal -->
+<div id="metricsModal" class="modal">
+    <div class="modal-content modal-lg">
+        <div class="modal-header">
+            <h2>API Key Metrics</h2>
+            <button class="close-button">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="metricsLoading" class="loading-spinner">
+                <div class="spinner"></div>
+                <p>Loading metrics...</p>
+            </div>
+            <div id="metricsContent" class="hidden">
+                <div class="metrics-header">
+                    <div class="detail-row">
+                        <div class="detail-label">User:</div>
+                        <div class="detail-value" id="metricsUserName"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">API Key:</div>
+                        <div class="detail-value" id="metricsApiKey"></div>
+                    </div>
+                </div>
+
+                <div class="metrics-overview">
+                    <div class="metric-card small">
+                        <div class="metric-title">Total Requests</div>
+                        <div class="metric-value" id="metricsTotalRequests"></div>
+                    </div>
+                    <div class="metric-card small">
+                        <div class="metric-title">Requests Today</div>
+                        <div class="metric-value" id="metricsRequestsToday"></div>
+                    </div>
+                    <div class="metric-card small">
+                        <div class="metric-title">Avg Response Time</div>
+                        <div class="metric-value" id="metricsAvgResponseTime"></div>
+                    </div>
+                </div>
+
+                <div class="metrics-charts">
+                    <div class="chart-container">
+                        <h3>Requests Over Time</h3>
+                        <canvas id="timeSeriesChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Status Code Distribution</h3>
+                        <canvas id="statusCodesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="~/js/admin.js" asp-append-version="true"></script>
+}

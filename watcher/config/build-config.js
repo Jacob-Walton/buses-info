@@ -28,6 +28,7 @@ const config = {
 			"js/authTransitions.js",
 			"js/contentPages.js",
 			"js/navbar.js",
+			"js/admin.js",
 		],
 		scss: ["styles/site.scss"],
 	},
