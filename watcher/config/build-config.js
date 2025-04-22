@@ -29,6 +29,7 @@ const config = {
 			"js/contentPages.js",
 			"js/navbar.js",
 			"js/admin.js",
+			"js/busrankings.js"
 		],
 		scss: ["styles/site.scss"],
 	},

@@ -405,5 +405,85 @@ namespace BusInfo.Services
             // More gradual confidence reduction
             return (int)(highestProb * (0.7 + (ratio * 0.3)));
         }
+
+        private int ScoreBus(string bay)
+        {
+            // Split bay and number [0] [1:]
+            // Example bay A16 -> A, 16
+            string bayRow = bay.Substring(0, 1).ToUpperInvariant();
+            string bayNumber = bay.Substring(1).Trim();
+            if (string.IsNullOrEmpty(bayNumber)) return 0;
+
+            if (bayRow == "T") return 10;
+
+            try
+            {
+                int bayNum = int.Parse(bayNumber, CultureInfo.InvariantCulture);
+                return bayNum < 10 ? Math.Max(10 - bayNum, 0) : 0;
+            }
+            catch (FormatException)
+            {
+                return 0;
+            }
+        }
+
+        public async Task<BusRankingResponse> GetBusRankingsAsync()
+        {
+            // Get all buses from BusArrivals
+            var allBuses = _dbContext.BusArrivals
+                .AsNoTracking()
+                .Select(ba => new { ba.Service, ba.Bay })
+                .ToListAsync();
+
+            var busData = await allBuses;
+            ConcurrentDictionary<string, BusRankingInfo> rankingDict = new ConcurrentDictionary<string, BusRankingInfo>();
+
+            List<Task> tasks = new List<Task>();
+            foreach (var bus in busData)
+            {
+                tasks.Add(Task.Run(() =>
+                {
+                    string service = bus.Service;
+                    string bay = bus.Bay ?? string.Empty;
+                    int score = ScoreBus(bay);
+
+                    if (score > 0)
+                    {
+                        rankingDict.AddOrUpdate(service, new BusRankingInfo
+                        {
+                            Service = service,
+                            Rank = 0,
+                            Score = score
+                        },
+                        (key, existing) =>
+                        {
+                            existing.Score += score;
+                            return existing;
+                        });
+                    }
+                }));
+            }
+            await Task.WhenAll(tasks);
+
+            // Sort the rankings by score in descending order and assign ranks
+            List<BusRankingInfo> sortedRankings = rankingDict.Values.OrderByDescending(x => x.Score).ToList();
+            for (int i = 0; i < sortedRankings.Count; i++)
+            {
+                sortedRankings[i].Rank = i + 1;
+            }
+
+            // Create a new dictionary with the sorted rankings
+            Dictionary<string, BusRankingInfo> sortedRankingDict = new Dictionary<string, BusRankingInfo>();
+            foreach (BusRankingInfo? ranking in sortedRankings)
+            {
+                sortedRankingDict[ranking.Service] = ranking;
+            }
+
+            return new BusRankingResponse
+            {
+                Rankings = sortedRankingDict,
+                LastUpdated = DateTime.UtcNow
+            };
+        }
     }
 }

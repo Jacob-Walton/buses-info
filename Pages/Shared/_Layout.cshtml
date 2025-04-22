@@ -83,16 +83,20 @@
                 <ul class="navbar-nav">
                     <li class="nav-item">
                         <a class="nav-link @(ViewContext.RouteData.Values["Page"]?.ToString() == "/Index" ? "active" : "")"
-                            asp-page="/Index">Home</a>
+                            asp-page="/Index"><i class="fas fa-home"></i> Home</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link @(ViewContext.RouteData.Values["Page"]?.ToString() == "/BusInfo" ? "active" : "")"
-                            asp-page="/BusInfo">Bus Information</a>
+                            asp-page="/BusInfo"><i class="fas fa-bus"></i> Buses</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["Page"]?.ToString() == "/BusRankings" ? "active" : "")"
+                            asp-page="/BusRankings"><i class="fas fa-trophy"></i> Rankings</a>
                     </li>
 
                     @if (User.Identity?.IsAuthenticated != true)
                     {
-                        <a class="nav-link nav-link__bold" asp-page="/Login">Sign In</a>
+                        <a class="nav-link nav-link__bold" asp-page="/Login"><i class="fas fa-sign-in-alt"></i> Sign In</a>
                     }
                     else
                     {
@@ -147,7 +151,14 @@
                     <a class="mobile-nav-link @(ViewContext.RouteData.Values["Page"]?.ToString() == "/BusInfo" ? "active" : "")"
                         asp-page="/BusInfo">
                         <i class="fas fa-bus"></i>
-                        Bus Information
+                        Buses
+                    </a>
+                </li>
+                <li class="mobile-nav-item">
+                    <a class="mobile-nav-link @(ViewContext.RouteData.Values["Page"]?.ToString() == "/BusRankings" ? "active" : "")"
+                        asp-page="/BusRankings">
+                        <i class="fas fa-trophy"></i>
+                        Rankings
                     </a>
                 </li>
             </ul>
@@ -216,7 +227,8 @@
                         <h4>Navigation</h4>
                         <ul>
                             <li><a asp-page="/Index"><i class="fas fa-home"></i> Home</a></li>
-                            <li><a asp-page="/BusInfo"><i class="fas fa-bus"></i> Bus Information</a></li>
+                            <li><a asp-page="/BusInfo"><i class="fas fa-bus"></i> Buses</a></li>
+                            <li><a asp-page="/BusRankings"><i class="fas fa-trophy"></i> Rankings</a></li>
                             @if (User.Identity?.IsAuthenticated == true)
                             {
                                 <li><a asp-page="/Account/Settings"><i class="fas fa-cog"></i> Account Settings</a></li>

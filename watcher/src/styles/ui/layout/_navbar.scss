@@ -105,21 +105,45 @@
       padding: 0.5rem 0.75rem;
       @include transition(all, 0.2s);
       @include alternating-border-radius($button-border-radius);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      i {
+        font-size: 0.9rem;
+        // Slight opacity for subtle appearance
+        opacity: 0.8;
+      }
 
       &:hover {
         color: $primary;
         background-color: $primary-hover;
+
+        i {
+          opacity: 1;
+        }
       }
 
       &.active {
         color: $primary;
         background-color: $primary-hover;
+
+        i {
+          opacity: 1;
+        }
       }
 
       &__bold {
         background-color: $primary;
         color: #ffffff;
         padding: 0.5rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        i {
+          opacity: 1;
+        }
 
         &:hover {
           background-color: $primary-dark;
@@ -138,6 +162,13 @@
     font-weight: 600;
     @include transition(all, 0.2s);
     @include alternating-border-radius($button-border-radius);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    i {
+      font-size: 0.9rem;
+    }
 
     &:hover {
       background-color: $primary-dark;
@@ -162,7 +193,11 @@
       font-weight: 600;
 
       i {
-        font-size: 1rem;
+        font-size: 0.9rem;
+
+        &:first-child {
+          margin-right: -0.25rem;
+        }
       }
 
       &:hover {

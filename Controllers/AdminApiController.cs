@@ -21,7 +21,7 @@ namespace BusInfo.Controllers
         private readonly IApiKeyGenerator _apiKeyGenerator;
 
         public AdminApiController(
-            ApplicationDbContext context, 
+            ApplicationDbContext context,
             IUserService userService,
             IApiKeyGenerator apiKeyGenerator)
         {
@@ -117,7 +117,7 @@ namespace BusInfo.Controllers
                 request.ReviewedBy = User.Identity?.Name;
                 request.ReviewedAt = DateTime.UtcNow;
                 request.ReviewNotes = review.Notes;
-                
+
                 if (review.Status == "Rejected")
                 {
                     request.RejectionReason = review.RejectionReason;
@@ -126,7 +126,7 @@ namespace BusInfo.Controllers
                 {
                     // Generate a new API key for the user using the key generator service
                     string apiKeyValue = await _apiKeyGenerator.GenerateApiKeyAsync(request.UserId);
-                    
+
                     // The key is already saved to the database by the generator service
                     // so we don't need to create and save a new ApiKey entity
                 }
@@ -223,7 +223,7 @@ namespace BusInfo.Controllers
         {
             var result = new List<TimeSeriesDataPoint>();
             var rnd = new Random();
-            
+
             for (int i = 0; i < 24; i++)
             {
                 result.Add(new TimeSeriesDataPoint
@@ -232,7 +232,7 @@ namespace BusInfo.Controllers
                     Value = rnd.Next(0, 50)
                 });
             }
-            
+
             return result;
         }
         #endregion

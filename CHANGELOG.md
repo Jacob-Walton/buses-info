@@ -1,6 +1,14 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+All notable changes to this project will be documented in this file..
+
+## [v0.1.4] - 2025-04-22
+
+### Added
+
+- Bus rankings page.
+
+---
 
 ## [v0.1.3] - 2025-03-24
 

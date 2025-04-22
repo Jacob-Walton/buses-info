@@ -4,22 +4,22 @@
     ViewData["Title"] = "Home";
 }
 
-<div class="home-container">
-    <section class="hero">
-        <div class="hero-content">
-            <h1 class="hero-title">Bus Info</h1>
-            <p class="hero-subtitle">Unofficial bus arrival information</p>
-            
-            @if (User.Identity?.IsAuthenticated == true)
-            {
-                <a href="/buses" class="button primary">View Bus Information</a>
-            }
-            else
-            {
-                <a href="/Login" class="button primary">Sign in to view bus information</a>
-            }
-            
-            <p class="disclaimer">This is an independent project and is not affiliated with or endorsed by Runshaw College.</p>
-        </div>
-    </section>
+<div class="home-background">
+    <div class="auth-links">
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <a href="/buses" class="btn-primary">
+                <i class="fas fa-bus"></i> View Bus Information
+            </a>
+        }
+        else
+        {
+            <a href="/Login" class="btn-primary">
+                <i class="fas fa-sign-in-alt"></i> Sign In
+            </a>
+            <a href="/Register" class="btn-secondary">
+                <i class="fas fa-user-plus"></i> Register
+            </a>
+        }
+    </div>
 </div>

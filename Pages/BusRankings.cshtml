@@ -1,0 +1,38 @@
+@page "/rankings"
+@model BusRankingsModel
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@{
+    ViewData["Title"] = "Bus Rankings";
+}
+
+<div class="bus-rankings-container">
+    <div class="content-container">
+        <h1 class="rankings-title">Bus Rankings</h1>
+        <p class="rankings-subtitle">These rankings are based on past bus arrivals and are updated daily.</p>
+
+        <div id="error" class="error" style="display: none;"></div>
+
+        <div id="loadingIndicator" class="loading">
+            <div class="spinner"></div>
+            <div class="loading-text">Loading rankings...</div>
+        </div>
+        
+        <div id="rankingsContainer" class="rankings-container">
+            <!-- Rankings will be populated here -->
+        </div>
+    </div>
+
+    <div class="info-footer">
+        <div id="lastUpdated"></div>
+        <div class="data-source">
+            Rankings are based on statistical analysis of historical bay assignments • Updated daily
+        </div>
+    </div>
+</div>
+
+@Html.AntiForgeryToken()
+
+@section Scripts {
+    <script src="/js/busrankings.js" defer></script>
+}

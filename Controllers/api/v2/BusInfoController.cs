@@ -79,6 +79,29 @@ namespace BusInfo.Controllers.Api.V2
             }
         }
 
+        [HttpGet("rankings")]
+        [ProducesResponseType(typeof(BusRankingResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetBusRankingsAsync()
+        {
+            try
+            {
+                BusRankingResponse rankings = await _busInfoService.GetBusRankingsAsync();
+                return Ok(rankings);
+            }
+            catch (ApiException ex)
+            {
+                _logError(_logger, DateTime.UtcNow, "API error retrieving rankings", ex);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while fetching bus rankings.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logError(_logger, DateTime.UtcNow, "Invalid operation while retrieving rankings", ex);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing the rankings data.");
+            }
+        }
+
         [HttpGet("map")]
         [Produces("image/png")]
         [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
