@@ -45,6 +45,7 @@ using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.Extensions.Logging;
 using BusInfo.Middleware;
 using Npgsql;
+using Azure.Security.KeyVault.Certificates;
 
 namespace BusInfo
 {
@@ -77,6 +78,26 @@ namespace BusInfo
                 X509KeyStorageFlags.Exportable);
         }
 
+        private static X509Certificate2 LoadHttpsCertificateFromKeyVault(string keyVaultUri, TokenCredential credential)
+        {
+            // Create a certificate client
+            CertificateClient certificateClient = new(new Uri(keyVaultUri), credential);
+            _ = certificateClient.GetCertificate("https");
+
+            SecretClient secretClient = new(new Uri(keyVaultUri), credential);
+
+            // Get the secret by the certificate's name (NOT by trying to parse the secret ID)
+            KeyVaultSecret secret = secretClient.GetSecret("https");
+
+            // Convert the secret value to a certificate with private key
+            byte[] pfxBytes = Convert.FromBase64String(secret.Value);
+            return new X509Certificate2(pfxBytes,
+                                       (string)null!,
+                                       X509KeyStorageFlags.MachineKeySet |
+                                       X509KeyStorageFlags.PersistKeySet |
+                                       X509KeyStorageFlags.Exportable);
+        }
+
         public static void Main(string[] args)
         {
             try
@@ -86,6 +107,7 @@ namespace BusInfo
                     .CreateBootstrapLogger();
 
                 Log.Information("Starting application");
+                Log.Information("Environment: {Environment}", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"));
 
                 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -196,7 +218,13 @@ namespace BusInfo
             ConfigurationManager config = builder.Configuration;
             string keyVaultUri = config["KeyVault:Uri"] ?? throw new InvalidOperationException("KeyVault URI is not configured");
 
-            X509Certificate2 serverCertificate = LoadCertificateFromKeyVault(keyVaultUri, config);
+            X509Certificate2 dataProtectionCert = LoadCertificateFromKeyVault(keyVaultUri, config);
+
+            TokenCredential credential = CreateAzureCredential(config);
+            X509Certificate2 httpsCert = LoadHttpsCertificateFromKeyVault(keyVaultUri, credential);
+
+            builder.WebHost.ConfigureKestrel(options =>
+                options.ConfigureHttpsDefaults(httpsOptions => httpsOptions.ServerCertificate = httpsCert));
 
             // Configure SMTP settings
             builder.Services.Configure<SmtpSettings>(config.GetSection("Smtp"));
@@ -213,15 +241,21 @@ namespace BusInfo
             {
                 builder.Services.AddDataProtection()
                     .PersistKeysToStackExchangeRedis(redis, config["DataProtection:Keys:InstanceName"])
-                    .ProtectKeysWithCertificate(serverCertificate)
+                    .ProtectKeysWithCertificate(dataProtectionCert)
                     .SetApplicationName(config["DataProtection:Keys:ApplicationName"] ?? "BusInfo");
             }
             else
             {
+                // For non-Windows platforms, use a different key protection mechanism
                 builder.Services.AddDataProtection()
                     .PersistKeysToStackExchangeRedis(redis, config["DataProtection:Keys:InstanceName"])
-                    .ProtectKeysWithCertificate(serverCertificate)
+                    .ProtectKeysWithCertificate(dataProtectionCert)
+                    .SetDefaultKeyLifetime(TimeSpan.FromDays(90))
+                    .DisableAutomaticKeyGeneration() // Prevent automatic key generation
                     .SetApplicationName(config["DataProtection:Keys:ApplicationName"] ?? "BusInfo");
+
+                // Log that we're using cross-platform configuration
+                Log.Information("Configuring Data Protection for non-Windows platform");
             }
 
             builder.Services.AddStackExchangeRedisCache(options =>
