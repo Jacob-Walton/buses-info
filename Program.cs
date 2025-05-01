@@ -72,7 +72,7 @@ namespace BusInfo
             return new X509Certificate2(
                 certificateBytes,
                 (string)null!,
-                X509KeyStorageFlags.MachineKeySet |
+                X509KeyStorageFlags.UserKeySet |
                 X509KeyStorageFlags.PersistKeySet |
                 X509KeyStorageFlags.Exportable);
         }

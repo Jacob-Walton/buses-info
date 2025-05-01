@@ -29,6 +29,20 @@
     <meta name="baidu" content="noindex, nofollow" />
     <meta name="duckduckgo" content="noindex, nofollow" />
     @await RenderSectionAsync("Head", required: false)
+
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "0bad85d3-b37c-4836-8e82-d6cb94fff109",
+      safari_web_id: "web.onesignal.auto.3c6dd35c-6a89-4a57-8823-48d881ba6e9f",
+      notifyButton: {
+        enable: true,
+      },
+    });
+  });
+</script>
 </head>
 
 <body>
