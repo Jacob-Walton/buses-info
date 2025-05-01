@@ -26,3 +26,5 @@ watcher/dist/**.js
 watcher/dist/**.map
 watcher/dist/**.css
 certs/**
+pnpm-lock.yaml
+watcher/dist/**
