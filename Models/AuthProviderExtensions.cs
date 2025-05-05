@@ -6,7 +6,7 @@ namespace BusInfo.Models
         {
             AuthProvider.Local => "Email/Password",
             AuthProvider.Google => "Google",
-            AuthProvider.Microsoft => "Microsoft",
+            AuthProvider.Apple => "Apple",
             _ => provider.ToString()
         };
     }

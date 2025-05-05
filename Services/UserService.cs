@@ -316,15 +316,21 @@ namespace BusInfo.Services
             // Check scheme
             string? scheme = principal.Identity?.AuthenticationType;
 
-            return idp?.Contains("google", StringComparison.OrdinalIgnoreCase) == true ||
+            if (idp?.Contains("google", StringComparison.OrdinalIgnoreCase) == true ||
                 loginProvider?.Equals("Google", StringComparison.OrdinalIgnoreCase) == true ||
-                scheme?.Equals("Google", StringComparison.OrdinalIgnoreCase) == true
-                ? AuthProvider.Google
-                : idp?.Contains("microsoft", StringComparison.OrdinalIgnoreCase) == true ||
-                                loginProvider?.Equals("Microsoft", StringComparison.OrdinalIgnoreCase) == true ||
-                                scheme?.Equals("Microsoft", StringComparison.OrdinalIgnoreCase) == true
-                    ? AuthProvider.Microsoft
-                    : AuthProvider.Local;
+                scheme?.Equals("Google", StringComparison.OrdinalIgnoreCase) == true)
+            {
+                return AuthProvider.Google;
+            }
+
+            if (idp?.Contains("apple", StringComparison.OrdinalIgnoreCase) == true ||
+                loginProvider?.Equals("Apple", StringComparison.OrdinalIgnoreCase) == true ||
+                scheme?.Equals("Apple", StringComparison.OrdinalIgnoreCase) == true)
+            {
+                return AuthProvider.Apple;
+            }
+
+            return AuthProvider.Local;
         }
     }
 }

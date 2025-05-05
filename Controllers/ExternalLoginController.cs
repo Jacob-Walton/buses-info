@@ -34,6 +34,12 @@ namespace BusInfo.Controllers
                 }
             };
 
+            if (provider.Equals("Apple", StringComparison.OrdinalIgnoreCase))
+            {
+                // Set specific properties for Apple sign-in if needed
+                properties.Items["response_mode"] = "form_post";
+            }
+
             return Challenge(properties, provider);
         }
 
@@ -56,11 +62,6 @@ namespace BusInfo.Controllers
             }
 
             return LocalRedirect("/");
-        }
-
-        public IActionResult SignIn(string provider, Uri? returnUrl = null)
-        {
-            throw new NotImplementedException();
         }
     }
 }

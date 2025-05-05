@@ -6,8 +6,6 @@ ENV DotNetTargettingPacksTargetsPath10=true
 
 # Restore dependencies
 RUN dotnet restore BusInfo.csproj
-# Build the project
-RUN dotnet build BusInfo.csproj -c Release -o out --framework net10.0
 # Publish the project
 RUN dotnet publish BusInfo.csproj -c Release -o out --framework net10.0
 

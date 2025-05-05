@@ -15,9 +15,9 @@ namespace BusInfo.Models
         /// </summary>
         Google = 1,
         /// <summary>
-        /// Microsoft OAuth
+        /// Apple OAuth
         /// </summary>
-        Microsoft = 2
+        Apple = 2
     }
 
     public class ApplicationUser

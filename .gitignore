@@ -28,3 +28,4 @@ watcher/dist/**.css
 certs/**
 pnpm-lock.yaml
 watcher/dist/**
+*.p8

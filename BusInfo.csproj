@@ -21,6 +21,7 @@
 
   <!-- Common packages for both frameworks -->
   <ItemGroup>
+    <PackageReference Include="AspNet.Security.OAuth.Apple" Version="9.3.0" />
     <PackageReference Include="ConfigCat.Client" Version="9.3.2" />
     <PackageReference Include="CsvHelper" Version="33.0.1" />
     <PackageReference Include="Humanizer.Core" Version="3.0.0-beta.54" />

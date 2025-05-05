@@ -46,6 +46,7 @@ using Microsoft.Extensions.Logging;
 using BusInfo.Middleware;
 using Npgsql;
 using Azure.Security.KeyVault.Certificates;
+using AspNet.Security.OAuth.Apple;
 
 namespace BusInfo
 {
@@ -397,24 +398,42 @@ namespace BusInfo
                     }
                 };
             })
-            .AddMicrosoftAccount(options =>
+            .AddApple(options =>
             {
-                options.ClientId = config["Authentication:Microsoft:ClientId"] ??
-                    throw new InvalidOperationException("Microsoft Client ID not configured");
-                options.ClientSecret = config["Authentication:Microsoft:ClientSecret"] ??
-                    throw new InvalidOperationException("Microsoft Client Secret not configured");
+                options.ClientId = config["Authentication:Apple:ClientId"] ??
+                    throw new InvalidOperationException("Apple Client ID not configured");
+                options.KeyId = config["Authentication:Apple:KeyId"] ??
+                    throw new InvalidOperationException("Apple Key ID not configured");
+                options.TeamId = config["Authentication:Apple:TeamId"] ??
+                    throw new InvalidOperationException("Apple Team ID not configured");
+
+                // Format the key with proper PEM format if it isn't already
+                string privateKeyContent = config["Authentication:Apple:PrivateKey"] ??
+                    throw new InvalidOperationException("Apple Private Key not configured");
+
+                // Ensure the private key is properly formatted with headers if needed
+                if (!privateKeyContent.Contains("BEGIN PRIVATE KEY"))
+                {
+                    privateKeyContent = $"-----BEGIN PRIVATE KEY-----\n{privateKeyContent}\n-----END PRIVATE KEY-----";
+                }
+
+                options.PrivateKey = (_, _) => Task.FromResult(privateKeyContent.AsMemory());
+
+                options.GenerateClientSecret = true;
+
                 options.SaveTokens = true;
-                options.CallbackPath = "/signin-microsoft";
+                options.CallbackPath = "/signin-apple";
                 options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 
-                options.Events = new OAuthEvents
+                // Set up events similar to what you have for Google
+                options.Events = new AppleAuthenticationEvents
                 {
-                    OnTicketReceived = async context =>
+                    OnCreatingTicket = async context =>
                     {
                         try
                         {
                             IUserService userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
-                            if (context?.Principal == null)
+                            if (context.Principal == null)
                                 throw new InvalidOperationException("Authentication principal not found");
 
                             ApplicationUser? user = await userService.GetOrCreateUserAsync(context.Principal) ??
@@ -432,21 +451,13 @@ namespace BusInfo
                             if (user.IsAdmin)
                                 claims.Add(new Claim(ClaimTypes.Role, "Admin"));
 
-                            ClaimsIdentity identity = new(claims, context.Principal.Identity?.AuthenticationType ??
-                                CookieAuthenticationDefaults.AuthenticationScheme);
+                            ClaimsIdentity identity = new(claims, context.Scheme.Name);
                             context.Principal = new ClaimsPrincipal(identity);
                         }
                         catch (InvalidOperationException ex) when (ex.Message.Contains("different authentication method", StringComparison.OrdinalIgnoreCase))
                         {
-                            context.Response.Redirect($"/login?error=wrong_provider&message={Uri.EscapeDataString(ex.Message)}");
-                            context.HandleResponse();
+                            context.Fail(ex);
                         }
-                    },
-                    OnRemoteFailure = context =>
-                    {
-                        context.HandleResponse();
-                        context.Response.Redirect($"/login?error=access_denied&message={Uri.EscapeDataString("Authentication was cancelled.")}");
-                        return Task.CompletedTask;
                     }
                 };
             });
