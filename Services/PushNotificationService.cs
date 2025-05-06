@@ -56,6 +56,11 @@ namespace BusInfo.Services
             Define<string>(LogLevel.Error, 6013,
                 "Error registering device for user {UserId}");
 
+        // New logger definition for multiple devices
+        private static readonly Action<ILogger, string, int, Exception?> _logMultipleDevicesForUser =
+            Define<string, int>(LogLevel.Information, 6014,
+                "User {UserId} has {DeviceCount} registered devices");
+
         // Notification sending (6030-6049)
         private static readonly Action<ILogger, string, string, Exception?> _logSendingNotification =
             Define<string, string>(LogLevel.Information, 6030,
@@ -238,6 +243,15 @@ namespace BusInfo.Services
 
                     _dbContext.DeviceRegistrations.Add(newDevice);
                     _logNewDeviceRegistered(_logger, request.UserId, null);
+
+                    // Log the number of devices this user now has (including the new one)
+                    int deviceCount = await _dbContext.DeviceRegistrations
+                        .CountAsync(d => d.UserId == request.UserId && d.IsActive) + 1;
+
+                    if (deviceCount > 1)
+                    {
+                        _logMultipleDevicesForUser(_logger, request.UserId, deviceCount, null);
+                    }
                 }
 
                 await _dbContext.SaveChangesAsync();
@@ -272,25 +286,49 @@ namespace BusInfo.Services
                     return false;
                 }
 
+                // Log when we find multiple devices
+                if (devices.Count > 1)
+                {
+                    _logMultipleDevicesForUser(_logger, userId, devices.Count, null);
+                }
+
                 bool anySuccess = false;
+                List<Exception> exceptions = new();
 
                 // Send to each device
                 foreach (DeviceRegistration device in devices)
                 {
-                    // Check if notification type matches user preferences
-                    if (!ShouldSendNotification(device, notification))
+                    try
                     {
-                        _logNotificationSkipped(_logger, device.Id, null);
-                        continue;
+                        // Check if notification type matches user preferences
+                        if (!ShouldSendNotification(device, notification))
+                        {
+                            _logNotificationSkipped(_logger, device.Id, null);
+                            continue;
+                        }
+
+                        bool success = await SendPushNotificationAsync(device.DeviceToken, notification);
+
+                        if (success)
+                        {
+                            anySuccess = true;
+                        }
+                        else
+                        {
+                            _logSendNotificationFailed(_logger, device.Id, null);
+                        }
                     }
-
-                    bool success = await SendPushNotificationAsync(device.DeviceToken, notification);
-                    anySuccess |= success;
-
-                    if (!success)
+                    catch (Exception ex)
                     {
-                        _logSendNotificationFailed(_logger, device.Id, null);
+                        exceptions.Add(ex);
+                        _logger.LogError(ex, "Error sending notification to device {DeviceId}", device.Id);
                     }
+                }
+
+                // If we have exceptions but some notifications were sent successfully, we still return success
+                if (exceptions.Count > 0 && !anySuccess)
+                {
+                    throw new AggregateException("Failed to send notifications to any device", exceptions);
                 }
 
                 return anySuccess;
