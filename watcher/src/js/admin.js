@@ -12,6 +12,8 @@ document.addEventListener("DOMContentLoaded", function () {
     initializeApiKeyManagement();
   } else if (currentPath === "/Admin/Users") {
     initializeUserManagement();
+  } else if (currentPath === "/Admin/Notifications") {
+    initializeNotificationsManagement();
   }
 });
 
@@ -748,6 +750,243 @@ async function toggleUserLock(userId) {
     console.error("Error toggling user lock:", error);
     alert("Failed to update user account status. Please try again.");
   }
+}
+
+/**
+ * Notifications Management initialization and functionality
+ */
+function initializeNotificationsManagement() {
+  // Initialize tabs
+  const tabButtons = document.querySelectorAll('.tab-button');
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const tabId = button.getAttribute('data-tab');
+      switchTab(tabId);
+      
+      // Load notification history when switching to history tab
+      if (tabId === 'history') {
+        loadNotificationHistory();
+      }
+    });
+  });
+
+  // Set up filter for notification history
+  document.getElementById('historyFilter')?.addEventListener('change', (e) => {
+    loadNotificationHistory(e.target.value);
+  });
+
+  // Set up broadcast notification form
+  const broadcastForm = document.getElementById('broadcastForm');
+  if (broadcastForm) {
+    broadcastForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      showNotificationPreview('broadcast');
+    });
+  }
+
+  // Set up user-specific notification form
+  const userSpecificForm = document.getElementById('userSpecificForm');
+  if (userSpecificForm) {
+    userSpecificForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      showNotificationPreview('user-specific');
+    });
+  }
+  
+  // Set up preview modal buttons
+  document.querySelector('#previewModal .close-button')?.addEventListener('click', closePreviewModal);
+  document.getElementById('editButton')?.addEventListener('click', closePreviewModal);
+  document.getElementById('sendButton')?.addEventListener('click', sendNotification);
+  
+  // Set up result modal buttons
+  document.querySelector('#resultModal .close-button')?.addEventListener('click', closeResultModal);
+  document.getElementById('closeResultButton')?.addEventListener('click', closeResultModal);
+  
+  // If we're on history tab initially, load the history
+  if (document.querySelector('.tab-button[data-tab="history"].active')) {
+    loadNotificationHistory();
+  }
+}
+
+async function loadNotificationHistory(type = 'all') {
+  const loadingElement = document.getElementById('notificationsLoading');
+  const errorElement = document.getElementById('notificationsError');
+  const emptyElement = document.getElementById('notificationsEmpty');
+  const listElement = document.getElementById('notificationsList');
+
+  try {
+    showElement(loadingElement);
+    hideElement(errorElement);
+    hideElement(emptyElement);
+    hideElement(listElement);
+
+    const response = await fetch(`/api/admin/notifications/history?type=${type}`);
+    if (!response.ok) {
+      throw new Error("Failed to load notification history");
+    }
+
+    const notifications = await response.json();
+    
+    // Update counter
+    document.getElementById('notificationCount').textContent = notifications.length;
+
+    if (notifications.length === 0) {
+      showElement(emptyElement);
+    } else {
+      renderNotificationHistory(notifications);
+      showElement(listElement);
+    }
+  } catch (error) {
+    console.error("Error loading notification history:", error);
+    showElement(errorElement);
+  } finally {
+    hideElement(loadingElement);
+  }
+}
+
+function renderNotificationHistory(notifications) {
+  const tableBody = document.getElementById('notificationsTableBody');
+  tableBody.innerHTML = '';
+
+  notifications.forEach(notification => {
+    const row = document.createElement('tr');
+    
+    const sentAt = new Date(notification.sentAt);
+    const isBroadcast = notification.recipients === 'All Users';
+    
+    row.innerHTML = `
+      <td>${sentAt.toLocaleString()}</td>
+      <td>
+        <span class="badge ${notification.notificationType.toLowerCase()}">
+          ${notification.notificationType}
+        </span>
+      </td>
+      <td title="${escapeHtml(notification.title)}">${escapeHtml(notification.title)}</td>
+      <td title="${escapeHtml(notification.body)}">${escapeHtml(notification.body)}</td>
+      <td>
+        <span class="badge ${isBroadcast ? 'broadcast' : 'targeted'}" title="${escapeHtml(notification.recipients)}">
+          ${isBroadcast ? 'All Users' : 'Specific Users'}
+        </span>
+      </td>
+      <td>${notification.devicesReached}</td>
+    `;
+    
+    tableBody.appendChild(row);
+  });
+}
+
+function showNotificationPreview(type) {
+  let title, body, notificationType, recipients;
+  
+  if (type === 'broadcast') {
+    title = document.getElementById('broadcastTitle').value;
+    body = document.getElementById('broadcastBody').value;
+    notificationType = document.getElementById('broadcastType').value;
+    recipients = 'All Users';
+  } else {
+    title = document.getElementById('userSpecificTitle').value;
+    body = document.getElementById('userSpecificBody').value;
+    notificationType = document.getElementById('userSpecificType').value;
+    
+    const emails = document.getElementById('userEmails').value;
+    const emailCount = emails.split(/[,;]/).filter(email => email.trim().length > 0).length;
+    recipients = `${emailCount} specific user(s)`;
+  }
+  
+  // Set preview content
+  document.getElementById('previewTitle').textContent = title;
+  document.getElementById('previewBody').textContent = body;
+  document.getElementById('previewRecipients').textContent = `Recipients: ${recipients}`;
+  
+  // Store type for later use when sending
+  document.getElementById('previewModal').dataset.notificationType = type;
+  
+  // Show modal
+  document.getElementById('previewModal').classList.add('active');
+}
+
+function closePreviewModal() {
+  document.getElementById('previewModal').classList.remove('active');
+}
+
+function closeResultModal() {
+  document.getElementById('resultModal').classList.remove('active');
+}
+
+async function sendNotification() {
+  const type = document.getElementById('previewModal').dataset.notificationType;
+  
+  let endpoint, payload;
+  
+  if (type === 'broadcast') {
+    endpoint = '/api/admin/notifications/broadcast';
+    payload = {
+      title: document.getElementById('broadcastTitle').value,
+      body: document.getElementById('broadcastBody').value,
+      type: document.getElementById('broadcastType').value
+    };
+  } else {
+    endpoint = '/api/admin/notifications/users';
+    payload = {
+      title: document.getElementById('userSpecificTitle').value,
+      body: document.getElementById('userSpecificBody').value,
+      type: document.getElementById('userSpecificType').value,
+      emails: document.getElementById('userEmails').value
+    };
+  }
+  
+  try {
+    closePreviewModal();
+    
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+    
+    const result = await response.json();
+    
+    if (response.ok && result.success) {
+      showResultModal(true, `${result.message}`);
+      
+      // Reset forms
+      if (type === 'broadcast') {
+        document.getElementById('broadcastForm').reset();
+      } else {
+        document.getElementById('userSpecificForm').reset();
+      }
+      
+      // Reload notification history if we're on that tab
+      if (document.querySelector('.tab-button[data-tab="history"].active')) {
+        loadNotificationHistory(document.getElementById('historyFilter').value);
+      }
+    } else {
+      const errorMessage = result.error || 'Failed to send notification';
+      showResultModal(false, errorMessage);
+    }
+  } catch (error) {
+    console.error("Error sending notification:", error);
+    showResultModal(false, 'An unexpected error occurred while sending the notification.');
+  }
+}
+
+function showResultModal(success, message) {
+  const successElement = document.getElementById('resultSuccess');
+  const errorElement = document.getElementById('resultError');
+  
+  if (success) {
+    document.getElementById('successDetails').textContent = message;
+    showElement(successElement);
+    hideElement(errorElement);
+  } else {
+    document.getElementById('errorDetails').textContent = message;
+    hideElement(successElement);
+    showElement(errorElement);
+  }
+  
+  document.getElementById('resultModal').classList.add('active');
 }
 
 /**

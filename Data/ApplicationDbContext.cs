@@ -13,6 +13,7 @@ namespace BusInfo.Data
         public DbSet<BusArrival>? BusArrivals { get; set; }
         public DbSet<ApiKey>? ApiKeys { get; set; }
         public DbSet<DeviceRegistration> DeviceRegistrations { get; set; }
+        public DbSet<NotificationHistory> NotificationHistory { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -88,6 +89,24 @@ namespace BusInfo.Data
                     .IsUnique();
 
                 entity.HasIndex(d => d.UserId);
+            })
+                .Entity<NotificationHistory>(entity =>
+            {
+                entity.Property(n => n.Title)
+                    .IsRequired()
+                    .HasMaxLength(200);
+
+                entity.Property(n => n.Body)
+                    .IsRequired()
+                    .HasMaxLength(1000);
+
+                entity.Property(n => n.NotificationType)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(n => n.Recipients)
+                    .IsRequired()
+                    .HasMaxLength(1000);
             });
         }
     }

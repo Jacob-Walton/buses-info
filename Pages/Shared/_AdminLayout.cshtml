@@ -27,6 +27,12 @@
                         <span>Users</span>
                     </a>
                 </li>
+                <li class="@(ViewContext.RouteData.Values["Page"]?.ToString() == "/Admin/Notifications" ? "active" : "")">
+                    <a href="/Admin/Notifications">
+                        <i class="fas fa-bell"></i>
+                        <span>Notifications</span>
+                    </a>
+                </li>
             </ul>
         </nav>
         <div class="sidebar-footer">

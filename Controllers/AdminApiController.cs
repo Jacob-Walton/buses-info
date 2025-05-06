@@ -4,10 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using BusInfo.Data;
 using BusInfo.Models;
+using BusInfo.Models.Notifications;
 using BusInfo.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace BusInfo.Controllers
 {
@@ -19,15 +21,21 @@ namespace BusInfo.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IUserService _userService;
         private readonly IApiKeyGenerator _apiKeyGenerator;
+        private readonly IPushNotificationService _notificationService;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public AdminApiController(
             ApplicationDbContext context,
             IUserService userService,
-            IApiKeyGenerator apiKeyGenerator)
+            IApiKeyGenerator apiKeyGenerator,
+            IPushNotificationService notificationService,
+            UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _userService = userService;
             _apiKeyGenerator = apiKeyGenerator;
+            _notificationService = notificationService;
+            _userManager = userManager;
         }
 
         #region Dashboard
@@ -293,6 +301,174 @@ namespace BusInfo.Controllers
             }
         }
         #endregion
+
+        #region Notifications Management
+
+        [HttpPost("notifications/broadcast")]
+        public async Task<IActionResult> SendBroadcastNotification([FromBody] NotificationRequest request)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var notification = new PushNotification
+                {
+                    Title = request.Title,
+                    Body = request.Body,
+                    Type = ParseNotificationType(request.Type),
+                    Sound = "default"
+                };
+
+                int count = await _notificationService.SendNotificationToAllAsync(notification);
+
+                // Save notification to history
+                await SaveNotificationHistoryAsync(notification, "All Users", count);
+
+                return Ok(new { success = true, count, message = $"Notification sent to {count} devices" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, error = ex.Message });
+            }
+        }
+
+        [HttpPost("notifications/users")]
+        public async Task<IActionResult> SendUserSpecificNotification([FromBody] UserNotificationRequest request)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                // Parse email addresses and find users
+                var emails = request.Emails.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(e => e.Trim())
+                    .Where(e => !string.IsNullOrEmpty(e))
+                    .ToList();
+
+                if (emails.Count == 0)
+                {
+                    return BadRequest(new { error = "No valid email addresses provided" });
+                }
+
+                var notification = new PushNotification
+                {
+                    Title = request.Title,
+                    Body = request.Body,
+                    Type = ParseNotificationType(request.Type),
+                    Sound = "default"
+                };
+
+                int totalSent = 0;
+                var notFoundEmails = new List<string>();
+                var foundUsers = new List<string>();
+
+                foreach (var email in emails)
+                {
+                    var user = await _userManager.FindByEmailAsync(email);
+                    if (user == null)
+                    {
+                        notFoundEmails.Add(email);
+                        continue;
+                    }
+
+                    foundUsers.Add(user.Email);
+                    bool sent = await _notificationService.SendNotificationAsync(user.Id, notification);
+                    if (sent)
+                    {
+                        totalSent++;
+                    }
+                }
+
+                // Save notification to history
+                await SaveNotificationHistoryAsync(notification, string.Join(", ", foundUsers), totalSent);
+
+                return Ok(new
+                {
+                    success = totalSent > 0,
+                    count = totalSent,
+                    notFound = notFoundEmails,
+                    message = $"Notification sent to {totalSent} devices"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, error = ex.Message });
+            }
+        }
+
+        [HttpGet("notifications/history")]
+        public async Task<IActionResult> GetNotificationHistory(string type = "all")
+        {
+            try
+            {
+                var query = _context.NotificationHistory.AsQueryable();
+
+                if (type == "broadcast")
+                {
+                    query = query.Where(n => n.Recipients == "All Users");
+                }
+                else if (type == "targeted")
+                {
+                    query = query.Where(n => n.Recipients != "All Users");
+                }
+
+                var history = await query
+                    .OrderByDescending(n => n.SentAt)
+                    .Take(100) // Limit to last 100 notifications
+                    .Select(n => new
+                    {
+                        n.Id,
+                        n.Title,
+                        n.Body,
+                        n.NotificationType,
+                        n.Recipients,
+                        n.DevicesReached,
+                        n.SentAt,
+                        n.SentBy
+                    })
+                    .ToListAsync();
+
+                return Ok(history);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        private async Task SaveNotificationHistoryAsync(PushNotification notification, string recipients, int devicesReached)
+        {
+            var history = new NotificationHistory
+            {
+                Title = notification.Title,
+                Body = notification.Body,
+                NotificationType = notification.Type.ToString(),
+                Recipients = recipients,
+                DevicesReached = devicesReached,
+                SentAt = DateTime.UtcNow,
+                SentBy = User.Identity?.Name
+            };
+
+            _context.NotificationHistory.Add(history);
+            await _context.SaveChangesAsync();
+        }
+
+        private static NotificationType ParseNotificationType(string type)
+        {
+            if (Enum.TryParse<NotificationType>(type, true, out var result))
+            {
+                return result;
+            }
+            return NotificationType.General;
+        }
+
+        #endregion
     }
 
     public class ApiKeyRequestReview
@@ -300,5 +476,17 @@ namespace BusInfo.Controllers
         public string Status { get; set; } = "Pending";
         public string? Notes { get; set; }
         public string? RejectionReason { get; set; }
+    }
+
+    public class NotificationRequest
+    {
+        public string Title { get; set; } = "";
+        public string Body { get; set; } = "";
+        public string Type { get; set; } = "General";
+    }
+
+    public class UserNotificationRequest : NotificationRequest
+    {
+        public string Emails { get; set; } = "";
     }
 }

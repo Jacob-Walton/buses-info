@@ -1,0 +1,236 @@
+// Admin Notifications Styles
+// -------------------------
+
+// Notification Cards
+.notification-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: $spacing-unit * 2;
+  margin-bottom: $spacing-unit * 2;
+}
+
+.notification-card {
+  background-color: $background;
+  border: 1px solid $border;
+  @include alternating-border-radius($regular-border-radius);
+  overflow: hidden;
+  @include box-shadow(0 2px 4px rgba(0, 0, 0, 0.05));
+  
+  .notification-card-header {
+    background-color: $light-grey;
+    padding: $spacing-unit * 1.5;
+    border-bottom: 1px solid $border;
+    
+    h3 {
+      margin: 0 0 $spacing-unit / 2;
+      color: $secondary;
+      display: flex;
+      align-items: center;
+      
+      i {
+        margin-right: $spacing-unit / 2;
+        color: $primary;
+      }
+    }
+    
+    p {
+      margin: 0;
+      color: $dark-grey;
+      font-size: 0.875rem;
+    }
+  }
+  
+  .notification-card-body {
+    padding: $spacing-unit * 1.5;
+  }
+}
+
+// Notification Form
+.notification-form {
+  .form-group {
+    margin-bottom: $spacing-unit * 1.5;
+    
+    label {
+      display: block;
+      margin-bottom: $spacing-unit / 2;
+      font-weight: 600;
+      color: $secondary;
+    }
+    
+    .form-input, .form-select {
+      width: 100%;
+      padding: $spacing-unit;
+      border: 1px solid $border;
+      background-color: $background;
+      color: $text;
+      font-size: 1rem;
+      @include alternating-border-radius($regular-border-radius / 2);
+      @include transition;
+      
+      &:focus {
+        outline: none;
+        border-color: $primary;
+      }
+    }
+    
+    textarea.form-input {
+      resize: vertical;
+    }
+  }
+}
+
+// Notification History List
+.notifications-list {
+  .data-table {
+    th, td {
+      &:nth-child(3), &:nth-child(4) { // Title and Message columns
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      
+      &.broadcast {
+        background-color: rgba($primary, 0.1);
+        color: $primary;
+      }
+      
+      &.targeted {
+        background-color: rgba($secondary, 0.1);
+        color: $secondary;
+      }
+      
+      &.general {
+        background-color: rgba($dark-grey, 0.1);
+        color: $dark-grey;
+      }
+      
+      &.serviceupdate {
+        background-color: rgba($accent, 0.1);
+        color: $accent;
+      }
+      
+      &.busarrival {
+        background-color: rgba($status-arrived, 0.1);
+        color: $status-arrived;
+      }
+    }
+  }
+}
+
+// Notification Preview
+.notification-preview {
+  margin-bottom: $spacing-unit * 2;
+  
+  .notification-preview-device {
+    width: 100%;
+    max-width: 350px;
+    margin: 0 auto;
+    background-color: $surface-alt;
+    border-radius: 12px;
+    padding: $spacing-unit;
+    @include box-shadow(0 2px 8px rgba(0, 0, 0, 0.1));
+    
+    .notification-preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: $spacing-unit / 2;
+      
+      .preview-time {
+        font-size: 0.75rem;
+        color: $dark-grey;
+      }
+      
+      .preview-app-name {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: $secondary;
+      }
+    }
+    
+    .notification-preview-content {
+      background-color: $background;
+      padding: $spacing-unit;
+      border-radius: 8px;
+      @include box-shadow(0 1px 3px rgba(0, 0, 0, 0.05));
+      
+      .preview-title {
+        font-weight: 600;
+        margin-bottom: $spacing-unit / 2;
+        color: $secondary;
+      }
+      
+      .preview-body {
+        font-size: 0.875rem;
+        color: $text;
+      }
+    }
+  }
+}
+
+.preview-actions {
+  text-align: center;
+  
+  .preview-recipients {
+    margin-bottom: $spacing-unit;
+    color: $dark-grey;
+    font-size: 0.875rem;
+  }
+  
+  .button-group {
+    display: flex;
+    justify-content: center;
+    gap: $spacing-unit;
+  }
+}
+
+// Result message
+.result-message {
+  text-align: center;
+  padding: $spacing-unit * 2;
+  
+  i {
+    font-size: 3rem;
+    margin-bottom: $spacing-unit;
+  }
+  
+  h3 {
+    margin: 0 0 $spacing-unit;
+  }
+  
+  p {
+    color: $dark-grey;
+  }
+  
+  &.success i {
+    color: $status-arrived;
+  }
+  
+  &.error i {
+    color: $status-not-arrived;
+  }
+}
+
+.button-group.center {
+  display: flex;
+  justify-content: center;
+  margin-top: $spacing-unit * 2;
+}
+
+// Media queries
+@media (max-width: 768px) {
+  .notification-cards {
+    grid-template-columns: 1fr;
+  }
+}
