@@ -99,7 +99,7 @@ namespace BusInfo.Services
                 return null;
 
             ApplicationUser? user = await _context.Users!
-                .FirstOrDefaultAsync(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase) && u.DeletedAt == null);
+                .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
 
             if (user == null)
                 return null;
@@ -149,9 +149,8 @@ namespace BusInfo.Services
             // Find or create user account
             string email = payload.Email;
 
-            // Modified query to avoid using IsPendingDeletion
             ApplicationUser? user = await _context.Users!
-                .FirstOrDefaultAsync(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
+                .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
 
             if (user == null)
             {
@@ -243,7 +242,7 @@ namespace BusInfo.Services
 
             // Modified query to avoid using IsPendingDeletion
             ApplicationUser? user = await _context.Users!
-                .FirstOrDefaultAsync(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
+                .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
 
             if (user == null)
             {
@@ -357,7 +356,7 @@ namespace BusInfo.Services
         public Task<ApplicationUser?> GetUserByEmailAsync(string email)
         {
             return _context.Users!
-                .FirstOrDefaultAsync(u => string.Equals(u.Email, email, StringComparison.OrdinalIgnoreCase));
+                .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
         }
 
         public async Task<ApplicationUser?> GetOrCreateUserAsync(ClaimsPrincipal principal)

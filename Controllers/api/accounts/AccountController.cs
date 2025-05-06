@@ -706,7 +706,15 @@ namespace BusInfo.Controllers
             string? email = User.FindFirst("preferred_username")?.Value
                 ?? User.FindFirst(ClaimTypes.Email)?.Value;
 
-            return email == null ? null : (_context.Users!.FirstOrDefault(u => u.Email == email)?.Id);
+            if (email == null)
+                return null;
+                
+            // Convert to lower case on both sides to ensure case-insensitive comparison
+            string emailLower = email.ToLower();
+            return _context.Users!
+                .Where(u => u.Email.ToLower() == emailLower)
+                .Select(u => u.Id)
+                .FirstOrDefault();
         }
     }
 
