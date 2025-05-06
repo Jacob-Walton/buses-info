@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using BusInfo.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BusInfo.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250505163212_RefreshToken")]
+    partial class RefreshToken
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -286,61 +289,6 @@ namespace BusInfo.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("BusStatuses");
-                });
-
-            modelBuilder.Entity("BusInfo.Models.Notifications.DeviceRegistration", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AppVersion")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<bool>("BusArrivalNotifications")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("DeviceToken")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("DeviceType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("OsVersion")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<bool>("ServiceUpdateNotifications")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("SpecificBuses")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DeviceToken")
-                        .IsUnique();
-
-                    b.ToTable("DeviceRegistrations");
                 });
 
             modelBuilder.Entity("BusInfo.Models.ApiKey", b =>

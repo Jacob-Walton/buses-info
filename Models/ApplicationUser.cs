@@ -39,34 +39,30 @@ namespace BusInfo.Models
         public bool EnableEmailNotifications { get; set; } = true;
         public string PasswordHash { get; set; } = string.Empty;
         public string Salt { get; set; } = string.Empty;
-
         public string? PasswordResetToken { get; set; }
         public DateTime? PasswordResetTokenExpiry { get; set; }
-
         public bool IsEmailVerified { get; set; }
         public string? EmailVerificationToken { get; set; }
         public DateTime? EmailVerificationTokenExpiry { get; set; }
         public DateTime? LastPasswordChangeDate { get; set; }
         public bool RequiresPasswordChange { get; set; }
-
         public bool TwoFactorEnabled { get; set; }
         public string? TwoFactorSecret { get; set; }
         public List<string> RecoveryCodes { get; set; }
         public int FailedLoginAttempts { get; set; }
         public DateTime? LockoutEnd { get; set; }
         public bool IsLocked => LockoutEnd > DateTime.UtcNow;
-
         public DateTime? DeletedAt { get; set; }
         public bool IsPendingDeletion => DeletedAt.HasValue && DeletedAt.Value.AddDays(30) > DateTime.UtcNow;
         public DateTime? DeletionConfirmedAt { get; set; }
         public string? DeletionReason { get; set; }
-
         public bool HasAgreedToTerms { get; set; }
         public DateTime? TermsAgreedAt { get; set; }
-
         public ApiKey? ActiveApiKey { get; set; }
-
         public AuthProvider AuthProvider { get; set; } = AuthProvider.Local;
         public string? ExternalId { get; set; }
+
+        public string? RefreshToken { get; set; }
+        public DateTime? RefreshTokenExpiry { get; set; }
     }
 }

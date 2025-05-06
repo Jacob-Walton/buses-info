@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using BusInfo.Models;
+using BusInfo.Models.Notifications;
 using System;
 
 namespace BusInfo.Data
@@ -11,6 +12,7 @@ namespace BusInfo.Data
         public DbSet<ApiKeyRequest>? ApiKeyRequests { get; set; }
         public DbSet<BusArrival>? BusArrivals { get; set; }
         public DbSet<ApiKey>? ApiKeys { get; set; }
+        public DbSet<DeviceRegistration> DeviceRegistrations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -18,18 +20,15 @@ namespace BusInfo.Data
             {
                 entity.HasIndex(u => u.Email).IsUnique();
 
-                // Basic columns
                 entity.Property(u => u.Email).IsRequired().HasMaxLength(256);
                 entity.Property(u => u.PasswordHash).IsRequired();
                 entity.Property(u => u.Salt).IsRequired();
 
-                // Array/List properties
                 entity.Property(u => u.PreferredRoutes)
                     .HasColumnType("text[]");
                 entity.Property(u => u.RecoveryCodes)
                     .HasColumnType("text[]");
 
-                // Nullable columns with specific types
                 entity.Property(u => u.PasswordResetToken)
                     .HasColumnType("varchar(100)");
                 entity.Property(u => u.EmailVerificationToken)
@@ -37,7 +36,6 @@ namespace BusInfo.Data
                 entity.Property(u => u.TwoFactorSecret)
                     .HasColumnType("varchar(100)");
 
-                // DateTime columns
                 entity.Property(u => u.CreatedAt)
                     .HasColumnType("timestamp with time zone");
                 entity.Property(u => u.LastLoginAt)
@@ -81,6 +79,15 @@ namespace BusInfo.Data
                     .WithMany()
                     .HasForeignKey(e => e.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
+            })
+                .Entity<DeviceRegistration>(entity =>
+            {
+                entity.HasKey(d => d.Id);
+
+                entity.HasIndex(d => d.DeviceToken)
+                    .IsUnique();
+
+                entity.HasIndex(d => d.UserId);
             });
         }
     }

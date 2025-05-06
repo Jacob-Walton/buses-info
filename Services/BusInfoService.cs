@@ -23,9 +23,9 @@ namespace BusInfo.Services
     /// <summary>
     /// Provides functionality to fetch and manage bus information and arrival predictions.
     /// </summary>
-    /// <param name="clientFactory"></param>
-    /// <param name="cache"></param>
-    /// <param name="dbContext"></param>
+    /// <param name="clientFactory">The factory to create HTTP clients.</param>
+    /// <param name="cache">The distributed cache for caching bus information.</param>
+    /// <param name="dbContext">The database context for accessing bus arrival data.</param>
     public sealed class BusInfoService(
         IHttpClientFactory clientFactory,
         IDistributedCache cache,
@@ -37,6 +37,7 @@ namespace BusInfo.Services
         private const string PREDICTION_CACHE_KEY = "BusPrediction_";
         private static readonly TimeSpan CACHE_EXPIRATION = TimeSpan.FromSeconds(30);
         private static readonly TimeSpan REQUEST_TIMEOUT = TimeSpan.FromSeconds(10);
+        private static readonly SemaphoreSlim _fetchLock = new(1, 1);
 
         private readonly IHttpClientFactory _clientFactory = clientFactory ?? throw new ArgumentNullException(nameof(clientFactory));
         private readonly IDistributedCache _cache = cache ?? throw new ArgumentNullException(nameof(cache));
@@ -91,8 +92,16 @@ namespace BusInfo.Services
                 };
             }
 
+            await _fetchLock.WaitAsync(cts.Token); // Wait for semaphore
             try
             {
+                // Check cache again inside lock in case another thread fetched while waiting
+                string? cachedData = await _cache.GetStringAsync(CACHE_KEY);
+                if (!string.IsNullOrEmpty(cachedData))
+                {
+                    return JsonSerializer.Deserialize<BusInfoResponse>(cachedData) ?? CreateEmptyBusInfoResponse();
+                }
+
                 string response = await client.GetStringAsync(new Uri(BUS_INFO_URL), cts.Token);
 
                 HtmlDocument doc = new();
@@ -100,12 +109,12 @@ namespace BusInfo.Services
 
                 Dictionary<string, BusStatus> busData = [];
 
-                HtmlNodeCollection rows = doc.DocumentNode.SelectNodes("//table[@id='grdAll']//tr");
+                HtmlNodeCollection? rows = doc.DocumentNode.SelectNodes("//table[@id='grdAll']//tr");
                 if (rows != null)
                 {
                     foreach (HtmlNode? row in rows)
                     {
-                        HtmlNodeCollection cells = row.SelectNodes("td");
+                        HtmlNodeCollection? cells = row.SelectNodes("td");
                         if (cells?.Count >= 3)
                         {
                             string service = cells[0].InnerText.Trim();
@@ -120,18 +129,59 @@ namespace BusInfo.Services
                     }
                 }
 
-                return new BusInfoResponse
+                // If no bus data was found, get services from the database
+                if (busData.Count == 0)
+                {
+                    List<string> uniqueServices = await _dbContext.BusArrivals!
+                        .Select(ba => ba.Service)
+                        .Distinct()
+                        .ToListAsync();
+
+                    foreach (string service in uniqueServices)
+                    {
+                        busData[service] = new BusStatus
+                        {
+                            Status = "Not arrived",
+                            Bay = null
+                        };
+                    }
+                }
+
+                BusInfoResponse busInfoResponse = new()
                 {
                     BusData = busData,
                     LastUpdated = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture),
-                    Status = "OK"
+                    Status = busData.Count > 0 ? "OK" : "No bus data available"
                 };
+
+                // Cache the newly fetched data
+                await _cache.SetStringAsync(
+                    CACHE_KEY,
+                    JsonSerializer.Serialize(busInfoResponse),
+                    new DistributedCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow = CACHE_EXPIRATION
+                    });
+
+                return busInfoResponse;
+            }
+            catch (OperationCanceledException ex)
+            {
+                // Log timeout or cancellation
+                throw new InvalidOperationException("Request timed out while fetching bus info.", ex);
             }
             catch (Exception ex)
             {
+                // Log general fetch error
                 throw new InvalidOperationException("Failed to fetch bus info", ex);
             }
+            finally
+            {
+                _fetchLock.Release(); // Release semaphore
+            }
         }
+
+        private static BusInfoResponse CreateEmptyBusInfoResponse() => new() { BusData = [], Status = "Cached data invalid" };
 
         public async Task<BusInfoLegacyResponse> GetLegacyBusInfoAsync()
         {
@@ -159,8 +209,16 @@ namespace BusInfo.Services
             using HttpClient client = _clientFactory.CreateClient();
             using CancellationTokenSource cts = new(REQUEST_TIMEOUT);
 
+            await _fetchLock.WaitAsync(cts.Token); // Wait for semaphore
             try
             {
+                // Check cache again inside lock
+                string? cachedData = await _cache.GetStringAsync(CACHE_KEY_LEGACY);
+                if (!string.IsNullOrEmpty(cachedData))
+                {
+                    return JsonSerializer.Deserialize<BusInfoLegacyResponse>(cachedData) ?? CreateEmptyLegacyBusInfoResponse();
+                }
+
                 string response = await client.GetStringAsync(new Uri(BUS_INFO_URL), cts.Token);
 
                 HtmlDocument doc = new();
@@ -168,12 +226,12 @@ namespace BusInfo.Services
 
                 Dictionary<string, string> busData = [];
 
-                HtmlNodeCollection rows = doc.DocumentNode.SelectNodes("//table[@id='grdAll']//tr");
+                HtmlNodeCollection? rows = doc.DocumentNode.SelectNodes("//table[@id='grdAll']//tr");
                 if (rows != null)
                 {
                     foreach (HtmlNode? row in rows)
                     {
-                        HtmlNodeCollection cells = row.SelectNodes("td");
+                        HtmlNodeCollection? cells = row.SelectNodes("td");
                         if (cells?.Count >= 3)
                         {
                             string service = cells[0].InnerText.Trim();
@@ -188,17 +246,40 @@ namespace BusInfo.Services
                     }
                 }
 
-                return new BusInfoLegacyResponse
+                BusInfoLegacyResponse legacyResponse = new()
                 {
                     BusData = busData,
                     LastUpdated = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture)
                 };
+
+                // Cache the newly fetched data
+                await _cache.SetStringAsync(
+                    CACHE_KEY_LEGACY,
+                    JsonSerializer.Serialize(legacyResponse),
+                    new DistributedCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow = CACHE_EXPIRATION
+                    });
+
+                return legacyResponse;
+            }
+            catch (OperationCanceledException ex)
+            {
+                // Log timeout or cancellation
+                throw new InvalidOperationException("Request timed out while fetching legacy bus info.", ex);
             }
             catch (Exception ex)
             {
+                // Log general fetch error
                 throw new InvalidOperationException("Failed to fetch legacy bus info", ex);
             }
+            finally
+            {
+                _fetchLock.Release(); // Release semaphore
+            }
         }
+
+        private static BusInfoLegacyResponse CreateEmptyLegacyBusInfoResponse() => new() { BusData = [] };
 
         /// <summary>
         /// Gets predictions for bus bay assignments based on historical data.
@@ -208,6 +289,7 @@ namespace BusInfo.Services
         /// Predictions are cached for 45 seconds to avoid excessive database queries.
         /// No predictions are made for weekend services.
         /// </remarks>
+        /// <exception cref="InvalidOperationException">throws if the prediction process fails.</exception>
         public async Task<BusPredictionResponse> GetBusPredictionsAsync()
         {
             try
@@ -256,7 +338,7 @@ namespace BusInfo.Services
                 DateTime now = DateTime.UtcNow;
                 int currentDayOfWeek = (int)now.DayOfWeek;
 
-                var historicalData = await _dbContext!.BusArrivals
+                var historicalData = await _dbContext.BusArrivals!
                     .AsNoTracking()
                     .Where(ba => services.Contains(ba.Service) &&
                                 ba.ArrivalTime >= now.AddDays(-28) &&
@@ -267,7 +349,7 @@ namespace BusInfo.Services
 
                 if (historicalData.Count == 0)
                 {
-                    historicalData = await _dbContext.BusArrivals
+                    historicalData = await _dbContext.BusArrivals!
                         .AsNoTracking()
                         .Where(ba => services.Contains(ba.Service) &&
                                     !string.IsNullOrEmpty(ba.Bay))
@@ -406,12 +488,12 @@ namespace BusInfo.Services
             return (int)(highestProb * (0.7 + (ratio * 0.3)));
         }
 
-        private int ScoreBus(string bay)
+        private static int ScoreBus(string bay)
         {
             // Split bay and number [0] [1:]
             // Example bay A16 -> A, 16
-            string bayRow = bay.Substring(0, 1).ToUpperInvariant();
-            string bayNumber = bay.Substring(1).Trim();
+            string bayRow = bay[..1].ToUpperInvariant();
+            string bayNumber = bay[1..].Trim();
             if (string.IsNullOrEmpty(bayNumber)) return 0;
 
             if (bayRow == "T") return 10;
@@ -430,15 +512,15 @@ namespace BusInfo.Services
         public async Task<BusRankingResponse> GetBusRankingsAsync()
         {
             // Get all buses from BusArrivals
-            var allBuses = _dbContext.BusArrivals
+            var allBuses = _dbContext.BusArrivals!
                 .AsNoTracking()
                 .Select(ba => new { ba.Service, ba.Bay })
                 .ToListAsync();
 
             var busData = await allBuses;
-            ConcurrentDictionary<string, BusRankingInfo> rankingDict = new ConcurrentDictionary<string, BusRankingInfo>();
+            ConcurrentDictionary<string, BusRankingInfo> rankingDict = new();
 
-            List<Task> tasks = new List<Task>();
+            List<Task> tasks = [];
             foreach (var bus in busData)
             {
                 tasks.Add(Task.Run(() =>
@@ -455,7 +537,7 @@ namespace BusInfo.Services
                             Rank = 0,
                             Score = score
                         },
-                        (key, existing) =>
+                        (_, existing) =>
                         {
                             existing.Score += score;
                             return existing;
@@ -466,14 +548,14 @@ namespace BusInfo.Services
             await Task.WhenAll(tasks);
 
             // Sort the rankings by score in descending order and assign ranks
-            List<BusRankingInfo> sortedRankings = rankingDict.Values.OrderByDescending(x => x.Score).ToList();
+            List<BusRankingInfo> sortedRankings = [.. rankingDict.Values.OrderByDescending(x => x.Score)];
             for (int i = 0; i < sortedRankings.Count; i++)
             {
                 sortedRankings[i].Rank = i + 1;
             }
 
             // Create a new dictionary with the sorted rankings
-            Dictionary<string, BusRankingInfo> sortedRankingDict = new Dictionary<string, BusRankingInfo>();
+            Dictionary<string, BusRankingInfo> sortedRankingDict = [];
             foreach (BusRankingInfo? ranking in sortedRankings)
             {
                 sortedRankingDict[ranking.Service] = ranking;

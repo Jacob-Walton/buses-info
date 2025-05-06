@@ -16,10 +16,17 @@ using Microsoft.Extensions.Logging;
 
 namespace BusInfo.Controllers.Api.V2
 {
+    /// <summary>
+    /// API controller for bus information and related services.
+    /// </summary>
+    /// <param name="logger">The logger for logging information.</param>
+    /// <param name="busInfoService">The service for bus information retrieval.</param>
+    /// <param name="cache">The memory cache for caching data.</param>
+    /// <param name="configCatService">The service for feature flag management.</param>
     [ApiController]
     [Route("api/v2/businfo")]
     [Produces("application/json")]
-    [Authorize(AuthenticationSchemes = "Cookies,ApiKey")]
+    [Authorize(AuthenticationSchemes = "Cookies,ApiKey,Bearer")]
     public class BusInfoController(
         ILogger<BusInfoController> logger,
         IBusInfoService busInfoService,
@@ -32,24 +39,56 @@ namespace BusInfo.Controllers.Api.V2
         private readonly IConfigCatService _configCatService = configCatService;
         private const string MapCacheKeyPrefix = "BusLaneMap_";
 
+        #region Logger Message Definitions
+
         private static readonly Action<ILogger, DateTime, string?, Exception?> _logRequestReceived =
             LoggerMessage.Define<DateTime, string?>(
                 LogLevel.Information,
-                new EventId(1, nameof(GetBusInfoAsync)),
+                new EventId(1000, "BusInfoRequestReceived"),
                 "Bus info request received at {Timestamp}. ID: {RequestId}");
 
         private static readonly Action<ILogger, DateTime, string?, Exception?> _logRequestCompleted =
             LoggerMessage.Define<DateTime, string?>(
                 LogLevel.Information,
-                new EventId(2, nameof(GetBusInfoAsync)),
+                new EventId(1001, "BusInfoRequestCompleted"),
                 "Bus info request completed at {Timestamp}. ID: {RequestId}");
 
-        private static readonly Action<ILogger, DateTime, string?, Exception?> _logError =
+        private static readonly Action<ILogger, DateTime, string?, Exception?> _logBusInfoError =
             LoggerMessage.Define<DateTime, string?>(
                 LogLevel.Error,
-                new EventId(3, "BusInfoError"),
-                "Error processing request at {Timestamp}. Details: {Details}");
+                new EventId(2000, "BusInfoError"),
+                "Error processing bus info request at {Timestamp}. Details: {Details}");
 
+        private static readonly Action<ILogger, DateTime, string?, Exception?> _logRankingsError =
+            LoggerMessage.Define<DateTime, string?>(
+                LogLevel.Error,
+                new EventId(2001, "BusRankingsError"),
+                "Error processing bus rankings request at {Timestamp}. Details: {Details}");
+
+        private static readonly Action<ILogger, DateTime, string?, Exception?> _logMapError =
+            LoggerMessage.Define<DateTime, string?>(
+                LogLevel.Error,
+                new EventId(2002, "BusMapError"),
+                "Error processing bus lane map request at {Timestamp}. Details: {Details}");
+
+        private static readonly Action<ILogger, DateTime, string?, Exception?> _logPredictionsError =
+            LoggerMessage.Define<DateTime, string?>(
+                LogLevel.Error,
+                new EventId(2003, "BusPredictionsError"),
+                "Error processing bus predictions request at {Timestamp}. Details: {Details}");
+
+        private static readonly Action<ILogger, DateTime, string?, Exception?> _logBatchPredictionsError =
+            LoggerMessage.Define<DateTime, string?>(
+                LogLevel.Error,
+                new EventId(2004, "BatchPredictionsError"),
+                "Error processing batch bus predictions request at {Timestamp}. Details: {Details}");
+
+        #endregion Logger Message Definitions
+
+        /// <summary>
+        /// Gets current bus information.
+        /// </summary>
+        /// <returns>Current bus information</returns>
         [HttpGet]
         [ProducesResponseType(typeof(BusInfoResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -69,16 +108,20 @@ namespace BusInfo.Controllers.Api.V2
             }
             catch (ApiException ex)
             {
-                _logError(_logger, DateTime.UtcNow, "API Exception", ex);
+                _logBusInfoError(_logger, DateTime.UtcNow, "API Exception", ex);
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while fetching bus information.");
             }
             catch (Exception ex)
             {
-                _logError(_logger, DateTime.UtcNow, "Unexpected error", ex);
+                _logBusInfoError(_logger, DateTime.UtcNow, "Unexpected error", ex);
                 throw;
             }
         }
 
+        /// <summary>
+        /// Gets bus rankings.
+        /// </summary>
+        /// <returns>Current bus rankings</returns>
         [HttpGet("rankings")]
         [ProducesResponseType(typeof(BusRankingResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -92,16 +135,20 @@ namespace BusInfo.Controllers.Api.V2
             }
             catch (ApiException ex)
             {
-                _logError(_logger, DateTime.UtcNow, "API error retrieving rankings", ex);
+                _logRankingsError(_logger, DateTime.UtcNow, "API error retrieving rankings", ex);
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while fetching bus rankings.");
             }
             catch (InvalidOperationException ex)
             {
-                _logError(_logger, DateTime.UtcNow, "Invalid operation while retrieving rankings", ex);
+                _logRankingsError(_logger, DateTime.UtcNow, "Invalid operation while retrieving rankings", ex);
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing the rankings data.");
             }
         }
 
+        /// <summary>
+        /// Gets a visual map of bus lane positions.
+        /// </summary>
+        /// <returns>PNG image of bus lane map</returns>
         [HttpGet("map")]
         [Produces("image/png")]
         [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
@@ -111,8 +158,8 @@ namespace BusInfo.Controllers.Api.V2
         public async Task<IActionResult> GetBusLaneMapAsync()
         {
             // Ensure the Accept header includes image/png or */*
-            if (!Request.Headers.Accept.ToString().Contains("image/png") &&
-                !Request.Headers.Accept.ToString().Contains("*/*") &&
+            if (!Request.Headers.Accept.ToString().Contains("image/png", StringComparison.InvariantCulture) &&
+                !Request.Headers.Accept.ToString().Contains("*/*", StringComparison.InvariantCulture) &&
                 !string.IsNullOrEmpty(Request.Headers.Accept))
             {
                 return StatusCode(StatusCodes.Status406NotAcceptable,
@@ -150,21 +197,25 @@ namespace BusInfo.Controllers.Api.V2
             }
             catch (ApiException ex)
             {
-                _logError(_logger, DateTime.UtcNow, "API error retrieving map", ex);
+                _logMapError(_logger, DateTime.UtcNow, "API error retrieving map", ex);
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving the bus lane map.");
             }
             catch (InvalidOperationException ex)
             {
-                _logError(_logger, DateTime.UtcNow, "Invalid operation while retrieving map", ex);
+                _logMapError(_logger, DateTime.UtcNow, "Invalid operation while retrieving map", ex);
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing the map data.");
             }
             catch (Exception ex)
             {
-                _logError(_logger, DateTime.UtcNow, "Unexpected error retrieving map", ex);
+                _logMapError(_logger, DateTime.UtcNow, "Unexpected error retrieving map", ex);
                 throw;
             }
         }
 
+        /// <summary>
+        /// Gets bus arrival predictions.
+        /// </summary>
+        /// <returns>Bus arrival predictions</returns>
         [HttpGet("predictions")]
         [ProducesResponseType(typeof(BusPredictionResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -184,16 +235,21 @@ namespace BusInfo.Controllers.Api.V2
             }
             catch (ApiException ex)
             {
-                _logError(_logger, DateTime.UtcNow, "Error getting predictions", ex);
+                _logPredictionsError(_logger, DateTime.UtcNow, "Error getting predictions", ex);
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while fetching predictions.");
             }
             catch (InvalidOperationException ex)
             {
-                _logError(_logger, DateTime.UtcNow, "Error getting predictions", ex);
+                _logPredictionsError(_logger, DateTime.UtcNow, "Error getting predictions", ex);
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing predictions.");
             }
         }
 
+        /// <summary>
+        /// Gets predictions for specific bus numbers.
+        /// </summary>
+        /// <param name="busNumbers">Semicolon-separated list of bus numbers</param>
+        /// <returns>Predictions for requested buses</returns>
         [HttpGet("predictions/{busNumbers}")]
         [ProducesResponseType(typeof(Dictionary<string, PredictionInfo>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -235,12 +291,12 @@ namespace BusInfo.Controllers.Api.V2
             }
             catch (ApiException ex)
             {
-                _logError(_logger, DateTime.UtcNow, "API error getting predictions", ex);
+                _logBatchPredictionsError(_logger, DateTime.UtcNow, "API error getting predictions", ex);
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while fetching predictions.");
             }
             catch (InvalidOperationException ex)
             {
-                _logError(_logger, DateTime.UtcNow, "Invalid operation while getting predictions", ex);
+                _logBatchPredictionsError(_logger, DateTime.UtcNow, "Invalid operation while getting predictions", ex);
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing the request.");
             }
         }

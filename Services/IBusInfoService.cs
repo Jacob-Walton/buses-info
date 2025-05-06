@@ -5,8 +5,8 @@ namespace BusInfo.Services
 {
     public interface IBusInfoService
     {
-        Task<BusInfoLegacyResponse> GetLegacyBusInfoAsync();
         Task<BusInfoResponse> GetBusInfoAsync();
+        Task<BusInfoLegacyResponse> GetLegacyBusInfoAsync();
         Task<BusPredictionResponse> GetBusPredictionsAsync();
         Task<BusRankingResponse> GetBusRankingsAsync();
     }

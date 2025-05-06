@@ -47,6 +47,9 @@ using BusInfo.Middleware;
 using Npgsql;
 using Azure.Security.KeyVault.Certificates;
 using AspNet.Security.OAuth.Apple;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace BusInfo
 {
@@ -407,12 +410,11 @@ namespace BusInfo
                 options.TeamId = config["Authentication:Apple:TeamId"] ??
                     throw new InvalidOperationException("Apple Team ID not configured");
 
-                // Format the key with proper PEM format if it isn't already
                 string privateKeyContent = config["Authentication:Apple:PrivateKey"] ??
                     throw new InvalidOperationException("Apple Private Key not configured");
 
-                // Ensure the private key is properly formatted with headers if needed
-                if (!privateKeyContent.Contains("BEGIN PRIVATE KEY"))
+                // Ensure the private key is properly formatted with headers
+                if (!privateKeyContent.Contains("BEGIN PRIVATE KEY", StringComparison.InvariantCulture))
                 {
                     privateKeyContent = $"-----BEGIN PRIVATE KEY-----\n{privateKeyContent}\n-----END PRIVATE KEY-----";
                 }
@@ -425,7 +427,6 @@ namespace BusInfo
                 options.CallbackPath = "/signin-apple";
                 options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 
-                // Set up events similar to what you have for Google
                 options.Events = new AppleAuthenticationEvents
                 {
                     OnCreatingTicket = async context =>
@@ -460,6 +461,24 @@ namespace BusInfo
                         }
                     }
                 };
+            })
+            .AddJwtBearer(options =>
+            {
+                string issuer = builder.Configuration["Jwt:Issuer"] ?? "https://rb.dev.konpeki.co.uk";
+                string audience = builder.Configuration["Jwt:Audience"] ?? "https://rb.dev.konpeki.co.uk";
+                string key = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not configured");
+
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = issuer,
+                    ValidAudience = audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(key))
+                };
             });
 
             builder.Services.AddAuthentication()
@@ -472,7 +491,7 @@ namespace BusInfo
                     .Build())
                 .AddPolicy("ApiPolicy", policy =>
                     policy.RequireAuthenticatedUser()
-                         .AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme, "ApiKey"))
+                         .AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme, "ApiKey", JwtBearerDefaults.AuthenticationScheme))
                 .AddPolicy("RequireAuthenticatedUser", policy =>
                     policy.RequireAuthenticatedUser())
                 .AddPolicy("AdminOnly", policy =>
@@ -522,6 +541,10 @@ namespace BusInfo
             // Configure Weather Service
             builder.Services.Configure<WeatherSettings>(builder.Configuration.GetSection("Weather"));
             builder.Services.AddHttpClient<IWeatherService, OpenWeatherMapService>();
+
+            // Add push notification services
+            builder.Services.AddScoped<IPushNotificationService, PushNotificationService>();
+            builder.Services.AddHostedService<NotificationBackgroundService>();
         }
 
         private static void ConfigureApp(WebApplication app)
