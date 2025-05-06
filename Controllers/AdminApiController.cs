@@ -9,7 +9,6 @@ using BusInfo.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
 
 namespace BusInfo.Controllers
 {
@@ -22,20 +21,17 @@ namespace BusInfo.Controllers
         private readonly IUserService _userService;
         private readonly IApiKeyGenerator _apiKeyGenerator;
         private readonly IPushNotificationService _notificationService;
-        private readonly UserManager<ApplicationUser> _userManager;
 
         public AdminApiController(
             ApplicationDbContext context,
             IUserService userService,
             IApiKeyGenerator apiKeyGenerator,
-            IPushNotificationService notificationService,
-            UserManager<ApplicationUser> userManager)
+            IPushNotificationService notificationService)
         {
             _context = context;
             _userService = userService;
             _apiKeyGenerator = apiKeyGenerator;
             _notificationService = notificationService;
-            _userManager = userManager;
         }
 
         #region Dashboard
@@ -370,7 +366,8 @@ namespace BusInfo.Controllers
 
                 foreach (var email in emails)
                 {
-                    var user = await _userManager.FindByEmailAsync(email);
+                    // Use IUserService instead of UserManager
+                    var user = await _userService.GetUserByEmailAsync(email);
                     if (user == null)
                     {
                         notFoundEmails.Add(email);
