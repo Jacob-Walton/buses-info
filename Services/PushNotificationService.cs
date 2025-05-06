@@ -172,6 +172,15 @@ namespace BusInfo.Services
             Define<string, int>(LogLevel.Debug, 6086,
                 "For user {UserId}: processed {DeviceCount} devices");
 
+        // Add new logger definitions for APNs server selection
+        private static readonly Action<ILogger, string, string, Exception?> _logTryingApnsServer =
+            Define<string, string>(LogLevel.Debug, 6087,
+                "Trying to send notification to {DeviceTokenPrefix} using {Server} server");
+
+        private static readonly Action<ILogger, string, Exception?> _logFallbackToAlternateServer =
+            Define<string>(LogLevel.Information, 6088,
+                "Falling back to alternate APNs server for device {DeviceTokenPrefix}");
+
         #endregion Logger Message Definitions
 
         public PushNotificationService(
@@ -525,7 +534,7 @@ namespace BusInfo.Services
                 _logEmptyToken(_logger, null);
                 return false;
             }
-
+            
             // Do basic token validation before attempting to send
             if (IsLikelyBadToken(deviceToken))
             {
@@ -537,13 +546,58 @@ namespace BusInfo.Services
 
             try
             {
+                string tokenPrefix = deviceToken[..Math.Min(deviceToken.Length, 10)];
+                
+                // First attempt with the primary server based on app bundle ID
+                bool useDevelopmentServer = string.Equals(_appleSettings.AppBundleId, "com.example.development", StringComparison.OrdinalIgnoreCase);
+                bool success = await TrySendPushNotificationAsync(deviceToken, notification, useDevelopmentServer);
+                
+                // If the first attempt failed, try the alternate server
+                if (!success)
+                {
+                    _logFallbackToAlternateServer(_logger, tokenPrefix, null);
+                    success = await TrySendPushNotificationAsync(deviceToken, notification, !useDevelopmentServer);
+                }
+                
+                // If still failing after both attempts, mark as inactive
+                if (!success)
+                {
+                    await MarkDeviceAsInactiveAsync(deviceToken);
+                }
+                
+                return success;
+            }
+            catch (Exception ex)
+            {
+                string tokenPrefix = deviceToken.Substring(0, Math.Min(deviceToken.Length, 10));
+                _logPushError(_logger, tokenPrefix, ex);
+                
+                // Mark device as inactive on exceptions too
+                await MarkDeviceAsInactiveAsync(deviceToken);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Attempts to send a push notification to a specific APNs server (production or development)
+        /// </summary>
+        /// <param name="deviceToken">Device token to send the notification to</param>
+        /// <param name="notification">Notification details</param>
+        /// <param name="useDevelopmentServer">Whether to use the development server</param>
+        private async Task<bool> TrySendPushNotificationAsync(string deviceToken, PushNotification notification, bool useDevelopmentServer)
+        {
+            string serverType = useDevelopmentServer ? "development" : "production";
+            string tokenPrefix = deviceToken[..Math.Min(deviceToken.Length, 10)];
+            
+            _logTryingApnsServer(_logger, tokenPrefix, serverType, null);
+            
+            try
+            {
                 // Prepare the HTTP client
                 using HttpClient httpClient = _httpClientFactory.CreateClient();
                 // Ensure HTTP/2 is preferred (default in modern .NET)
                 httpClient.DefaultRequestVersion = new Version(2, 0);
 
-                bool useDevelopmentServer =
-                    string.Equals(_appleSettings.AppBundleId, "com.example.development", StringComparison.OrdinalIgnoreCase);
                 string baseUrl = useDevelopmentServer
                     ? "https://api.development.push.apple.com/3/device/"
                     : "https://api.push.apple.com/3/device/";
@@ -602,7 +656,6 @@ namespace BusInfo.Services
 
                 if (isSuccess)
                 {
-                    string tokenPrefix = deviceToken[..Math.Min(deviceToken.Length, 10)];
                     _logPushSuccess(_logger, tokenPrefix, null);
                 }
                 else
@@ -610,25 +663,15 @@ namespace BusInfo.Services
                     string responseContent = await response.Content.ReadAsStringAsync();
                     _logPushFailure(_logger, (int)response.StatusCode, responseContent, null);
 
-                    // Check for specific errors like invalid token
-                    if (response.StatusCode == System.Net.HttpStatusCode.BadRequest ||
-                        response.StatusCode == System.Net.HttpStatusCode.Gone ||
-                        (int)response.StatusCode == 410) // Explicitly check for Gone status code
-                    {
-                        // Token may be invalid or expired
-                        await MarkDeviceAsInactiveAsync(deviceToken);
-                    }
+                    // Don't mark as inactive here since we're handling that in the calling method after both attempts
                 }
 
                 return isSuccess;
             }
             catch (Exception ex)
             {
-                string tokenPrefix = deviceToken.Substring(0, Math.Min(deviceToken.Length, 10));
-                _logPushError(_logger, tokenPrefix, ex);
-
-                // Mark device as inactive on exceptions too
-                await MarkDeviceAsInactiveAsync(deviceToken);
+                _logger.LogError(ex, "Error sending push notification to device {DeviceToken} using {ServerType} server", 
+                    tokenPrefix, serverType);
                 return false;
             }
         }
