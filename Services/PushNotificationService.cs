@@ -163,6 +163,15 @@ namespace BusInfo.Services
             Define<string>(LogLevel.Error, 6121,
                 "Error marking device as inactive: {DeviceToken}");
 
+        // Add new logger definition for bad tokens in the Logger Message Definitions region
+        private static readonly Action<ILogger, string, Exception?> _logBadDeviceToken =
+            Define<string>(LogLevel.Warning, 6085,
+                "Detected bad device token: {TokenPrefix}");
+
+        private static readonly Action<ILogger, string, int, Exception?> _logDeviceProcessingStatus =
+            Define<string, int>(LogLevel.Debug, 6086,
+                "For user {UserId}: processed {DeviceCount} devices");
+
         #endregion Logger Message Definitions
 
         public PushNotificationService(
@@ -316,6 +325,14 @@ namespace BusInfo.Services
                         else
                         {
                             _logSendNotificationFailed(_logger, device.Id, null);
+
+                            // Explicitly check for bad tokens
+                            if (IsLikelyBadToken(device.DeviceToken))
+                            {
+                                string tokenPrefix = device.DeviceToken[..Math.Min(device.DeviceToken.Length, 10)];
+                                _logBadDeviceToken(_logger, tokenPrefix, null);
+                                await MarkDeviceAsInactiveAsync(device.DeviceToken);
+                            }
                         }
                     }
                     catch (Exception ex)
@@ -324,6 +341,9 @@ namespace BusInfo.Services
                         _logger.LogError(ex, "Error sending notification to device {DeviceId}", device.Id);
                     }
                 }
+
+                // Log summary of device processing
+                _logDeviceProcessingStatus(_logger, userId, devices.Count, null);
 
                 // If we have exceptions but some notifications were sent successfully, we still return success
                 if (exceptions.Count > 0 && !anySuccess)
@@ -362,26 +382,56 @@ namespace BusInfo.Services
                 }
 
                 int successCount = 0;
+                List<Exception> exceptions = new();
 
                 // Send to each device
                 foreach (DeviceRegistration device in devices)
                 {
-                    // Check if notification type matches user preferences
-                    if (!ShouldSendNotification(device, notification))
+                    try
                     {
-                        continue;
-                    }
+                        // Check if notification type matches user preferences
+                        if (!ShouldSendNotification(device, notification))
+                        {
+                            continue;
+                        }
 
-                    bool success = await SendPushNotificationAsync(device.DeviceToken, notification);
+                        bool success = await SendPushNotificationAsync(device.DeviceToken, notification);
 
-                    if (success)
-                    {
-                        successCount++;
+                        if (success)
+                        {
+                            successCount++;
+                        }
+                        else
+                        {
+                            _logBroadcastFailed(_logger, device.Id, null);
+
+                            // Explicitly check for bad tokens
+                            if (IsLikelyBadToken(device.DeviceToken))
+                            {
+                                string tokenPrefix = device.DeviceToken[..Math.Min(device.DeviceToken.Length, 10)];
+                                _logBadDeviceToken(_logger, tokenPrefix, null);
+                                await MarkDeviceAsInactiveAsync(device.DeviceToken);
+                            }
+                        }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        _logBroadcastFailed(_logger, device.Id, null);
+                        exceptions.Add(ex);
+                        _logger.LogError(ex, "Error sending broadcast notification to device {DeviceId}", device.Id);
                     }
+                }
+
+                // Group devices by user for reporting
+                var devicesByUser = devices.GroupBy(d => d.UserId);
+                foreach (var userDevices in devicesByUser)
+                {
+                    _logDeviceProcessingStatus(_logger, userDevices.Key, userDevices.Count(), null);
+                }
+
+                // Log summary if we had exceptions
+                if (exceptions.Count > 0)
+                {
+                    _logger.LogWarning("Encountered {ErrorCount} errors while sending broadcast notifications", exceptions.Count);
                 }
 
                 return successCount;
@@ -440,6 +490,30 @@ namespace BusInfo.Services
         }
 
         /// <summary>
+        /// Checks if a device token is likely to be bad/invalid
+        /// </summary>
+        private bool IsLikelyBadToken(string deviceToken)
+        {
+            // Basic validation of token format
+            if (string.IsNullOrWhiteSpace(deviceToken))
+                return true;
+
+            // Apple tokens should be 64 hexadecimal characters
+            // This is a simple check - you might need to adjust based on actual token format
+            if (deviceToken.Length != 64)
+                return true;
+
+            // Check if token contains only valid hex characters
+            foreach (char c in deviceToken)
+            {
+                if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')))
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Sends a push notification to a specific device token
         /// </summary>
         /// <param name="deviceToken">Device token to send the notification to</param>
@@ -449,6 +523,15 @@ namespace BusInfo.Services
             if (string.IsNullOrEmpty(deviceToken))
             {
                 _logEmptyToken(_logger, null);
+                return false;
+            }
+
+            // Do basic token validation before attempting to send
+            if (IsLikelyBadToken(deviceToken))
+            {
+                string tokenPrefix = deviceToken[..Math.Min(deviceToken.Length, 10)];
+                _logBadDeviceToken(_logger, tokenPrefix, null);
+                await MarkDeviceAsInactiveAsync(deviceToken);
                 return false;
             }
 
@@ -543,6 +626,9 @@ namespace BusInfo.Services
             {
                 string tokenPrefix = deviceToken.Substring(0, Math.Min(deviceToken.Length, 10));
                 _logPushError(_logger, tokenPrefix, ex);
+
+                // Mark device as inactive on exceptions too
+                await MarkDeviceAsInactiveAsync(deviceToken);
                 return false;
             }
         }
