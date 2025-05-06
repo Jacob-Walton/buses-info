@@ -6,21 +6,50 @@
 
   input {
     width: 100%;
+    padding: $spacing-unit;
     padding-right: 90px;
+    border: 1px solid $border;
+    background-color: $background;
+    color: $text;
+    font-size: 0.9375rem;
     font-family: "Fira Code", monospace;
-    font-size: 0.875rem;
     letter-spacing: 0.5px;
+    @include alternating-border-radius($button-border-radius);
+    @include transition(all, 0.2s);
+
+    &:hover:not([readonly]) {
+      border-color: darken($border, 10%);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: $primary;
+      @include box-shadow(0 0 0 3px rgba($primary, 0.1));
+    }
+
+    &[readonly] {
+      background-color: $light-grey;
+      color: $dark-grey;
+      cursor: not-allowed;
+    }
+
+    &[type="password"] {
+      letter-spacing: 0.2em;
+    }
   }
 
   .input-buttons {
     position: absolute;
-    right: 0;
+    right: 1px;
     top: 50%;
     transform: translateY(-50%);
     display: flex;
     align-items: center;
-    height: 100%;
+    height: calc(100% - 2px);
     border-left: 1px solid $border;
+    background-color: $background;
+    border-radius: 0 $button-border-radius $button-border-radius 0;
+    overflow: hidden;
 
     %shared-height {
       height: 100%;
@@ -32,6 +61,10 @@
       padding: 0 12px;
       color: $dark-grey;
       transition: 0.2s ease all;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 42px;
 
       i {
         font-size: 14px;
@@ -42,8 +75,8 @@
         background-color: $primary-hover;
       }
 
-      &:last-child {
-        border-radius: 0 $button-border-radius 0 0;
+      &:active {
+        background-color: rgba($primary, 0.2);
       }
     }
 
@@ -51,6 +84,30 @@
       @extend %shared-height;
       width: 1px;
       background-color: $border;
+    }
+  }
+
+  // Handle focus properly when buttons are clicked
+  &:focus-within {
+    input {
+      border-color: $primary;
+      @include box-shadow(0 0 0 3px rgba($primary, 0.1));
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .input-with-buttons {
+    input {
+      padding: calc($spacing-unit * 0.75);
+      padding-right: 80px;
+    }
+
+    .input-buttons {
+      .input-button {
+        padding: 0 10px;
+      }
     }
   }
 }

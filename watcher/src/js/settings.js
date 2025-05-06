@@ -1052,8 +1052,8 @@ class SettingsManager {
                     <h3>Using Your API Key</h3>
                     <p>Include your API key in request headers as <code>X-API-Key</code> when making requests to our API endpoints.</p>
                     <div class="api-endpoints">
-                        <div class="endpoint"><span class="method">GET</span> /api/v1/routes</div>
-                        <div class="endpoint"><span class="method">GET</span> /api/v1/buses</div>
+                        <div class="endpoint"><span class="method">GET</span> /api/v1/businfo</div>
+                        <div class="endpoint"><span class="method">GET</span> /api/v2/businfo</div>
                     </div>
                 </div>`;
 			return; // Exit early if user has API key
