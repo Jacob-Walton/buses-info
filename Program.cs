@@ -97,7 +97,7 @@ namespace BusInfo
             byte[] pfxBytes = Convert.FromBase64String(secret.Value);
             return new X509Certificate2(pfxBytes,
                                        (string)null!,
-                                       X509KeyStorageFlags.MachineKeySet |
+                                       X509KeyStorageFlags.UserKeySet |
                                        X509KeyStorageFlags.PersistKeySet |
                                        X509KeyStorageFlags.Exportable);
         }
