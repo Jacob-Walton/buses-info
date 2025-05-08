@@ -13,6 +13,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.Extensions.Configuration;
+using System.Security.Claims;
 
 namespace BusInfo.Controllers.Api.V2
 {
@@ -23,6 +28,7 @@ namespace BusInfo.Controllers.Api.V2
     /// <param name="busInfoService">The service for bus information retrieval.</param>
     /// <param name="cache">The memory cache for caching data.</param>
     /// <param name="configCatService">The service for feature flag management.</param>
+    /// <param name="configuration">The configuration for accessing JWT settings.</param>
     [ApiController]
     [Route("api/v2/businfo")]
     [Produces("application/json")]
@@ -31,12 +37,14 @@ namespace BusInfo.Controllers.Api.V2
         ILogger<BusInfoController> logger,
         IBusInfoService busInfoService,
         IMemoryCache cache,
-        IConfigCatService configCatService) : ControllerBase
+        IConfigCatService configCatService,
+        IConfiguration configuration) : ControllerBase
     {
         private readonly IBusInfoService _busInfoService = busInfoService;
         private readonly ILogger<BusInfoController> _logger = logger;
         private readonly IMemoryCache _cache = cache;
         private readonly IConfigCatService _configCatService = configCatService;
+        private readonly IConfiguration _configuration = configuration;
         private const string MapCacheKeyPrefix = "BusLaneMap_";
 
         #region Logger Message Definitions
@@ -148,15 +156,33 @@ namespace BusInfo.Controllers.Api.V2
         /// <summary>
         /// Gets a visual map of bus lane positions.
         /// </summary>
+        /// <param name="token">Optional JWT token for authentication.</param>
         /// <returns>PNG image of bus lane map</returns>
         [HttpGet("map")]
         [Produces("image/png")]
+        [AllowAnonymous] // Allow anonymous access to handle token validation manually
         [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status406NotAcceptable)]
-        public async Task<IActionResult> GetBusLaneMapAsync()
+        public async Task<IActionResult> GetBusLaneMapAsync(string? token = null)
         {
+            // Manual token validation if provided in query parameter
+            if (!string.IsNullOrEmpty(token) && !User.Identity?.IsAuthenticated == true)
+            {
+                bool isTokenValid = await ValidateTokenAsync(token);
+                if (!isTokenValid)
+                {
+                    return Unauthorized(new { message = "Invalid token" });
+                }
+                // Token is valid, continue processing
+            }
+            // If no token is provided and user is not authenticated through other means
+            else if (!User.Identity?.IsAuthenticated == true)
+            {
+                return Unauthorized(new { message = "Authentication required" });
+            }
+
             // Ensure the Accept header includes image/png or */*
             if (!Request.Headers.Accept.ToString().Contains("image/png", StringComparison.InvariantCulture) &&
                 !Request.Headers.Accept.ToString().Contains("*/*", StringComparison.InvariantCulture) &&
@@ -298,6 +324,44 @@ namespace BusInfo.Controllers.Api.V2
             {
                 _logBatchPredictionsError(_logger, DateTime.UtcNow, "Invalid operation while getting predictions", ex);
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing the request.");
+            }
+        }
+
+        /// <summary>
+        /// Validates a JWT token.
+        /// </summary>
+        /// <param name="token">The JWT token to validate</param>
+        /// <returns>True if token is valid, false otherwise</returns>
+        private async Task<bool> ValidateTokenAsync(string token)
+        {
+            try
+            {
+                string issuer = _configuration["Jwt:Issuer"] ?? "https://rb.dev.konpeki.co.uk";
+                string audience = _configuration["Jwt:Audience"] ?? "https://rb.dev.konpeki.co.uk";
+                string key = _configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not configured");
+
+                JwtSecurityTokenHandler tokenHandler = new();
+                TokenValidationParameters validationParameters = new()
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = issuer,
+                    ValidAudience = audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
+                };
+
+                // Validate token and get the principal
+                ClaimsPrincipal principal = tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
+
+                // Additional checks if needed based on claims, etc.
+                return await Task.FromResult(true);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Token validation failed");
+                return false;
             }
         }
     }

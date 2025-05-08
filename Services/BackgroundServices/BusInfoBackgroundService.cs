@@ -62,6 +62,12 @@ namespace BusInfo.Services.BackgroundServices
                 new EventId(4, "DataReset"),
                 "Reset previous bus data");
 
+        private static readonly Action<ILogger, string, string, Exception?> LogDuplicateArrival =
+            LoggerMessage.Define<string, string>(
+                LogLevel.Warning,
+                new EventId(5, "DuplicateArrival"),
+                "Duplicate arrival detected for service {Service} at bay {Bay}, skipping");
+
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             while (!stoppingToken.IsCancellationRequested)
@@ -126,8 +132,16 @@ namespace BusInfo.Services.BackgroundServices
 
                             if (!hasArrivedToday)
                             {
-                                await SaveArrivalDataAsync(dbContext, weatherService, service, currentBay, stoppingToken);
-                                LogNewArrival(_logger, service, currentBay, null);
+                                try
+                                {
+                                    await SaveArrivalDataAsync(dbContext, weatherService, service, currentBay, stoppingToken);
+                                    LogNewArrival(_logger, service, currentBay, null);
+                                }
+                                catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("duplicate key") == true)
+                                {
+                                    // Someone else might have inserted the same record between our check and save
+                                    LogDuplicateArrival(_logger, service, currentBay, null);
+                                }
                             }
                         }
 
@@ -142,17 +156,18 @@ namespace BusInfo.Services.BackgroundServices
             }
         }
 
-        private static Task<bool> HasArrivedTodayAsync(
+        private static async Task<bool> HasArrivedTodayAsync(
             ApplicationDbContext dbContext,
             string service,
             string bay,
             CancellationToken cancellationToken)
         {
-            DateTime today = DateTime.UtcNow.Date;
-            return dbContext!.BusArrivals.AnyAsync(
+            DateTime todayDate = DateTime.UtcNow.Date;
+
+            return await dbContext!.BusArrivals.AnyAsync(
                 x => x.Service == service &&
                      x.Bay == bay &&
-                     x.ArrivalTime.Date == today,
+                     x.ArrivalDate == todayDate,
                 cancellationToken);
         }
 
@@ -169,10 +184,12 @@ namespace BusInfo.Services.BackgroundServices
 
             BusArrival arrival = new()
             {
+                // Don't set Id - let the database generate it
                 Service = service,
                 Bay = bay,
                 Status = $"Arrived at {now:HH:mm}",
                 ArrivalTime = now,
+                ArrivalDate = now.Date, // Set the ArrivalDate field for uniqueness constraints
                 DayOfWeek = (int)now.DayOfWeek,
                 Temperature = weather.Temperature,
                 Weather = weather.Weather,
@@ -180,8 +197,21 @@ namespace BusInfo.Services.BackgroundServices
                 IsSchoolTerm = IsSchoolTerm(now)
             };
 
-            dbContext.BusArrivals.Add(arrival);
-            await dbContext.SaveChangesAsync(cancellationToken);
+            await dbContext.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
+            {
+                using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+                try
+                {
+                    dbContext.BusArrivals.Add(arrival);
+                    await dbContext.SaveChangesAsync(cancellationToken);
+                    await transaction.CommitAsync(cancellationToken);
+                }
+                catch (DbUpdateException)
+                {
+                    await transaction.RollbackAsync(cancellationToken);
+                    throw;
+                }
+            });
         }
 
         private static bool IsSchoolTerm(DateTime date)
