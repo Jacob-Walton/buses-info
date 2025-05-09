@@ -68,7 +68,7 @@ namespace BusInfo.Data
                 entity.Property(e => e.ArrivalTime)
                     .HasColumnType("timestamp with time zone");
 
-                entity.HasIndex(e => new { e.Service, e.Bay, e.ArrivalTime })
+                entity.HasIndex(e => new { e.Service, e.DayOfWeek, e.WeekOfYear })
                     .IsUnique();
             })
                 .Entity<ApiKey>(entity =>

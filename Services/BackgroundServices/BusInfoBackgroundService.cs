@@ -9,6 +9,7 @@ using BusInfo.Data;
 using BusInfo.Models;
 using BusInfo.Models.Notifications;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -147,7 +148,7 @@ namespace BusInfo.Services.BackgroundServices
 
                         if (currentBay != previousBay && !string.IsNullOrEmpty(currentBay))
                         {
-                            bool hasArrivedToday = await HasArrivedTodayAsync(dbContext, service, currentBay, stoppingToken);
+                            bool hasArrivedToday = await HasArrivedTodayAsync(dbContext, service, stoppingToken);
 
                             if (!hasArrivedToday)
                             {
@@ -157,7 +158,7 @@ namespace BusInfo.Services.BackgroundServices
                                     LogNewArrival(_logger, service, currentBay, null);
                                     await CheckAndSendNotificationsAsync(service, currentBay, stoppingToken);
                                 }
-                                catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("duplicate key") == true)
+                                catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("duplicate key", StringComparison.InvariantCulture) == true)
                                 {
                                     // Someone else might have inserted the same record between our check and save
                                     LogDuplicateArrival(_logger, service, currentBay, null);
@@ -186,7 +187,7 @@ namespace BusInfo.Services.BackgroundServices
             ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
             // Find users who have this bus in their preferred routes
-            var usersToNotify = await dbContext.Users
+            List<ApplicationUser> usersToNotify = await dbContext.Users!
                 .Where(u => u.PreferredRoutes.Contains(service) && u.DeletedAt == null)
                 .ToListAsync(cancellationToken);
 
@@ -216,7 +217,7 @@ namespace BusInfo.Services.BackgroundServices
             List<string> notifiedUserIds = [];
 
             // Send notification to each user
-            foreach (var user in usersToNotify)
+            foreach (ApplicationUser? user in usersToNotify)
             {
                 try
                 {
@@ -241,7 +242,8 @@ namespace BusInfo.Services.BackgroundServices
             {
                 try
                 {
-                    var history = new NotificationHistory
+                    NotificationHistory history = new()
+
                     {
                         Title = notification.Title,
                         Body = notification.Body,
@@ -251,7 +253,7 @@ namespace BusInfo.Services.BackgroundServices
                         SentAt = DateTime.UtcNow,
                         SentBy = "System"
                     };
-                    
+
                     dbContext.NotificationHistory.Add(history);
                     await dbContext.SaveChangesAsync(cancellationToken);
                 }
@@ -262,18 +264,20 @@ namespace BusInfo.Services.BackgroundServices
             }
         }
 
-        private static async Task<bool> HasArrivedTodayAsync(
+        private static Task<bool> HasArrivedTodayAsync(
             ApplicationDbContext dbContext,
             string service,
-            string bay,
             CancellationToken cancellationToken)
         {
-            DateTime todayDate = DateTime.UtcNow.Date;
+            int currentDayOfWeek = (int)DateTime.UtcNow.DayOfWeek;
+            Calendar cal = CultureInfo.InvariantCulture.Calendar;
+            int weekOfYear = cal.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
 
-            return await dbContext!.BusArrivals.AnyAsync(
+            // Check if this service has already arrived today
+            return dbContext!.BusArrivals!.AnyAsync(
                 x => x.Service == service &&
-                     x.Bay == bay &&
-                     x.ArrivalTime.Date == todayDate,
+                     x.DayOfWeek == currentDayOfWeek &&
+                     x.WeekOfYear == weekOfYear,
                 cancellationToken);
         }
 
@@ -287,10 +291,10 @@ namespace BusInfo.Services.BackgroundServices
             DateTime now = DateTime.UtcNow;
             WeatherInfo weather = await weatherService.GetWeatherAsync("Leyland,UK");
             Calendar cal = CultureInfo.InvariantCulture.Calendar;
+            int weekOfYear = cal.GetWeekOfYear(now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
 
             BusArrival arrival = new()
             {
-                // Don't set Id - let the database generate it
                 Service = service,
                 Bay = bay,
                 Status = $"Arrived at {now:HH:mm}",
@@ -298,23 +302,43 @@ namespace BusInfo.Services.BackgroundServices
                 DayOfWeek = (int)now.DayOfWeek,
                 Temperature = weather.Temperature,
                 Weather = weather.Weather,
-                WeekOfYear = cal.GetWeekOfYear(now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday),
+                WeekOfYear = weekOfYear,
                 IsSchoolTerm = IsSchoolTerm(now)
             };
 
             await dbContext.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
             {
-                using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+                await using IDbContextTransaction transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
                 try
                 {
-                    dbContext.BusArrivals.Add(arrival);
-                    await dbContext.SaveChangesAsync(cancellationToken);
-                    await transaction.CommitAsync(cancellationToken);
+                    // Check again inside transaction to reduce race condition possibility
+                    bool exists = await dbContext.BusArrivals!
+                        .AnyAsync(x =>
+                            x.Service == service &&
+                            x.DayOfWeek == (int)now.DayOfWeek &&
+                            x.WeekOfYear == weekOfYear,
+                            cancellationToken);
+
+                    if (!exists)
+                    {
+                        dbContext.BusArrivals?.Add(arrival);
+                        await dbContext.SaveChangesAsync(cancellationToken);
+                        await transaction.CommitAsync(cancellationToken);
+                    }
+                    else
+                    {
+                        // Silent rollback if already exists for today
+                        await transaction.RollbackAsync(cancellationToken);
+                    }
                 }
-                catch (DbUpdateException)
+                catch (DbUpdateException ex)
                 {
                     await transaction.RollbackAsync(cancellationToken);
-                    throw;
+                    // Only rethrow if it's not a duplicate key error
+                    if (!ex.InnerException?.Message.Contains("duplicate key", StringComparison.InvariantCulture) ?? true)
+                    {
+                        throw;
+                    }
                 }
             });
         }

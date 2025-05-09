@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using static Microsoft.Extensions.Logging.LoggerMessage;
+using System.Collections.Concurrent;
 
 namespace BusInfo.Services
 {
@@ -29,8 +30,7 @@ namespace BusInfo.Services
         private readonly ILogger<PushNotificationService> _logger;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly AppleNotificationSettings _appleSettings;
-        // Store both the token and its expiry time
-        private readonly Dictionary<string, (string token, DateTime expiry)> _tokenCache = [];
+        private static readonly ConcurrentDictionary<string, (string token, DateTime expiry)> _tokenCache = new();
 
         #region Logger Message Definitions
 
