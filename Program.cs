@@ -544,7 +544,6 @@ namespace BusInfo
 
             // Add push notification services
             builder.Services.AddScoped<IPushNotificationService, PushNotificationService>();
-            builder.Services.AddHostedService<NotificationBackgroundService>();
         }
 
         private static void ConfigureApp(WebApplication app)

@@ -67,8 +67,6 @@ namespace BusInfo.Data
                 entity.Property(e => e.Weather).HasMaxLength(50);
                 entity.Property(e => e.ArrivalTime)
                     .HasColumnType("timestamp with time zone");
-                entity.Property(e => e.ArrivalDate)
-                    .HasColumnType("date");
 
                 entity.HasIndex(e => new { e.Service, e.Bay, e.ArrivalTime })
                     .IsUnique();

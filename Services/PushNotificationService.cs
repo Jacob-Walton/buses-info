@@ -231,11 +231,6 @@ namespace BusInfo.Services
                     existingDevice.BusArrivalNotifications = request.NotificationSettings.BusArrivalNotifications;
                     existingDevice.ServiceUpdateNotifications = request.NotificationSettings.ServiceUpdateNotifications;
 
-                    // Convert specific buses array to comma-separated string for storage
-                    existingDevice.SpecificBuses = request.NotificationSettings.SpecificBuses?.Length > 0
-                        ? string.Join(",", request.NotificationSettings.SpecificBuses)
-                        : string.Empty;
-
                     _dbContext.Update(existingDevice);
                     _logDeviceUpdated(_logger, request.UserId, null);
                 }
@@ -254,9 +249,6 @@ namespace BusInfo.Services
                         IsActive = true,
                         BusArrivalNotifications = request.NotificationSettings.BusArrivalNotifications,
                         ServiceUpdateNotifications = request.NotificationSettings.ServiceUpdateNotifications,
-                        SpecificBuses = request.NotificationSettings.SpecificBuses?.Length > 0
-                            ? string.Join(",", request.NotificationSettings.SpecificBuses)
-                            : string.Empty
                     };
 
                     _dbContext.DeviceRegistrations.Add(newDevice);
@@ -318,8 +310,8 @@ namespace BusInfo.Services
                 {
                     try
                     {
-                        // Check if notification type matches user preferences
-                        if (!ShouldSendNotification(device, notification))
+                        // Check if notification type matches user preferences - now using async method
+                        if (!await ShouldSendNotificationAsync(device, notification))
                         {
                             _logNotificationSkipped(_logger, device.Id, null);
                             continue;
@@ -398,8 +390,8 @@ namespace BusInfo.Services
                 {
                     try
                     {
-                        // Check if notification type matches user preferences
-                        if (!ShouldSendNotification(device, notification))
+                        // Check if notification type matches user preferences - now using async method
+                        if (!await ShouldSendNotificationAsync(device, notification))
                         {
                             continue;
                         }
@@ -457,7 +449,7 @@ namespace BusInfo.Services
         /// </summary>
         /// <param name="device">Device registration</param>
         /// <param name="notification">Notification details</param>
-        private bool ShouldSendNotification(DeviceRegistration device, PushNotification notification)
+        private async Task<bool> ShouldSendNotificationAsync(DeviceRegistration device, PushNotification notification)
         {
             // For test notifications, always send
             if (notification.Type == NotificationType.General)
@@ -478,17 +470,24 @@ namespace BusInfo.Services
                 return false;
             }
 
-            // If specific buses are defined and this is a bus arrival notification
+            // If this is a bus arrival notification, check the user's preferred routes
             if (notification.Type == NotificationType.BusArrival &&
-                !string.IsNullOrEmpty(device.SpecificBuses) &&
                 notification.Data != null &&
                 notification.Data.TryGetValue("busNumber", out string? busNumber))
             {
-                // Check if the user wants notifications for all buses (empty list) or this specific bus
-                string[] specificBuses = device.SpecificBuses.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                // Get the user from database to check their preferred routes
+                var user = await _dbContext.Users
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(u => u.Id == device.UserId && u.DeletedAt == null);
 
-                // If user has specified buses but this bus isn't in the list
-                if (specificBuses.Length > 0 && !specificBuses.Contains(busNumber))
+                if (user == null)
+                {
+                    _logger.LogWarning("User {UserId} not found for device {DeviceId}", device.UserId, device.Id);
+                    return false;
+                }
+
+                // If user has preferred routes but this bus isn't in their list
+                if (user.PreferredRoutes != null && user.PreferredRoutes.Count > 0 && !user.PreferredRoutes.Contains(busNumber))
                 {
                     _logSkipBusNotInPreferred(_logger, busNumber, device.Id, null);
                     return false;

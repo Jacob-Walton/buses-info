@@ -27,8 +27,6 @@ namespace BusInfo.Models.Notifications
 
         public bool ServiceUpdateNotifications { get; set; } = true;
 
-        public string SpecificBuses { get; set; } = string.Empty;
-
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
@@ -59,7 +57,5 @@ namespace BusInfo.Models.Notifications
         public bool BusArrivalNotifications { get; set; } = true;
 
         public bool ServiceUpdateNotifications { get; set; } = true;
-
-        public string[] SpecificBuses { get; set; } = Array.Empty<string>();
     }
 }

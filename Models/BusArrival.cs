@@ -14,6 +14,5 @@ namespace BusInfo.Models
         public string Weather { get; set; } = string.Empty;
         public int WeekOfYear { get; set; }
         public bool IsSchoolTerm { get; set; }
-        public DateTime ArrivalDate { get; set; }
     }
 }

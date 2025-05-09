@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using BusInfo.Data;
 using BusInfo.Models;
+using BusInfo.Models.Notifications;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -67,6 +68,24 @@ namespace BusInfo.Services.BackgroundServices
                 LogLevel.Warning,
                 new EventId(5, "DuplicateArrival"),
                 "Duplicate arrival detected for service {Service} at bay {Bay}, skipping");
+
+        private static readonly Action<ILogger, string, Exception?> LogNoUsersForBus =
+            LoggerMessage.Define<string>(
+                LogLevel.Information,
+                new EventId(6, "NoUsersForBus"),
+                "No users have bus {Service} in their preferred routes");
+
+        private static readonly Action<ILogger, string, string, int, int, Exception?> LogNotificationsSent =
+            LoggerMessage.Define<string, string, int, int>(
+                LogLevel.Information,
+                new EventId(7, "NotificationsSent"),
+                "Sent bus arrival notification for {Service} at bay {Bay} to {SuccessCount}/{TotalCount} users");
+
+        private static readonly Action<ILogger, string, string, Exception?> LogNotificationError =
+            LoggerMessage.Define<string, string>(
+                LogLevel.Error,
+                new EventId(8, "NotificationError"),
+                "Failed to send notification to user {UserId} for bus {Service}");
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -136,6 +155,7 @@ namespace BusInfo.Services.BackgroundServices
                                 {
                                     await SaveArrivalDataAsync(dbContext, weatherService, service, currentBay, stoppingToken);
                                     LogNewArrival(_logger, service, currentBay, null);
+                                    await CheckAndSendNotificationsAsync(service, currentBay, stoppingToken);
                                 }
                                 catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("duplicate key") == true)
                                 {
@@ -156,6 +176,92 @@ namespace BusInfo.Services.BackgroundServices
             }
         }
 
+        private async Task CheckAndSendNotificationsAsync(
+            string service,
+            string bay,
+            CancellationToken cancellationToken)
+        {
+            using IServiceScope scope = _scopeFactory.CreateScope();
+            IPushNotificationService pushService = scope.ServiceProvider.GetRequiredService<IPushNotificationService>();
+            ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+            // Find users who have this bus in their preferred routes
+            var usersToNotify = await dbContext.Users
+                .Where(u => u.PreferredRoutes.Contains(service) && u.DeletedAt == null)
+                .ToListAsync(cancellationToken);
+
+            if (usersToNotify.Count == 0)
+            {
+                LogNoUsersForBus(_logger, service, null);
+                return;
+            }
+
+            // Create the notification
+            PushNotification notification = new()
+            {
+                Id = Guid.NewGuid().ToString(),
+                Title = $"Bus {service} has arrived",
+                Body = $"Your bus {service} has arrived at bay {bay}",
+                Type = NotificationType.BusArrival,
+                Sound = "default",
+                Data = new Dictionary<string, string>
+                {
+                    ["busNumber"] = service,
+                    ["bay"] = bay
+                }
+            };
+
+            // Track notification metrics
+            int successCount = 0;
+            List<string> notifiedUserIds = [];
+
+            // Send notification to each user
+            foreach (var user in usersToNotify)
+            {
+                try
+                {
+                    bool success = await pushService.SendNotificationAsync(user.Id, notification);
+                    if (success)
+                    {
+                        successCount++;
+                        notifiedUserIds.Add(user.Id);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogNotificationError(_logger, user.Id, service, ex);
+                }
+            }
+
+            // Log notification outcome
+            LogNotificationsSent(_logger, service, bay, successCount, usersToNotify.Count, null);
+
+            // Store notification history if any notifications were sent
+            if (successCount > 0)
+            {
+                try
+                {
+                    var history = new NotificationHistory
+                    {
+                        Title = notification.Title,
+                        Body = notification.Body,
+                        NotificationType = notification.Type.ToString(),
+                        Recipients = string.Join(",", notifiedUserIds),
+                        DevicesReached = successCount,
+                        SentAt = DateTime.UtcNow,
+                        SentBy = "System"
+                    };
+                    
+                    dbContext.NotificationHistory.Add(history);
+                    await dbContext.SaveChangesAsync(cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to save notification history for bus {Service}", service);
+                }
+            }
+        }
+
         private static async Task<bool> HasArrivedTodayAsync(
             ApplicationDbContext dbContext,
             string service,
@@ -167,7 +273,7 @@ namespace BusInfo.Services.BackgroundServices
             return await dbContext!.BusArrivals.AnyAsync(
                 x => x.Service == service &&
                      x.Bay == bay &&
-                     x.ArrivalDate == todayDate,
+                     x.ArrivalTime.Date == todayDate,
                 cancellationToken);
         }
 
@@ -189,7 +295,6 @@ namespace BusInfo.Services.BackgroundServices
                 Bay = bay,
                 Status = $"Arrived at {now:HH:mm}",
                 ArrivalTime = now,
-                ArrivalDate = now.Date, // Set the ArrivalDate field for uniqueness constraints
                 DayOfWeek = (int)now.DayOfWeek,
                 Temperature = weather.Temperature,
                 Weather = weather.Weather,
