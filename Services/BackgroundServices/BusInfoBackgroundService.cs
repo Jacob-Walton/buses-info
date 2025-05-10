@@ -269,14 +269,15 @@ namespace BusInfo.Services.BackgroundServices
             string service,
             CancellationToken cancellationToken)
         {
-            int currentDayOfWeek = (int)DateTime.UtcNow.DayOfWeek;
+            DateTime now = DateTime.UtcNow;
             Calendar cal = CultureInfo.InvariantCulture.Calendar;
-            int weekOfYear = cal.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
+            int weekOfYear = cal.GetWeekOfYear(now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
+            int dayOfWeek = (int)now.DayOfWeek;
 
-            // Check if this service has already arrived today
+            // Check if this service has already arrived with same service, day of week, and week of year
             return dbContext!.BusArrivals!.AnyAsync(
                 x => x.Service == service &&
-                     x.DayOfWeek == currentDayOfWeek &&
+                     x.DayOfWeek == dayOfWeek &&
                      x.WeekOfYear == weekOfYear,
                 cancellationToken);
         }
@@ -292,6 +293,7 @@ namespace BusInfo.Services.BackgroundServices
             WeatherInfo weather = await weatherService.GetWeatherAsync("Leyland,UK");
             Calendar cal = CultureInfo.InvariantCulture.Calendar;
             int weekOfYear = cal.GetWeekOfYear(now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
+            int dayOfWeek = (int)now.DayOfWeek;
 
             BusArrival arrival = new()
             {
@@ -299,7 +301,7 @@ namespace BusInfo.Services.BackgroundServices
                 Bay = bay,
                 Status = $"Arrived at {now:HH:mm}",
                 ArrivalTime = now,
-                DayOfWeek = (int)now.DayOfWeek,
+                DayOfWeek = dayOfWeek,
                 Temperature = weather.Temperature,
                 Weather = weather.Weather,
                 WeekOfYear = weekOfYear,
@@ -315,9 +317,8 @@ namespace BusInfo.Services.BackgroundServices
                     bool exists = await dbContext.BusArrivals!
                         .AnyAsync(x =>
                             x.Service == service &&
-                            x.DayOfWeek == (int)now.DayOfWeek &&
-                            x.WeekOfYear == weekOfYear,
-                            cancellationToken);
+                            x.DayOfWeek == dayOfWeek &&
+                            x.WeekOfYear == weekOfYear, cancellationToken);
 
                     if (!exists)
                     {
@@ -327,7 +328,7 @@ namespace BusInfo.Services.BackgroundServices
                     }
                     else
                     {
-                        // Silent rollback if already exists for today
+                        // Silent rollback if already exists
                         await transaction.RollbackAsync(cancellationToken);
                     }
                 }

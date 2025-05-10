@@ -1,192 +1,196 @@
 @page
 @model NotificationsModel
 @{
-    ViewData["Title"] = "Notifications Management";
+    ViewData["Title"] = "Notification Management";
     Layout = "_AdminLayout";
 }
 
-<div class="admin-notifications">
-    <div class="page-header">
-        <h1>Notifications Management</h1>
-        <a href="/Admin" class="button secondary">
-            <i class="fas fa-arrow-left"></i> Back to Dashboard
-        </a>
-    </div>
+<div class="page-header">
+    <h1>Notification Management</h1>
+</div>
 
-    <div class="tabs">
-        <button class="tab-button active" data-tab="send">Send Notifications</button>
-        <button class="tab-button" data-tab="history">Notification History</button>
-    </div>
+<div class="tabs">
+    <button type="button" class="tab-button active" data-tab="send">Send Notifications</button>
+    <button type="button" class="tab-button" data-tab="history">Notification History</button>
+</div>
 
-    <div class="tab-content active" id="send-tab">
-        <div class="notification-cards">
-            <!-- Broadcast Notification Card -->
-            <div class="notification-card">
-                <div class="notification-card-header">
-                    <h3><i class="fas fa-broadcast-tower"></i> Broadcast Notification</h3>
-                    <p>Send to all registered devices</p>
-                </div>
-                <div class="notification-card-body">
-                    <form id="broadcastForm" class="notification-form">
-                        <div class="form-group">
-                            <label for="broadcastTitle">Title</label>
-                            <input type="text" id="broadcastTitle" class="form-input" placeholder="Notification Title" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="broadcastBody">Message</label>
-                            <textarea id="broadcastBody" class="form-input" rows="3" placeholder="Notification Message" required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="broadcastType">Type</label>
-                            <select id="broadcastType" class="form-select">
-                                <option value="General">General</option>
-                                <option value="ServiceUpdate">Service Update</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="button primary">
-                            <i class="fas fa-paper-plane"></i> Send to All Users
-                        </button>
-                    </form>
-                </div>
+<div id="send-tab" class="tab-content active">
+    <div class="notification-cards">
+        <div class="notification-card">
+            <div class="notification-card-header">
+                <h3><i class="fas fa-bullhorn"></i> Broadcast Notification</h3>
+                <p>Send a notification to all users who have registered devices</p>
             </div>
-
-            <!-- User-specific Notification Card -->
-            <div class="notification-card">
-                <div class="notification-card-header">
-                    <h3><i class="fas fa-user-check"></i> User-specific Notification</h3>
-                    <p>Send to specific users by email</p>
-                </div>
-                <div class="notification-card-body">
-                    <form id="userSpecificForm" class="notification-form">
-                        <div class="form-group">
-                            <label for="userEmails">User Email(s)</label>
-                            <textarea id="userEmails" class="form-input" rows="2" placeholder="Enter email addresses (separated by commas)" required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="userSpecificTitle">Title</label>
-                            <input type="text" id="userSpecificTitle" class="form-input" placeholder="Notification Title" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="userSpecificBody">Message</label>
-                            <textarea id="userSpecificBody" class="form-input" rows="3" placeholder="Notification Message" required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="userSpecificType">Type</label>
-                            <select id="userSpecificType" class="form-select">
-                                <option value="General">General</option>
-                                <option value="ServiceUpdate">Service Update</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="button primary">
-                            <i class="fas fa-paper-plane"></i> Send to Specific Users
-                        </button>
-                    </form>
-                </div>
+            <div class="notification-card-body">
+                <form id="broadcastForm" class="notification-form">
+                    <div class="form-group">
+                        <label for="broadcastTitle">Title <span class="required">*</span></label>
+                        <input type="text" id="broadcastTitle" class="form-input" required placeholder="Notification title">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="broadcastBody">Message <span class="required">*</span></label>
+                        <textarea id="broadcastBody" class="form-input" rows="4" required placeholder="Notification message"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="broadcastType">Notification Type</label>
+                        <select id="broadcastType" class="form-select">
+                            <option value="General">General</option>
+                            <option value="ServiceUpdate">Service Update</option>
+                            <option value="BusArrival">Bus Arrival</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">Preview Notification</button>
+                    </div>
+                </form>
             </div>
         </div>
-    </div>
-
-    <div class="tab-content" id="history-tab">
-        <div class="filter-bar">
-            <div class="form-group">
-                <label for="historyFilter">Type</label>
-                <select id="historyFilter" class="form-select">
-                    <option value="all">All Notifications</option>
-                    <option value="broadcast">Broadcast Only</option>
-                    <option value="targeted">Targeted Only</option>
-                </select>
+        
+        <div class="notification-card">
+            <div class="notification-card-header">
+                <h3><i class="fas fa-user-check"></i> User Specific Notification</h3>
+                <p>Send a notification to specific users by email address</p>
             </div>
-            <div class="count-info">
-                <span id="notificationCount">0</span> notifications found
-            </div>
-        </div>
-
-        <div class="data-container">
-            <div id="notificationsLoading" class="loading-spinner">
-                <div class="spinner"></div>
-                <p>Loading notifications history...</p>
-            </div>
-            <div id="notificationsError" class="error-message hidden">
-                <i class="fas fa-exclamation-circle"></i>
-                <p>Failed to load notification history. Please try again.</p>
-            </div>
-            <div id="notificationsEmpty" class="empty-state hidden">
-                <i class="fas fa-bell-slash"></i>
-                <p>No notifications found.</p>
-            </div>
-            <div id="notificationsList" class="notifications-list hidden">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Type</th>
-                            <th>Title</th>
-                            <th>Message</th>
-                            <th>Recipients</th>
-                            <th>Delivered</th>
-                        </tr>
-                    </thead>
-                    <tbody id="notificationsTableBody">
-                        <!-- Notification history rows will be populated here -->
-                    </tbody>
-                </table>
+            <div class="notification-card-body">
+                <form id="userSpecificForm" class="notification-form">
+                    <div class="form-group">
+                        <label for="userEmails">User Emails <span class="required">*</span></label>
+                        <textarea id="userEmails" class="form-input" rows="2" required placeholder="Enter comma-separated email addresses"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="userSpecificTitle">Title <span class="required">*</span></label>
+                        <input type="text" id="userSpecificTitle" class="form-input" required placeholder="Notification title">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="userSpecificBody">Message <span class="required">*</span></label>
+                        <textarea id="userSpecificBody" class="form-input" rows="4" required placeholder="Notification message"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="userSpecificType">Notification Type</label>
+                        <select id="userSpecificType" class="form-select">
+                            <option value="General">General</option>
+                            <option value="ServiceUpdate">Service Update</option>
+                            <option value="BusArrival">Bus Arrival</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">Preview Notification</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Notification Preview Modal -->
-<div id="previewModal" class="modal">
+<div id="history-tab" class="tab-content">
+    <div class="filter-bar">
+        <select id="historyFilter" class="form-select">
+            <option value="all">All Types</option>
+            <option value="general">General</option>
+            <option value="serviceupdate">Service Updates</option>
+            <option value="busarrival">Bus Arrivals</option>
+        </select>
+        
+        <div class="count-info">
+            Showing <span id="notificationCount">0</span> notifications
+        </div>
+    </div>
+    
+    <div id="notificationsLoading" class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Loading notification history...</p>
+    </div>
+    
+    <div id="notificationsError" class="error-message hidden">
+        <i class="fas fa-exclamation-triangle"></i>
+        <p>Failed to load notification history. Please try again later.</p>
+    </div>
+    
+    <div id="notificationsEmpty" class="empty-state hidden">
+        <i class="fas fa-bell-slash"></i>
+        <p>No notifications found.</p>
+    </div>
+    
+    <div id="notificationsList" class="notifications-list hidden">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Sent At</th>
+                    <th>Type</th>
+                    <th>Title</th>
+                    <th>Message</th>
+                    <th>Recipients</th>
+                    <th>Devices</th>
+                </tr>
+            </thead>
+            <tbody id="notificationsTableBody">
+                <!-- Notification rows will be added here via JavaScript -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Preview Modal -->
+<div id="previewModal" class="modal" data-notification-type="">
     <div class="modal-content">
         <div class="modal-header">
             <h2>Notification Preview</h2>
-            <button class="close-button">&times;</button>
+            <button type="button" class="close-button">&times;</button>
         </div>
         <div class="modal-body">
             <div class="notification-preview">
                 <div class="notification-preview-device">
                     <div class="notification-preview-header">
-                        <span class="preview-time">Now</span>
+                        <div class="preview-time">Now</div>
                         <div class="preview-app-name">Bus Info</div>
                     </div>
                     <div class="notification-preview-content">
-                        <div class="preview-title" id="previewTitle">Notification Title</div>
-                        <div class="preview-body" id="previewBody">Notification message will appear here.</div>
+                        <div class="preview-title" id="previewTitle"></div>
+                        <div class="preview-body" id="previewBody"></div>
                     </div>
                 </div>
             </div>
-
+            
             <div class="preview-actions">
-                <p class="preview-recipients" id="previewRecipients">Recipients: All users</p>
+                <div class="preview-recipients" id="previewRecipients"></div>
                 <div class="button-group">
-                    <button id="editButton" class="button secondary">Edit</button>
-                    <button id="sendButton" class="button primary">Send Notification</button>
+                    <button type="button" id="editButton" class="btn-secondary">Edit</button>
+                    <button type="button" id="sendButton" class="btn-primary">Send Notification</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Notification Result Modal -->
+<!-- Result Modal -->
 <div id="resultModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
             <h2>Notification Result</h2>
-            <button class="close-button">&times;</button>
+            <button type="button" class="close-button">&times;</button>
         </div>
         <div class="modal-body">
-            <div id="resultSuccess" class="result-message success hidden">
+            <div id="resultSuccess" class="result-message success">
                 <i class="fas fa-check-circle"></i>
                 <h3>Notification Sent Successfully</h3>
-                <p id="successDetails">Notification has been sent to X devices.</p>
+                <p id="successDetails"></p>
             </div>
+            
             <div id="resultError" class="result-message error hidden">
-                <i class="fas fa-exclamation-triangle"></i>
+                <i class="fas fa-exclamation-circle"></i>
                 <h3>Error Sending Notification</h3>
-                <p id="errorDetails">An error occurred while sending the notification.</p>
+                <p id="errorDetails"></p>
             </div>
+            
             <div class="button-group center">
-                <button id="closeResultButton" class="button secondary">Close</button>
+                <button type="button" id="closeResultButton" class="btn-primary">Close</button>
             </div>
         </div>
     </div>

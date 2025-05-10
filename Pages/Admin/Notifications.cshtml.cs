@@ -8,6 +8,7 @@ namespace BusInfo.Pages.Admin
     {
         public void OnGet()
         {
+            // Notification data will be loaded via JavaScript/API
         }
     }
 }
