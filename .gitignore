@@ -29,3 +29,23 @@ certs/**
 pnpm-lock.yaml
 watcher/dist/**
 *.p8
+
+# OpenTofu Files
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Exclude all .tfvars files
+*.tfvars
+*.tfvars.json
+
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+.terraform.d/

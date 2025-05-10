@@ -1,4 +1,4 @@
-# Bus Info
+# Buses Info
 
 ![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17.2-316192?style=for-the-badge&logo=postgresql&logoColor=white)
@@ -6,124 +6,154 @@
 
 ## Overview
 
-This repository contains the source code for my Bus Info project. It provides almost real-time information about bus arrivals at Runshaw College.
+A real-time bus arrival information system for Runshaw College.
 
-## Technical Framework
+## Technical Architecture
 
-### Core Technologies
+### Core Technology Stack
 
-- ASP.NET Core 10.0
-- PostgreSQL 17.2
-- Redis Stack
-- Prediction system (WIP)
+- **Framework**: ASP.NET Core 10.0
+- **Database**: PostgreSQL 17.2
+- **Cache**: Redis Stack
+- **ML Component**: Prediction system for arrival forecasting (not yet implemented)
 
-### System Structure
+### System Components
 
-The application utilises a layered approach:
+#### Data Layer
 
-1. Data Storage: PostgreSQL 17.2
-2. Cache System: Redis Stack
-3. Processing Layer: ASP.NET Core 10.0
-4. Interface Layer: Web-based presentation
+- PostgreSQL with optimized indexing for transport data
+- Redis for high-performance caching
+- Serilog with PostgreSQL sink for structured logging
 
-### Primary Components
+#### Authentication System
 
-#### Data Management
+- Cookie-based authentication for web interface
+- API key authorization for external integrations
+- Role-based access control
 
-- PostgreSQL 17.2 with index optimisation
-- Redis-based caching
-- Serilog with PostgreSQL integration
+#### Performance Optimizations
 
-#### Authentication Methods
+- Redis caching implementation
+- Asynchronous processing patterns
+- Request monitoring and metrics collection
 
-- Cookie-based web authentication
-- API key system for external access
-- Role-based access controls
+## Installation
 
-#### Performance Considerations
+### Prerequisites
 
-- Redis cache implementation
-- Asynchronous operations
-- Request monitoring systems
-
-## Development Configuration
-
-### Requirements
-
-```plaintext
 - .NET 10.0 SDK
 - PostgreSQL 17.2
 - Redis Stack
 - Node.js
-```
+- OpenTofu 1.9.0+
+- AWS CLI configured with appropriate credentials
 
-### Installation Steps
+### Setup Process
 
-1. **Clone and Setup**
+1. **Repository Setup**
 
-   ```shell
-   # Clone the repository
+   ```bash
    git clone https://github.com/Jacob-Walton/buses-info.git
    cd buses-info
    ```
 
-2. **Configure Settings**
+2. **Configuration**
 
-   ```shell
-   # Rename the settings file
-   $ mv appsettings.example.json appsettings.json
-   
-   # Edit the settings file with your values
-   $ nano appsettings.json
+   ```bash
+   cp appsettings.example.json appsettings.json
+   # Edit configuration with appropriate values
    ```
 
-3. **Install Dependencies**
+3. **Backend Setup**
 
-   ```shell
-   # Restore .NET packages
-   $ dotnet restore
+   ```bash
+   dotnet restore
+   dotnet ef database update
    ```
 
-4. **Database Setup**
+4. **Frontend Build**
 
-   ```shell
-   # Create the database
-   $ dotnet ef database update
+   ```bash
+   cd watcher
+   npm install
+   npm run build
+   cd ..
    ```
 
-5. **Static Files**
+5. **Application Execution**
 
-   ```shell
-   # Move to watcher directory
-   $ cd watcher
-
-   # Install dependencies
-   $ npm install
-
-   # Build the files
-   $ npm run build
+   ```bash
+   dotnet run --environment Development
    ```
 
-6. **Run the Application**
+> [!NOTE]
+> Ensure all connection strings and required values are
+> properly configured in `appsettings.json` before starting
+> the application.
 
-   ```shell
-   # Move back to the root directory
-   $ cd ..
+## Infrastructure
 
-   # Start the application
-   $ dotnet run --environment Development
-   
-   # The application will be available at:
-   # http://localhost:{port}
+The application stores and retrieves content from AWS infstructure provisioned and managed by OpenTofu.
+
+### Cloud Resources
+
+- **S3 Bucket**: Hosts static assets in Frankfurt (eu-central-1)
+- **CloudFront Distribution**: Global CDN for static assets
+- **Origin Access Control**: Secures S3 bucket access
+
+### Infrastructure Deployment
+
+1. **Navigate to Infrastructure Dir**
+
+   ```bash
+   cd infrastructure
    ```
 
-> **Note:** Ensure you have configured your keyvault and filled in all required values in appsettings.json before starting the application.
+2. **Initialize OpenTofu**
 
-## API Documentation
+   ```bash
+   tofu init
+   ```
 
-The system provides a REST API for external access. The API is versioned to allow for future updates.
+3. **Deploy Infrastructure**
 
-### V1 API
+   ```bash
+   tofu apply
+   ```
+
+4. **Access Outputs**
+
+The deployment provides the S3 bucket name and CloudFront distribution domain.
+
+> [!IMPORTANT]
+> The OpenTofu configuration creates resources optimized for AWS free tier.
+> Ensure your AWS credentials are configured with appropriate permissions.
+
+## Infrastructure Management
+
+- Check Deployment Status
+
+  ```bash
+  tofu status
+  ```
+
+- Update Infrastructure
+
+  ```bash
+  tofu apply
+  ```
+
+- Remove Infrastructure
+
+  ```bash
+  tofu destroy
+  ```
+
+## API Reference
+
+The system exposes REST APIs for integration with external systems.
+
+### V1 API (Legacy)
 
 ```http
 GET /api/v1/businfo
@@ -142,7 +172,9 @@ Response format:
 }
 ```
 
-### V2 API
+### V2 API (Current)
+
+#### General Bus Information
 
 ```http
 GET /api/v2/businfo
@@ -164,6 +196,8 @@ Response format:
   "status": "OK"
 }
 ```
+
+#### Prediction Endpoints
 
 ```http
 GET /api/v2/businfo/predictions
@@ -193,25 +227,21 @@ Response format:
         }
       ],
       "overallConfidence": 100
-    },
-    "115": {
-      "predictions": [
-        {
-          "bay": "C13",
-          "probability": 100
-        }
-      ],
-      "overallConfidence": 100
     }
   }
 }
 ```
 
 ```http
-GET /api/v2/businfo/predictions/809;819
-
+GET /api/v2/businfo/predictions/{bus-numbers}
 Headers:
     X-Api-Key: {key}
+```
+
+Example:
+
+```http
+GET /api/v2/businfo/predictions/809;819
 ```
 
 Response format:
@@ -239,35 +269,32 @@ Response format:
 }
 ```
 
-## Security Measures
+## Security Implementation
 
-The system implements standard security protocols:
+The application implements industry-standard security measures:
 
 - HTTPS enforcement
 - CSRF protection
-- Rate limiting
-- Cookie security
-- Input validation
-- XSS mitigation
+- API rate limiting
+- Secure cookie configuration
+- Input validation and sanitization
+- XSS mitigation techniques
 
 ## Development Status
 
-This project is under active development. Contributions must follow established coding standards.
+This project is under active development. Contributions must follow the project coding standards and undergo review before acceptance.
 
-## Legal Statement
+## Disclaimer
 
-This project is an independent project and is not affiliated with any external organisations.
-
-## Attributions
-
-For attributions, see the [ATTRIBUTIONS](ATTRIBUTIONS) file.
+This is an independent project and is not affiliated with or endorsed by any public transportation authority or Runshaw College.
 
 ## License
 
-This project is licensed under the License for Buses-Info. For more details, see the [LICENCE](LICENCE) file.
+This project is licensed under the License for Buses-Info. See the [LICENSE](LICENSE) file for details.
 
 ## Contact
 
-For any enquiries:
+For inquiries or contributions:
 
 - Email: [jacob-walton@konpeki.co.uk](mailto:jacob-walton@konpeki.co.uk)
+- Issues: GitHub issue tracker
