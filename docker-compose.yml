@@ -1,0 +1,79 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: buses_postgres
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/migrations:/docker-entrypoint-initdb.d
+    networks:
+      - buses_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: buses_backend
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - LISTEN_ADDR=${LISTEN_ADDR}
+      - CACHE_DURATION_MINUTES=${CACHE_DURATION_MINUTES}
+      - RUST_LOG=${RUST_LOG}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - buses_network
+    restart: unless-stopped
+    # No ports exposed
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: buses_frontend
+    depends_on:
+      - backend
+    networks:
+      - buses_network
+    restart: unless-stopped
+    # No ports exposed
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: buses_nginx
+    ports:
+      - "10000:80"
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - buses_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  buses_network:
+    driver: bridge

@@ -1,0 +1,1 @@
+export { LegalModal } from './LegalModal';

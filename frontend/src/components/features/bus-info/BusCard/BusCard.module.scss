@@ -1,0 +1,127 @@
+@import '@/styles/abstracts/variables';
+@import '@/styles/abstracts/mixins';
+
+.busCard {
+  background: white;
+  border: 1px solid $border;
+  @include alternating-border-radius($button-border-radius);
+  padding: $spacing-unit;
+  margin-bottom: $spacing-unit * 0.75;
+  @include transition;
+  @include box-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+
+  &:hover {
+    transform: translateY(-1px);
+    @include box-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+  }
+
+  &.preferred {
+    border-color: $primary;
+    background: linear-gradient(135deg, $primary-hover 0%, white 100%);
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: $spacing-unit * 0.75;
+}
+
+.serviceInfo {
+  flex: 1;
+}
+
+.serviceNumber {
+  margin: 0 0 $spacing-unit * 0.25 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: $text;
+}
+
+.bayStatus {
+  display: inline-block;
+  padding: $spacing-unit * 0.25 $spacing-unit * 0.5;
+  @include alternating-border-radius(0.25rem);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  &.assigned {
+    background-color: rgba($status-arrived, 0.1);
+    color: $status-arrived;
+  }
+
+  &.not-assigned {
+    background-color: $accent-light;
+    color: $accent;
+  }
+}
+
+.favoriteBtn {
+  @include reset-button;
+  font-size: 1.25rem;
+  color: $dark-grey;
+  padding: $spacing-unit * 0.25;
+  @include alternating-border-radius(0.25rem);
+  @include transition;
+
+  &:hover {
+    background-color: $surface-alt;
+    transform: scale(1.1);
+  }
+
+  &.active {
+    color: #ffc107; // Warning color for star
+  }
+}
+
+.details {
+  border-top: 1px solid $surface;
+  padding-top: $spacing-unit * 0.75;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: $spacing-unit * 0.5;
+}
+
+.label {
+  font-weight: 500;
+  color: $dark-grey;
+  font-size: 0.875rem;
+}
+
+.statusValue {
+  font-weight: 500;
+  font-size: 0.875rem;
+  padding: $spacing-unit * 0.125 $spacing-unit * 0.375;
+  @include alternating-border-radius(0.1875rem);
+
+  &.assigned {
+    background-color: rgba($status-arrived, 0.1);
+    color: $status-arrived;
+  }
+
+  &.not-assigned {
+    background-color: rgba(#17a2b8, 0.1);
+    color: #17a2b8;
+  }
+}
+
+@include responsive(mobile) {
+  .busCard {
+    padding: $spacing-unit * 0.75;
+    margin-bottom: $spacing-unit * 0.5;
+  }
+
+  .serviceNumber {
+    font-size: 1.125rem;
+  }
+
+  .header {
+    margin-bottom: $spacing-unit * 0.5;
+  }
+}

@@ -1,0 +1,55 @@
+@mixin transition(
+  $property: all,
+  $duration: 0.3s,
+  $timing: cubic-bezier(0.4, 0, 0.2, 1)
+) {
+  transition: $property $duration $timing;
+}
+
+@mixin box-shadow($shadow...) {
+  box-shadow: $shadow;
+}
+
+@mixin alternating-border-radius($radius) {
+  border-radius: 0 $radius 0 $radius;
+}
+
+@mixin reset-button {
+  appearance: none;
+  background: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  text-decoration: none;
+  color: inherit;
+  font: inherit;
+  line-height: normal;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -ms-appearance: none;
+  -o-appearance: none;
+  appearance: none;
+}
+
+@mixin responsive($breakpoint) {
+  @if $breakpoint == mobile {
+    @media (max-width: #{$mobile}) {
+      @content;
+    }
+  }
+  @if $breakpoint == tablet {
+    @media (max-width: #{$tablet}) {
+      @content;
+    }
+  }
+  @if $breakpoint == desktop {
+    @media (min-width: #{$desktop}) {
+      @content;
+    }
+  }
+}

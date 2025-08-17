@@ -1,0 +1,418 @@
+@import '@/styles/abstracts/variables';
+@import '@/styles/abstracts/mixins';
+
+.loginPage {
+  display: flex;
+  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
+  background-color: $background;
+  position: relative;
+}
+
+.authBackground {
+  display: none;
+  
+  @media (min-width: 768px) {
+    display: block;
+    flex: 1;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+      url("https://dhfrjz15mb441.cloudfront.net/bus-info/runshaw.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    
+    &::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.2);
+    }
+    
+    .brandContent {
+      z-index: 1;
+      text-align: center;
+      padding: $spacing-unit * 2;
+      max-width: 500px;
+      
+      h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: $spacing-unit;
+      }
+      
+      p {
+        font-size: 1.125rem;
+        line-height: 1.6;
+        opacity: 0.9;
+      }
+    }
+  }
+}
+
+.authFormContainer {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: $spacing-unit;
+  background-color: white;
+  overflow-y: auto;
+  
+  @media (min-width: 768px) {
+    max-width: 500px;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.loginContainer {
+  width: 100%;
+  max-width: 400px;
+  padding: $spacing-unit * 1.5;
+}
+
+.loginLogo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: $spacing-unit * 0.75;
+  
+  img {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    @include alternating-border-radius(0.75rem);
+  }
+}
+
+.loginTitle {
+  font-size: 1.5rem;
+  color: $primary;
+  margin-bottom: $spacing-unit;
+  text-align: center;
+  font-weight: 600;
+}
+
+.errorSummary {
+  color: $accent;
+  background-color: $accent-light;
+  border: 1px solid $accent;
+  padding: 0.625rem;
+  margin-bottom: $spacing-unit * 0.75;
+  font-size: 0.875rem;
+  @include alternating-border-radius($button-border-radius);
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    li {
+      position: relative;
+      padding-left: $spacing-unit;
+      font-size: 0.8125rem;
+      line-height: 1.4;
+      margin-bottom: calc($spacing-unit / 4);
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      &::before {
+        content: "\f06a";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 0.875rem;
+      }
+    }
+  }
+}
+
+.loginForm {
+  .formGroup {
+    margin-bottom: $spacing-unit * 0.75;
+    position: relative;
+
+    label {
+      display: block;
+      margin-bottom: 0.25rem;
+      font-weight: 500;
+      font-size: 0.875rem;
+      color: $dark-grey;
+    }
+
+    input[type="email"],
+    input[type="password"],
+    input[type="tel"],
+    input[type="text"] {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border: 1.5px solid $border;
+      background-color: $background;
+      font-size: 0.9375rem;
+      @include transition(border-color);
+      @include box-shadow(none);
+      @include alternating-border-radius(0.75rem);
+
+      &:focus {
+        outline: none;
+        border-color: $primary;
+        background-color: rgba($primary, 0.02);
+      }
+
+      &:disabled {
+        background-color: $surface;
+        cursor: not-allowed;
+        opacity: 0.7;
+      }
+
+      &::placeholder {
+        color: $dark-grey;
+      }
+    }
+  }
+}
+
+.formOptions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-unit * 0.5;
+  
+  .option {
+    margin-bottom: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+
+    .checkboxWrapper {
+      position: relative;
+      width: 18px;
+      height: 18px;
+      margin-right: 0.5rem;
+      flex-shrink: 0;
+
+      input[type="checkbox"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+
+        & + .checkboxCustom {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 18px;
+          height: 18px;
+          background: $background;
+          border: 2px solid $border;
+          @include alternating-border-radius(4px);
+          @include transition;
+          cursor: pointer;
+
+          &::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 8px;
+            height: 8px;
+            background: $primary;
+            @include alternating-border-radius(2px);
+            @include transition;
+          }
+        }
+
+        &:checked + .checkboxCustom {
+          border-color: $primary;
+          background: $primary;
+
+          &::after {
+            transform: translate(-50%, -50%) scale(1);
+            background: white;
+          }
+        }
+      }
+    }
+
+    span {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: $text;
+    }
+  }
+  
+  .forgotLink {
+    font-size: 0.8125rem;
+    color: $primary;
+    text-decoration: none;
+    
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.btnPrimary {
+  @include reset-button;
+  width: 100%;
+  padding: 0.625rem 1rem;
+  background-color: $primary;
+  color: white;
+  font-weight: 500;
+  font-size: 0.9375rem;
+  @include alternating-border-radius($button-border-radius);
+  @include transition;
+  margin-top: $spacing-unit * 0.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  &:hover:not(:disabled) {
+    background-color: $primary-dark;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  i {
+    font-size: 0.875rem;
+  }
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: $spacing-unit 0;
+  
+  span {
+    font-size: 0.75rem;
+    color: $dark-grey;
+    white-space: nowrap;
+  }
+  
+  .dividerLine {
+    height: 1px;
+    flex-grow: 1;
+    background: linear-gradient(
+      to right,
+      transparent,
+      rgba($dark-grey, 0.15) 20%,
+      rgba($dark-grey, 0.15) 80%,
+      transparent
+    );
+  }
+}
+
+.socialLogin {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: $spacing-unit * 0.75;
+  
+  button {
+    @include reset-button;
+    flex: 1;
+    height: 2.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: $background;
+    border: 1.5px solid rgba(0, 0, 0, 0.1);
+    color: #333333;
+    @include alternating-border-radius($button-border-radius);
+    @include transition;
+    
+    &:hover:not(:disabled) {
+      background-color: rgba(0, 0, 0, 0.03);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    img {
+      width: 18px;
+      height: 18px;
+      margin-right: 0.5rem;
+      object-fit: contain;
+    }
+  }
+}
+
+.btnGoogle {
+  // Styles are applied through the .socialLogin button above
+}
+
+.btnMicrosoft {
+  // Styles are applied through the .socialLogin button above
+}
+
+.loginLinks {
+  margin-top: $spacing-unit * 0.75;
+  text-align: center;
+
+  .authTransitionLink {
+    color: $primary;
+    text-decoration: none;
+    font-size: 0.875rem;
+    @include transition(color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+
+    &:hover {
+      color: $primary-dark;
+    }
+
+    i {
+      font-size: 0.875rem;
+    }
+  }
+}
+
+@include responsive(mobile) {
+  .loginPage {
+    flex-direction: column;
+  }
+
+  .authBackground {
+    display: none;
+  }
+
+  .authFormContainer {
+    max-width: none;
+    box-shadow: none;
+  }
+
+  .loginContainer {
+    padding: $spacing-unit;
+  }
+
+  .loginLogo img {
+    width: 80px;
+    height: 80px;
+  }
+
+  .loginTitle {
+    font-size: 1.25rem;
+  }
+}

@@ -1,0 +1,95 @@
+@import '@/styles/abstracts/variables';
+@import '@/styles/abstracts/mixins';
+
+.legalModal {
+  .legalModalContent {
+    max-width: 600px;
+    width: 90vw;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+}
+
+.legalModalHeader {
+  display: flex;
+  align-items: center;
+  gap: $spacing-unit;
+  margin-bottom: $spacing-unit * 2;
+  color: $primary;
+
+  i {
+    font-size: 2rem;
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+}
+
+.legalModalBody {
+  margin-bottom: $spacing-unit * 2;
+
+  p {
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: $spacing-unit;
+    color: $text;
+  }
+}
+
+.legalTerms {
+  p {
+    font-weight: normal;
+    text-align: left;
+    margin-bottom: $spacing-unit;
+  }
+
+  ol {
+    padding-left: $spacing-unit * 2;
+    
+    li {
+      margin-bottom: $spacing-unit;
+      line-height: 1.6;
+    }
+  }
+
+  a {
+    color: $primary;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.legalModalFooter {
+  display: flex;
+  justify-content: center;
+  padding-top: $spacing-unit;
+  border-top: 1px solid $border;
+}
+
+.acceptButton {
+  @include reset-button;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: $spacing-unit $spacing-unit * 2;
+  background-color: $primary;
+  color: white;
+  font-weight: 600;
+  @include alternating-border-radius($button-border-radius);
+  @include transition;
+
+  &:hover {
+    background-color: $primary-dark;
+    transform: translateY(-1px);
+  }
+
+  i {
+    font-size: 1rem;
+  }
+}

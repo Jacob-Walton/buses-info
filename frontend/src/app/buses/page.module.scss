@@ -1,0 +1,12 @@
+@import '@/styles/abstracts/variables';
+@import '@/styles/abstracts/mixins';
+
+.busesPage {
+  min-height: calc(100vh - $navbar-height);
+  background: $background;
+}
+
+.container {
+  width: 100%;
+  padding: 0;
+}

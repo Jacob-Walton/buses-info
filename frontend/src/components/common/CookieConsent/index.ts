@@ -1,0 +1,1 @@
+export { default as CookieConsent, useCookiePreferences } from './CookieConsent';

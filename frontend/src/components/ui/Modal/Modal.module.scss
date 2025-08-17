@@ -1,0 +1,70 @@
+@import '@/styles/abstracts/variables';
+@import '@/styles/abstracts/mixins';
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-unit;
+  z-index: 9999;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modalContent {
+  background-color: $background;
+  padding: $spacing-unit * 2;
+  @include alternating-border-radius($regular-border-radius);
+  @include box-shadow(0 10px 40px rgba(0, 0, 0, 0.2));
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideIn 0.3s ease-out;
+}
+
+.closeButton {
+  @include reset-button;
+  position: absolute;
+  top: $spacing-unit;
+  right: $spacing-unit;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $dark-grey;
+  @include transition;
+  @include alternating-border-radius(50%);
+
+  &:hover {
+    background-color: rgba($primary, 0.1);
+    color: $primary;
+  }
+
+  i {
+    font-size: 1rem;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(-20px) scale(0.95); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1); 
+  }
+}

@@ -1,0 +1,483 @@
+@import '@/styles/abstracts/variables';
+@import '@/styles/abstracts/mixins';
+
+.navbar {
+  background-color: $background;
+  border-bottom: 1px solid $border;
+  padding: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  height: 60px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 $spacing-unit;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+}
+
+.navbarBrandContainer {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.navbarBrand {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  color: $primary;
+  text-decoration: none;
+  @include transition(color);
+  position: relative;
+  height: 40px;
+  width: 100px;
+  
+  &.simple {
+    background-image: url("https://d1tl6qv7xwsvxx.cloudfront.net/assets/landscape-filled.png");
+    background-repeat: no-repeat;
+    background-position: left center;
+    background-size: contain;
+    text-indent: -9999px;
+    overflow: hidden;
+  }
+
+  &:hover {
+    color: $primary-dark;
+  }
+}
+
+.navbarMenu {
+  display: flex;
+  align-items: center;
+  gap: $spacing-unit;
+  height: 100%;
+}
+
+.navbarNav {
+  display: flex;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+  gap: $spacing-unit;
+  height: 100%;
+
+  .navItem {
+    margin: 0;
+    display: flex;
+    align-items: center;
+  }
+}
+
+.navLink {
+  @include reset-button;
+  color: $text;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  @include transition(all, 0.2s);
+  @include alternating-border-radius($button-border-radius);
+  display: flex;
+  align-items: center;
+  height: 36px;
+
+  &:hover {
+    color: $primary;
+    background-color: $primary-hover;
+  }
+
+  &.active {
+    color: $primary;
+    background-color: $primary-hover;
+  }
+}
+
+.navLinkBold {
+  @include reset-button;
+  background-color: $primary;
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  @include transition(all, 0.2s);
+  @include alternating-border-radius($button-border-radius);
+  display: flex;
+  align-items: center;
+  height: 36px;
+
+  &:hover {
+    background-color: $primary-dark;
+    color: #ffffff;
+    text-decoration: none;
+    transform: translateY(-1px);
+  }
+}
+
+.profileMenu {
+  position: relative;
+  margin-left: $spacing-unit;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.profileTrigger {
+  @include reset-button;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  @include alternating-border-radius($button-border-radius);
+  @include transition(all, 0.2s);
+  color: $text;
+  font-weight: 600;
+  height: 36px;
+
+  i {
+    font-size: 0.875rem;
+  }
+
+  &:hover {
+    color: $primary;
+    background-color: $primary-hover;
+  }
+}
+
+.profileDropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  background-color: $background;
+  border: 1px solid $border;
+  @include alternating-border-radius($button-border-radius);
+  min-width: 180px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  @include transition(all, 0.2s);
+  @include box-shadow(0 4px 12px rgba(0, 0, 0, 0.1));
+
+  &.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+}
+
+.dropdownItem {
+  @include reset-button;
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  color: $text;
+  font-weight: 500;
+  font-size: 0.875rem;
+  @include transition(all, 0.2s);
+  text-decoration: none;
+
+  i {
+    width: 16px;
+    color: $dark-grey;
+    text-align: center;
+    font-size: 0.875rem;
+  }
+
+  &:hover {
+    background-color: $primary-hover;
+    color: $primary;
+
+    i {
+      color: $primary;
+    }
+  }
+
+  &.danger {
+    color: $accent;
+
+    &:hover {
+      background-color: rgba($accent, 0.1);
+    }
+
+    i {
+      color: $accent;
+    }
+  }
+
+  &:first-child {
+    border-top-right-radius: $button-border-radius;
+  }
+
+  &:last-child {
+    border-bottom-left-radius: $button-border-radius;
+  }
+}
+
+// Mobile menu trigger
+.mobileMenuTrigger {
+  @include reset-button;
+  display: none;
+  width: 36px;
+  height: 36px;
+  position: relative;
+  z-index: 1002;
+  border-radius: 50%;
+  transition: background-color 0.3s ease;
+  flex-shrink: 0;
+  
+  &:hover {
+    background-color: rgba($primary, 0.1);
+  }
+
+  span {
+    display: block;
+    position: absolute;
+    width: 18px;
+    height: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: $text;
+    transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+    
+    &:nth-child(1) {
+      top: 13px;
+    }
+    
+    &:nth-child(2) {
+      top: 18px;
+      opacity: 1;
+    }
+    
+    &:nth-child(3) {
+      top: 23px;
+    }
+  }
+
+  &.active {
+    span {
+      background-color: $primary;
+      
+      &:nth-child(1) {
+        top: 18px;
+        transform: translateX(-50%) rotate(45deg);
+      }
+      
+      &:nth-child(2) {
+        opacity: 0;
+      }
+      
+      &:nth-child(3) {
+        top: 18px;
+        transform: translateX(-50%) rotate(-45deg);
+      }
+    }
+  }
+
+  @include responsive(mobile) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.mobileOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+
+  &.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  @include responsive(mobile) {
+    display: block;
+  }
+}
+
+// Mobile styles
+@include responsive(mobile) {
+  .navbar {
+    height: 60px;
+  }
+
+  .navbarBrand {
+    height: 32px;
+    width: 80px;
+    
+    &.simple {
+      background-size: contain;
+    }
+  }
+
+  .navbarMenu {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 85%;
+    max-width: 320px;
+    height: 100vh;
+    background-color: $background;
+    z-index: 1001;
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(0.215, 0.61, 0.355, 1);
+    box-shadow: -5px 0 30px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    will-change: transform;
+    padding: $spacing-unit;
+    padding-top: 70px;
+
+    &:not(.active) {
+      pointer-events: none;
+    }
+    
+    &.active {
+      transform: translateX(0);
+      pointer-events: auto;
+    }
+  }
+
+  .navbarNav {
+    flex-direction: column;
+    width: 100%;
+    gap: 0;
+    height: auto;
+    align-items: stretch;
+
+    .navItem {
+      width: 100%;
+      margin-bottom: 0.5rem;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+      
+      &.animate {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .navLink {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      padding: 0.875rem;
+      font-size: 0.95rem;
+      border-radius: 8px;
+      position: relative;
+      height: auto;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0.875rem;
+        width: 0;
+        height: 2px;
+        background-color: $primary;
+        transition: width 0.3s ease;
+      }
+      
+      &.active {
+        color: $primary;
+        background-color: rgba($primary, 0.08);
+        
+        &::after {
+          width: calc(100% - 1.75rem);
+        }
+      }
+
+      &:hover {
+        color: $primary;
+        background-color: rgba($primary, 0.05);
+      }
+    }
+
+    .navLinkBold {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      padding: 0.875rem;
+      font-size: 0.95rem;
+      border-radius: 8px;
+      margin-top: auto;
+      height: auto;
+    }
+  }
+
+  .profileMenu {
+    margin-top: auto;
+    padding-top: $spacing-unit;
+    border-top: 1px solid $border;
+    margin-left: 0;
+    width: 100%;
+    height: auto;
+
+    .profileDropdown {
+      position: static;
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+      padding: 0;
+      box-shadow: none;
+      border: none;
+      background: transparent;
+      min-width: auto;
+      width: 100%;
+
+      .dropdownItem {
+        padding: 0.875rem;
+        border-bottom: 1px solid $border;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+
+        &:last-child {
+          border-bottom: none;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar {
+    height: 56px;
+  }
+
+  .navbarBrand {
+    height: 28px;
+    width: 70px;
+  }
+
+  .navbarMenu {
+    width: 90%;
+    padding: 0.75rem;
+    padding-top: 65px;
+  }
+}

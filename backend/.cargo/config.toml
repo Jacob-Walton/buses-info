@@ -1,0 +1,89 @@
+[profile.release]
+lto = "thin"
+codegen-units = 16
+opt-level = 3
+strip = "symbols"
+debug = 1
+panic = "abort"
+overflow-checks = false
+incremental = false
+
+[profile.dev]
+debug = 2
+incremental = true
+codegen-units = 256
+lto = false
+strip = "none"
+opt-level = 0
+overflow-checks = true
+panic = "unwind"
+
+[profile.dev-opt]
+inherits = "dev"
+opt-level = 1
+lto = false
+codegen-units = 16
+
+[profile.release-with-debug]
+inherits = "release"
+debug = 2
+strip = "none"
+lto = "thin"
+
+[profile.lowend]
+inherits = "release"
+opt-level = 0
+lto = false
+codegen-units = 256
+strip = "symbols"
+debug = 0
+panic = "abort"
+overflow-checks = false
+incremental = true
+
+# Linux optimizations
+[target.x86_64-unknown-linux-gnu]
+rustflags = [
+    "-C", "link-arg=-fuse-ld=mold",
+    "-C", "target-cpu=native",
+    "-C", "link-arg=-Wl,--as-needed",
+]
+
+# Windows optimizations
+[target.x86_64-pc-windows-msvc]
+linker = "lld-link.exe"
+rustflags = [
+    "-C", "target-cpu=native",
+    "-Z", "share-generics",
+    "-C", "symbol-mangling-version=v0"
+]
+
+# Windows on ARM
+[target.aarch64-pc-windows-msvc]
+linker = "lld-link.exe"
+rustflags = [
+    "-C", "target-cpu=native",
+    "-Z", "share-generics",
+    "-C", "symbol-mangling-version=v0"
+]
+
+# Apple Silicon support
+[target.aarch64-apple-darwin]
+rustflags = [
+    "-C", "target-cpu=native",
+    "-Z", "share-generics",
+    "-C", "symbol-mangling-version=v0"
+]
+
+# Intel Mac support
+[target.x86_64-apple-darwin]
+rustflags = [
+    "-C", "target-cpu=native",
+    "-Z", "share-generics",
+    "-C", "symbol-mangling-version=v0"
+]
+
+[env]
+OPENSSL_STATIC = "0"
+PKG_CONFIG_ALLOW_CROSS = "1"
+PKG_CONFIG_PATH = "/usr/lib/pkgconfig:/usr/local/lib/pkgconfig"

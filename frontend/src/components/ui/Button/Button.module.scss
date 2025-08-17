@@ -1,0 +1,82 @@
+@import '@/styles/abstracts/variables';
+@import '@/styles/abstracts/mixins';
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  text-align: center;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  user-select: none;
+  @include alternating-border-radius($button-border-radius);
+  @include transition;
+
+  &:hover,
+  &:focus {
+    text-decoration: none;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  // Variants
+  &.primary {
+    color: white;
+    background-color: $primary;
+
+    &:hover,
+    &:focus {
+      background-color: $primary-dark;
+      color: white;
+    }
+  }
+
+  &.secondary {
+    color: white;
+    background-color: $secondary;
+
+    &:hover,
+    &:focus {
+      background-color: $secondary-dark;
+      color: white;
+    }
+  }
+
+  &.danger {
+    background-color: $accent;
+    color: white;
+    border: 1px solid darken($accent, 5%);
+
+    &:hover {
+      background-color: darken($accent, 10%);
+      border-color: darken($accent, 15%);
+    }
+
+    &:focus {
+      @include box-shadow(0 0 0 3px rgba($accent, 0.2));
+    }
+  }
+
+  // Sizes
+  &.small {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  &.medium {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+  }
+
+  &.large {
+    padding: $spacing-unit $spacing-unit * 2;
+    font-size: 1.125rem;
+  }
+}

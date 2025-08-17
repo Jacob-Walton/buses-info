@@ -1,0 +1,231 @@
+@import '@/styles/abstracts/variables';
+@import '@/styles/abstracts/mixins';
+
+.cookieConsent {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: $spacing-unit;
+
+  @media (max-width: 768px) {
+    align-items: flex-end;
+    padding: 0;
+  }
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.banner {
+  position: relative;
+  background-color: $background;
+  border: 1px solid $border;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  @include alternating-border-radius($button-border-radius);
+
+  @media (max-width: 768px) {
+    @include alternating-border-radius($button-border-radius $button-border-radius 0 0);
+    max-height: 90vh;
+  }
+}
+
+.content {
+  padding: $spacing-unit * 2;
+
+  @media (max-width: 768px) {
+    padding: $spacing-unit * 1.5;
+  }
+}
+
+.header {
+  margin-bottom: $spacing-unit * 1.5;
+
+  h3 {
+    color: $secondary;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: $spacing-unit / 2;
+  }
+
+  p {
+    color: $text;
+    line-height: 1.6;
+    margin: 0;
+  }
+}
+
+.basicView {
+  p {
+    color: $text;
+    line-height: 1.6;
+    margin-bottom: $spacing-unit * 1.5;
+  }
+}
+
+.detailView {
+  .cookieTypes {
+    margin-bottom: $spacing-unit * 1.5;
+  }
+
+  .cookieType {
+    margin-bottom: $spacing-unit * 1.5;
+    padding-bottom: $spacing-unit;
+    border-bottom: 1px solid $border;
+
+    &:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+
+    .typeHeader {
+      display: flex;
+      align-items: center;
+      gap: $spacing-unit / 2;
+      margin-bottom: $spacing-unit / 2;
+
+      input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: $primary;
+
+        &:disabled {
+          opacity: 0.6;
+        }
+      }
+
+      label {
+        color: $secondary;
+        font-size: 1rem;
+        cursor: pointer;
+
+        strong {
+          font-weight: 600;
+        }
+      }
+    }
+
+    p {
+      color: $text;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      margin: 0;
+      margin-left: calc(18px + $spacing-unit / 2);
+    }
+  }
+}
+
+.actions {
+  display: flex;
+  gap: $spacing-unit;
+  margin-bottom: $spacing-unit;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+
+  button {
+    padding: $spacing-unit / 1.5 $spacing-unit * 1.5;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    @include alternating-border-radius($button-border-radius);
+
+    @media (max-width: 768px) {
+      padding: $spacing-unit $spacing-unit * 1.5;
+    }
+  }
+
+  .acceptAll {
+    background-color: $primary;
+    color: $background;
+    border-color: $primary;
+
+    &:hover {
+      background-color: darken($primary, 10%);
+      border-color: darken($primary, 10%);
+    }
+  }
+
+  .acceptSelected {
+    background-color: $primary;
+    color: $background;
+    border-color: $primary;
+
+    &:hover {
+      background-color: darken($primary, 10%);
+      border-color: darken($primary, 10%);
+    }
+  }
+
+  .customize {
+    background-color: $surface;
+    color: $text;
+    border-color: $border;
+
+    &:hover {
+      background-color: darken($surface, 5%);
+      border-color: $primary;
+    }
+  }
+
+  .back {
+    background-color: $surface;
+    color: $text;
+    border-color: $border;
+    @include alternating-border-radius($button-border-radius $button-border-radius 0 0);
+
+    &:hover {
+      background-color: darken($surface, 5%);
+      border-color: $primary;
+    }
+  }
+
+  .rejectAll {
+    background-color: transparent;
+    color: $dark-grey;
+    border-color: $border;
+
+    &:hover {
+      background-color: $surface;
+      color: $text;
+    }
+  }
+}
+
+.links {
+  display: flex;
+  align-items: center;
+  gap: $spacing-unit / 2;
+  font-size: 0.875rem;
+  color: $dark-grey;
+
+  a {
+    color: $primary;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  span {
+    color: $border;
+  }
+}

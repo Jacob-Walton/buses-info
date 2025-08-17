@@ -1,0 +1,78 @@
+@import '../styles/abstracts/variables';
+@import '../styles/abstracts/mixins';
+
+.errorContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 140px);
+  padding: $spacing-unit * 2;
+  text-align: center;
+}
+
+.content {
+  max-width: 500px;
+  width: 100%;
+}
+
+.icon {
+  font-size: 4rem;
+  color: $accent;
+  margin-bottom: $spacing-unit;
+
+  @include responsive(mobile) {
+    font-size: 3rem;
+  }
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: $secondary;
+  margin: 0 0 $spacing-unit;
+
+  @include responsive(mobile) {
+    font-size: 1.5rem;
+  }
+}
+
+.description {
+  font-size: 1.125rem;
+  color: $dark-grey;
+  margin: 0 0 $spacing-unit * 2;
+  line-height: 1.6;
+}
+
+.errorDetails {
+  background-color: $surface;
+  border: 1px solid $border;
+  border-radius: $button-border-radius;
+  padding: $spacing-unit;
+  margin: $spacing-unit 0;
+  text-align: left;
+
+  summary {
+    cursor: pointer;
+    font-weight: 600;
+    margin-bottom: $spacing-unit / 2;
+  }
+
+  pre {
+    font-size: 0.875rem;
+    color: $accent;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: $spacing-unit;
+  justify-content: center;
+  flex-wrap: wrap;
+
+  @include responsive(mobile) {
+    flex-direction: column;
+    align-items: center;
+  }
+}

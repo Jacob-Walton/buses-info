@@ -1,0 +1,28 @@
+// SCSS Functions
+
+// Convert px to rem
+@function rem($pixels, $context: 16) {
+  @return #{$pixels / $context}rem;
+}
+
+// Lighten/darken colors
+@function tint($color, $percentage) {
+  @return mix(white, $color, $percentage);
+}
+
+@function shade($color, $percentage) {
+  @return mix(black, $color, $percentage);
+}
+
+// Z-index management
+@function z-index($layer) {
+  $z-indexes: (
+    'modal': 9999,
+    'overlay': 9998,
+    'dropdown': 1000,
+    'navbar': 1000,
+    'content': 1
+  );
+  
+  @return map-get($z-indexes, $layer);
+}

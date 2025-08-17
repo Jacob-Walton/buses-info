@@ -1,0 +1,150 @@
+@import '@/styles/abstracts/variables';
+@import '@/styles/abstracts/mixins';
+
+.busInfoContainer {
+  padding: $spacing-unit * 2;
+  min-height: calc(100vh - $navbar-height + $spacing-unit * 2);
+}
+
+.contentContainer {
+  // Container for main content
+}
+
+.searchOverlay {
+  margin-bottom: $spacing-unit * 1.5;
+  max-width: 400px;
+
+  .searchInput {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1.5px solid $border;
+    background-color: $background;
+    font-size: 0.9375rem;
+    @include transition(border-color);
+    @include box-shadow(none);
+    @include alternating-border-radius(0.75rem);
+
+    &:focus {
+      outline: none;
+      border-color: $primary;
+      background-color: rgba($primary, 0.02);
+    }
+
+    &::placeholder {
+      color: $dark-grey;
+    }
+  }
+}
+
+.busInfoSections {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-unit * 1.5;
+}
+
+.error {
+  background-color: $accent-light;
+  color: darken($primary, 20%);
+  padding: $spacing-unit;
+  @include alternating-border-radius($regular-border-radius);
+  margin-bottom: $spacing-unit;
+  text-align: center;
+
+  h3 {
+    margin: 0 0 $spacing-unit * 0.5 0;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.875rem;
+  }
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  padding: $spacing-unit * 2;
+  text-align: center;
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    margin-bottom: $spacing-unit;
+    position: relative;
+    
+    &::before {
+      content: '';
+      width: 100%;
+      height: 100%;
+      border: 3px solid rgba($primary, 0.3);
+      border-top: 3px solid $primary;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+  }
+
+  p {
+    color: $dark-grey;
+    font-size: 1rem;
+    margin: 0;
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.infoFooter {
+  margin-top: $spacing-unit * 2;
+  padding-top: $spacing-unit * 0.5;
+  color: $dark-grey;
+  font-size: 0.875rem;
+
+  #lastUpdated {
+    text-align: center;
+    margin-bottom: $spacing-unit * 0.5;
+    font-style: italic;
+  }
+
+  .dataSource {
+    text-align: center;
+    color: lighten($dark-grey, 15%);
+    font-size: 0.8125rem;
+
+    a {
+      color: $primary;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .busInfoContainer {
+    padding: $spacing-unit;
+  }
+
+  .searchOverlay {
+    margin-bottom: $spacing-unit;
+    
+    .searchInput {
+      padding: $spacing-unit * 0.75;
+      font-size: 0.9375rem;
+    }
+  }
+}

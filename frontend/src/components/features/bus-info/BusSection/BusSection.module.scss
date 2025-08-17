@@ -1,0 +1,143 @@
+@import '@/styles/abstracts/variables';
+@import '@/styles/abstracts/mixins';
+
+.busSection {
+  &Header {
+    margin-bottom: $spacing-unit;
+    padding-bottom: calc($spacing-unit / 2);
+    cursor: pointer;
+    user-select: none;
+    padding: $spacing-unit 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid $border;
+
+    h3 {
+      font-size: 1.25rem;
+      color: $secondary;
+      margin: 0;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: $spacing-unit * 0.5;
+
+      i {
+        font-size: 1rem;
+        color: $primary;
+      }
+    }
+
+    .sectionHeaderContent {
+      display: flex;
+      align-items: center;
+      gap: $spacing-unit;
+
+      .busCount {
+        color: $dark-grey;
+        font-size: 0.9rem;
+      }
+    }
+
+    .sectionToggle {
+      @include reset-button;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: $dark-grey;
+      @include transition(transform, 0.3s);
+
+      i {
+        font-size: 1rem;
+      }
+    }
+
+    &.collapsed {
+      .sectionToggle {
+        transform: rotate(-180deg);
+      }
+    }
+
+    &:hover {
+      .sectionToggle {
+        color: $primary;
+      }
+    }
+  }
+
+  &Content {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: $spacing-unit;
+    overflow: hidden;
+    @include transition(max-height, 0.3s);
+    will-change: max-height;
+
+    @media (max-width: 1400px) {
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    }
+
+    @media (max-width: 900px) {
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: calc($spacing-unit / 2);
+    }
+
+    @media (max-width: 600px) {
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: calc($spacing-unit / 2);
+    }
+
+    @media (max-width: 380px) {
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: calc($spacing-unit / 2);
+    }
+
+    &.collapsed {
+      max-height: 0 !important;
+    }
+
+    &:not(.collapsed) {
+      overflow-y: auto;
+    }
+
+    &::-webkit-scrollbar {
+      width: 0;
+      background: transparent;
+    }
+  }
+
+  &.preferredSection {
+    background-color: rgba($primary, 0.03);
+    border: 1px solid rgba($primary, 0.1);
+    padding: $spacing-unit * 2;
+    @include alternating-border-radius($regular-border-radius);
+    margin-bottom: $spacing-unit * 2;
+
+    .busSectionHeader {
+      h3 {
+        color: $primary;
+        font-weight: 700;
+      }
+
+      &:hover {
+        .sectionToggle {
+          color: $primary;
+        }
+      }
+    }
+
+    .busSectionContent {
+      padding-top: $spacing-unit;
+    }
+  }
+}
+
+.emptyMessage {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: $dark-grey;
+  font-style: italic;
+  padding: $spacing-unit * 2;
+}
