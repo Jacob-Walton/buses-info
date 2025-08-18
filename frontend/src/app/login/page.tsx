@@ -23,7 +23,7 @@ export default function LoginPage() {
 
     try {
       await login(email, password);
-      router.push('/buses');
+      router.push('/');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Invalid username or password.');
     } finally {
@@ -61,6 +61,17 @@ export default function LoginPage() {
           </div>
           
           <h1 className={styles.loginTitle}>Welcome Back</h1>
+
+          {process.env.NODE_ENV === 'development' && (
+            <div className={styles.devNotice}>
+              <h3>Development Mode</h3>
+              <p>Use these test credentials:</p>
+              <ul>
+                <li><strong>User:</strong> test@example.com / password</li>
+                <li><strong>Admin:</strong> admin@example.com / admin</li>
+              </ul>
+            </div>
+          )}
 
           {error && (
             <div className={styles.errorSummary} role="alert">

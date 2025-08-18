@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
+import { LegalModal } from '@/components/common';
 import styles from '../login/page.module.scss';
 import Image from 'next/image';
 
@@ -17,6 +18,7 @@ export default function RegisterPage() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showLegalModal, setShowLegalModal] = useState(false);
   const { register } = useAuth();
   const router = useRouter();
 
@@ -29,27 +31,32 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError('');
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match.');
-      setIsLoading(false);
       return;
     }
 
     if (formData.password.length < 8) {
       setError('Password must be at least 8 characters long.');
-      setIsLoading(false);
       return;
     }
+
+    setShowLegalModal(true);
+  };
+
+  const handleLegalAccept = async () => {
+    setShowLegalModal(false);
+    setIsLoading(true);
 
     try {
       await register({
         email: formData.email,
         password: formData.password,
         firstName: formData.firstName,
-        lastName: formData.lastName
+        lastName: formData.lastName,
+        termsAccepted: true
       });
       router.push('/buses');
     } catch (err) {
@@ -57,6 +64,10 @@ export default function RegisterPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleLegalClose = () => {
+    setShowLegalModal(false);
   };
 
   const handleGoogleLogin = () => {
@@ -233,6 +244,12 @@ export default function RegisterPage() {
           </div>
         </div>
       </div>
+
+      <LegalModal
+        isOpen={showLegalModal}
+        onAccept={handleLegalAccept}
+        onClose={handleLegalClose}
+      />
     </div>
   );
 }

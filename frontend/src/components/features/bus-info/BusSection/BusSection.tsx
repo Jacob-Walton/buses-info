@@ -1,7 +1,7 @@
 'use client';
 
 import styles from './BusSection.module.scss';
-import { BusStatus } from '@/lib/api';
+import { BusStatus } from '@/types/bus';
 import BusItem from '../BusItem';
 
 interface BusSectionProps {

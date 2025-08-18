@@ -6,3 +6,4 @@ Dockerfile
 .dockerignore
 *.db
 *.db-*
+.env*.local

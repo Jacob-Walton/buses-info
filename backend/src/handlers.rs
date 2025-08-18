@@ -1,5 +1,6 @@
 use crate::{
-    cache::BusCache, database::Database, models::BusStatus, scraper::scrape_bus_information,
+    cache::BusCache, database::Database, models::BusStatus, 
+    scraper::{scrape_bus_information, generate_dummy_bus_data},
 };
 use axum::{Json, extract::State, response::IntoResponse};
 use serde_json::json;
@@ -32,9 +33,18 @@ pub async fn current_bus_information(
 
     // Cache miss, scrape fresh data
     tracing::debug!("Cache miss, scraping fresh bus data");
-    let bus_values: Vec<BusStatus> = scrape_bus_information().await.unwrap_or_default();
+    let mut bus_values: Vec<BusStatus> = scrape_bus_information().await.unwrap_or_default();
 
-    // Cache the fresh data
+    // In debug mode, if scraping returned empty results, use dummy data
+    #[cfg(debug_assertions)]
+    if bus_values.is_empty() {
+        tracing::debug!("Scraping returned empty results in debug mode, using dummy data");
+        bus_values = generate_dummy_bus_data();
+    }
+
+    // In release mode, if scraping failed or returned empty, just return empty
+
+    // Cache the data (whether real or dummy)
     cache.set(bus_values.clone()).await;
 
     Json(json!({

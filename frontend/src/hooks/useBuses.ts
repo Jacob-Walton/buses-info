@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { api, BusResponse, ApiError } from '@/lib/api';
+import { BusResponse } from '@/types/bus';
+import { ApiError } from '@/lib/errors';
 
 interface UseBusesOptions {
   refreshInterval?: number; // in milliseconds
@@ -45,7 +46,15 @@ export function useBuses(options: UseBusesOptions = {}): UseBusesReturn {
       }
       setError(null);
 
-      const response = await api.getCurrentBuses();
+      const apiResponse = await fetch('/api/buses/current', {
+        signal: abortControllerRef.current.signal,
+      });
+
+      if (!apiResponse.ok) {
+        throw new ApiError(apiResponse.status, `HTTP ${apiResponse.status}: ${apiResponse.statusText}`);
+      }
+
+      const response: BusResponse = await apiResponse.json();
       
       setBuses(response.buses);
       setIsCached(response.cached);

@@ -1,5 +1,6 @@
 import styles from './BusItem.module.scss';
-import { BusStatus } from '@/lib/api';
+import React from 'react';
+import { BusStatus } from '@/types/bus';
 
 interface BusItemProps {
   bus: BusStatus;

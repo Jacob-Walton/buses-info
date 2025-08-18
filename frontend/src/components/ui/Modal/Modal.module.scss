@@ -15,6 +15,11 @@
   padding: $spacing-unit;
   z-index: 9999;
   animation: fadeIn 0.2s ease-out;
+  box-sizing: border-box;
+
+  @include responsive(mobile) {
+    padding: $spacing-unit * 0.5;
+  }
 }
 
 .modalContent {
@@ -27,6 +32,14 @@
   max-height: 90vh;
   overflow-y: auto;
   animation: slideIn 0.3s ease-out;
+  box-sizing: border-box;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+
+  @include responsive(mobile) {
+    padding: $spacing-unit * 1.5;
+    max-width: 100%;
+  }
 }
 
 .closeButton {

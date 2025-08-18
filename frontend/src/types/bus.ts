@@ -21,3 +21,19 @@ export interface BusPrediction {
   }[];
   confidence: number;
 }
+
+// API-related interfaces
+export interface BusStatus {
+  service: string;
+  bay: string | null;
+}
+
+export interface BusResponse {
+  buses: BusStatus[];
+  cached: boolean;
+}
+
+export interface HealthStatus {
+  database: boolean;
+  site: boolean;
+}

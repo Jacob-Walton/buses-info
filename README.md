@@ -6,95 +6,59 @@
 ![Rust](https://img.shields.io/badge/Rust-CE412B?style=for-the-badge&logo=rust&logoColor=FFF)
 ![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-336791?style=for-the-badge&logo=postgresql&logoColor=white)
-![Coverage](https://img.shields.io/badge/Coverage-60%25-orange?style=for-the-badge&logo=codecov&logoColor=white)
 
-## Overview
+Bus arrival information for Runshaw College.
 
-This repository contains the source code for my Bus Info project. It provides almost real-time information about bus arrivals at Runshaw College.
+**Tech Stack**: Rust backend, Next.js frontend, PostgreSQL database
 
-## Technical Framework
+## Quick Start
 
-### Core Technolgoies
-
-- Rust
-- Next.js
-- PostgreSQL
-
-### System Structure
-
-This application utilises two different technologies for the front and backend, Next.js and Rust.
-
-### Authentication Methods
-
-- Cookie-based web authentication
-- API key system (Not Implemented Yet)
-
-## Development Configuration
-
-This project is set up for easy local development using Docker Compose. It brings up everything you need:
-
-- **PostgreSQL** database
-- **Rust backend API**
-- **Next.js frontend**
-- **nginx** reverse proxy
-
-### Prerequisites
-
-- [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/)
-- [Node.js](https://nodejs.org/) (optional, for local frontend dev)
-- [Rust toolchain](https://rustup.rs/) (optional, for local backend dev)
-
-### Environment Variables
-
-Copy the example environment file and fill in your own secrets:
-
-```sh
+```bash
+# 1. Setup environment
 cp .env.example .env
-```
+# Edit .env with your database credentials
 
-You’ll need to set values for:
-
-- `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`
-- `DATABASE_URL`
-- `LISTEN_ADDR`, `CACHE_DURATION_MINUTES`, `RUST_LOG`
-
-Environment variables are loaded automatically by the backend, whether you run it from the project root or the backend directory.
-
-### Starting Everything
-
-To build and start all services, just run:
-
-```sh
+# 2. Start everything
 ./build_up.sh
 ```
 
-Or, if you prefer Docker Compose directly:
+**Access**: [http://localhost:10000](http://localhost:10000)
 
-```sh
-docker compose up --build
-```
+## Development
 
-The backend and frontend aren’t exposed directly; visit [http://localhost:8080](http://localhost:8080) to use the app via nginx.
+### Full Stack
 
-### Local Development
+```bash
+# Database
+docker compose up postgres -d
 
-**Frontend:**
+# Backend (terminal 1)
+cd backend && cargo run
 
-```sh
+# Frontend (terminal 2) 
 cd frontend
-npm install
-npm run dev
+echo "BACKEND_URL=http://localhost:4001" > .env.local
+npm install && npm run dev
 ```
-This runs Next.js locally at [http://localhost:3000](http://localhost:3000) (bypassing nginx).
 
-**Backend:**
+Frontend: [http://localhost:3000](http://localhost:3000)  
+Backend: [http://localhost:4001](http://localhost:4001)
 
-```sh
+### Frontend Only
+
+```bash
+cd frontend && npm run dev
+```
+
+## Testing
+
+```bash
+# Backend
 cd backend
-cargo run
+docker-compose -f docker-compose.test.yml up -d
+cargo test
+docker-compose -f docker-compose.test.yml down -v
+
+# Frontend
+cd frontend && npm run lint
 ```
-This runs the Rust API locally.
-
-**Database:**
-
-PostgreSQL runs in Docker. Database migrations are in `backend/migrations/` and are applied automatically on container startup.

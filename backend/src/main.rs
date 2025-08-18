@@ -27,14 +27,49 @@ fn default_level() -> tracing::Level {
     }
 }
 
+#[cfg(debug_assertions)]
+async fn create_debug_users(db: &Database) {
+    use crate::auth::create_test_users;
+    create_test_users(db).await;
+}
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let root_env = std::path::Path::new("../.env");
-    let local_env = std::path::Path::new(".env");
-    if root_env.exists() {
-        dotenvy::from_path(root_env).ok();
-    } else if local_env.exists() {
-        dotenvy::from_path(local_env).ok();
+    #[cfg(debug_assertions)]
+    {
+        println!("Running in debug mode");
+        let root_env = std::path::Path::new(".env.local");
+        if root_env.exists() {
+            dotenvy::from_path(root_env).ok();
+        }
+
+        let env_whitelist: Vec<&str> = vec![
+            "DATABASE_URL",
+            "JWT_SECRET_KEY",
+            "LISTEN_ADDR",
+            "CACHE_DURATION_MINUTES",
+            "RUST_LOG",
+        ];
+
+        println!("Environment variables:");
+        for var in env_whitelist {
+            if let Ok(value) = std::env::var(var) {
+                println!("{}: {}", var, value);
+            } else {
+                eprintln!("Warning: {} is not set", var);
+            }
+        }
+    }
+
+    #[cfg(not(debug_assertions))]
+    {
+        let root_env = std::path::Path::new("../.env");
+        let local_env = std::path::Path::new(".env");
+        if root_env.exists() {
+            dotenvy::from_path(root_env).ok();
+        } else if local_env.exists() {
+            dotenvy::from_path(local_env).ok();
+        }
     }
 
     if std::env::var("JWT_SECRET_KEY").is_err() {
@@ -52,6 +87,9 @@ async fn main() -> anyhow::Result<()> {
     // Initialize database
     let database_url = std::env::var("DATABASE_URL").ok();
     let database = Database::new(database_url.as_deref()).await?;
+
+    #[cfg(debug_assertions)]
+    create_debug_users(&database).await;
 
     // Initialize bus cache
     let cache_duration = std::env::var("CACHE_DURATION_MINUTES")

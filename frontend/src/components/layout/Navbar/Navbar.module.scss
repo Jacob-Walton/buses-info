@@ -485,17 +485,22 @@
       align-items: center;
       padding: $spacing-unit * 1.5;
       font-size: 1.0625rem;
-      font-weight: 700;
+      font-weight: 600;
       @include alternating-border-radius(0.75rem);
-      margin-top: $spacing-unit * 2;
       height: auto;
-      justify-content: center;
-      gap: $spacing-unit;
+      justify-content: flex-start;
+      gap: $spacing-unit * 1.25;
+      background: rgba($accent, 0.05);
+      color: $accent;
+      border: 1px solid rgba($accent, 0.2);
       @include transition(all, 0.25s);
+      margin-top: 0;
       
       &:hover {
-        transform: translateY(-2px);
-        @include box-shadow(0 4px 12px rgba($primary, 0.3));
+        background: rgba($accent, 0.1);
+        color: $accent;
+        transform: translateX(2px);
+        box-shadow: none;
       }
     }
   }

@@ -41,6 +41,9 @@ panic = "abort"
 overflow-checks = false
 incremental = true
 
+[build]
+rustflags = []
+
 # Linux optimizations
 [target.x86_64-unknown-linux-gnu]
 rustflags = [
@@ -58,8 +61,6 @@ linker = "lld-link.exe"
 rustflags = [
     "-C",
     "target-cpu=native",
-    "-Z",
-    "share-generics",
     "-C",
     "symbol-mangling-version=v0",
 ]
@@ -70,8 +71,6 @@ linker = "lld-link.exe"
 rustflags = [
     "-C",
     "target-cpu=native",
-    "-Z",
-    "share-generics",
     "-C",
     "symbol-mangling-version=v0",
 ]
@@ -81,8 +80,6 @@ rustflags = [
 rustflags = [
     "-C",
     "target-cpu=native",
-    "-Z",
-    "share-generics",
     "-C",
     "symbol-mangling-version=v0",
 ]
@@ -92,8 +89,6 @@ rustflags = [
 rustflags = [
     "-C",
     "target-cpu=native",
-    "-Z",
-    "share-generics",
     "-C",
     "symbol-mangling-version=v0",
 ]

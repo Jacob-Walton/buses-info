@@ -1,6 +1,12 @@
-.homeContainer {
-  margin-top: 0;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+@import '@/styles/abstracts/variables';
+@import '@/styles/abstracts/mixins';
+
+.busesPage {
+  min-height: calc(100vh - $navbar-height);
+  background: $background;
+}
+
+.container {
+  width: 100%;
+  padding: 0;
 }

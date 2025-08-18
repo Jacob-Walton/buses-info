@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import styles from './BusList.module.scss';
-import { BusStatus } from '@/lib/api';
+import { BusStatus } from '@/types/bus';
 import BusSection from '../BusSection';
 import { useLocalStorage } from '@/hooks';
 

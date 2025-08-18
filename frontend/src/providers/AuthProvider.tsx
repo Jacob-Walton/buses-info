@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { config } from '@/constants/config';
 
 interface User {
   id: string;
@@ -16,7 +17,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  register: (data: { email: string; password: string; firstName: string; lastName: string }) => Promise<void>;
+  register: (data: { email: string; password: string; firstName: string; lastName: string, termsAccepted: boolean }) => Promise<void>;
   refreshUser: () => Promise<void>;
 }
 
@@ -44,30 +45,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const checkAuthStatus = async () => {
     try {
-      // Check if we're in development mode
-      const isDev = process.env.NODE_ENV === 'development';
-      
-      if (isDev) {
-        // Use dummy user in development
-        const dummyUser: User = {
-          id: 'dev-user-123',
-          email: 'dev@example.com',
-          role: 'User',
-          name: 'Dev User',
-          created_at: '2024-01-15T10:30:00Z',
-        };
-        setUser(dummyUser);
-        setIsLoading(false);
-        return;
-      }
-
       const token = localStorage.getItem('auth_token');
       if (!token) {
         setIsLoading(false);
         return;
       }
 
-      // Validate token with API
       const response = await fetch('/api/auth/me', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -113,7 +96,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  const register = async (data: { email: string; password: string; firstName: string; lastName: string }) => {
+  const register = async (data: { email: string; password: string; firstName: string; lastName: string, termsAccepted: boolean }) => {
     try {
       const response = await fetch('/api/auth/register', {
         method: 'POST',

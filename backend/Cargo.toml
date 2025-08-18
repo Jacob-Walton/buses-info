@@ -25,7 +25,6 @@ dotenvy = "0.15.7"
 [dev-dependencies]
 sqlx = { version = "0.8.2", features = ["runtime-tokio-rustls", "sqlite", "chrono", "uuid"] }
 anyhow = "1.0.99"
-tokio-test = "0.4"
 tower = { version = "0.5.2", features = ["util"] }
 hyper = { version = "1.7.0", features = ["full"] }
 tower-http = { version = "0.6.6", features = ["trace"] }

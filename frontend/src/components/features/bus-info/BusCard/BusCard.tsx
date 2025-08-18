@@ -1,5 +1,6 @@
 import styles from './BusCard.module.scss';
-import { BusStatus } from '@/lib/api';
+import React from 'react';
+import { BusStatus } from '@/types/bus';
 
 interface BusCardProps {
   bus: BusStatus;

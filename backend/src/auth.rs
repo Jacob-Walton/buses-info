@@ -5,6 +5,7 @@ use jsonwebtoken::{DecodingKey, EncodingKey, Header, Validation, decode, encode}
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use sqlx::Row;
+use tracing::{debug, error, warn};
 
 use crate::database::Database;
 
@@ -240,4 +241,43 @@ pub async fn create_user(
         role,
         created_at,
     })
+}
+
+pub async fn create_test_users(db: &Database) {
+    let users = vec![
+        RegisterRequest {
+            email: "test@example.com".to_string(),
+            password: "password".to_string(),
+            first_name: "Test".to_string(),
+            last_name: "User".to_string(),
+        },
+        RegisterRequest {
+            email: "admin@example.com".to_string(),
+            password: "admin".to_string(),
+            first_name: "Admin".to_string(),
+            last_name: "User".to_string(),
+        },
+    ];
+
+    for user in users {
+        if let Ok(existing_user) = get_user_by_email(db, &user.email).await {
+            if existing_user.is_none() {
+                let password_hash = hash_password(&user.password).unwrap();
+                let new_user = create_user(
+                    db,
+                    &user.email,
+                    &user.first_name,
+                    &user.last_name,
+                    &password_hash,
+                )
+                .await
+                .unwrap();
+                debug!("Created user: {:?}", new_user);
+            } else {
+                warn!("User with email {} already exists", user.email);
+            }
+        } else {
+            error!("Failed to check for existing user with email {}", user.email);
+        }
+    }
 }

@@ -138,12 +138,6 @@
   }
 
   &.preferredSection {
-    background-color: rgba($primary, 0.03);
-    border: 1px solid rgba($primary, 0.1);
-    padding: $spacing-unit * 2;
-    @include alternating-border-radius($regular-border-radius);
-    margin-bottom: $spacing-unit * 2;
-
     .busSectionHeader {
       h3 {
         color: $primary;
@@ -155,10 +149,6 @@
           color: $primary;
         }
       }
-    }
-
-    .busSectionContent {
-      padding-top: $spacing-unit;
     }
   }
 }

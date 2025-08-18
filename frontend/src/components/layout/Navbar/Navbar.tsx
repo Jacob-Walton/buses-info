@@ -102,15 +102,6 @@ export function Navbar() {
                   Home
                 </Link>
               </li>
-              <li className={`${styles.navItem} ${isMobileMenuOpen ? styles.animate : ''}`}>
-                <Link 
-                  href="/buses" 
-                  className={`${styles.navLink} ${isActive('/buses') ? styles.active : ''}`}
-                  onClick={handleNavClick}
-                >
-                  Bus Information
-                </Link>
-              </li>
 
               {!isAuthenticated ? (
                 <li className={`${styles.navItem} ${isMobileMenuOpen ? styles.animate : ''}`}>

@@ -19,7 +19,19 @@ const nextConfig: NextConfig = {
         pathname: '/assets/**'
       }
     ]
-  }
+  },
+  async rewrites() {
+    // Only add proxy rewrites in development mode
+    if (process.env.NODE_ENV === 'development' && process.env.BACKEND_URL) {
+      return [
+        {
+          source: '/api/:path*',
+          destination: `${process.env.BACKEND_URL}/api/:path*`,
+        },
+      ];
+    }
+    return [];
+  },
 };
 
 export default nextConfig;
