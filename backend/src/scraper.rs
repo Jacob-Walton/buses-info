@@ -1,5 +1,5 @@
-use scraper::{Html, Selector};
 use crate::models::BusStatus;
+use scraper::{Html, Selector};
 
 pub async fn scrape_bus_information() -> anyhow::Result<Vec<BusStatus>> {
     const MAX_RETRIES: u32 = 3;

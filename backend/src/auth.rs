@@ -9,7 +9,9 @@ use sqlx::Row;
 use crate::database::Database;
 
 static JWT_SECRET: Lazy<Option<Vec<u8>>> = Lazy::new(|| {
-    std::env::var("JWT_SECRET_KEY").ok().map(|v| v.as_bytes().to_vec())
+    std::env::var("JWT_SECRET_KEY")
+        .ok()
+        .map(|v| v.as_bytes().to_vec())
 });
 
 #[derive(Debug, Serialize, Deserialize)]

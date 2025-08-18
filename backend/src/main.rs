@@ -35,7 +35,9 @@ async fn main() -> anyhow::Result<()> {
     }
 
     if std::env::var("JWT_SECRET_KEY").is_err() {
-        eprintln!("FATAL: JWT_SECRET_KEY environment variable is not set. Please set it in your environment or .env file.");
+        eprintln!(
+            "FATAL: JWT_SECRET_KEY environment variable is not set. Please set it in your environment or .env file."
+        );
         std::process::exit(1);
     }
 
@@ -67,7 +69,10 @@ async fn main() -> anyhow::Result<()> {
         .route("/api/auth/me", get(me))
         .route("/api/user/export-data", post(request_data_export))
         .route("/api/user/data", get(export_user_data))
-        .route("/api/user/delete-account", axum::routing::delete(delete_user_account))
+        .route(
+            "/api/user/delete-account",
+            axum::routing::delete(delete_user_account),
+        )
         .with_state(app_state);
 
     let addr = std::env::var("LISTEN_ADDR").unwrap_or("localhost:4001".to_string());
