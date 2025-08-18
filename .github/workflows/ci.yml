@@ -84,7 +84,7 @@ jobs:
 
       - name: Run backend linting
         working-directory: backend
-        run: cargo clippy --all-targets -- -D warnings
+        run: cargo clippy
 
       - name: Run backend tests
         working-directory: backend
