@@ -4,6 +4,13 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      create_release:
+        description: 'Create GitHub release'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   test-frontend:
@@ -62,6 +69,7 @@ jobs:
   create-release:
     needs: [test-frontend, test-backend]
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.inputs.create_release == 'true'
     permissions:
       contents: write
     steps:
