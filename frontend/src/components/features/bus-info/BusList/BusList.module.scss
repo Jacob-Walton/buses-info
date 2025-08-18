@@ -4,60 +4,40 @@
 .busInfoContainer {
   padding: $spacing-unit * 2;
   min-height: calc(100vh - $navbar-height + $spacing-unit * 2);
-  background: linear-gradient(135deg, $background 0%, rgba($surface, 0.3) 100%);
+
+  @include responsive(mobile) {
+    padding: $spacing-unit;
+    min-height: calc(100vh - $navbar-height);
+  }
 }
 
 .contentContainer {
   // Container for main content
 }
 
-.headerSection {
-  margin-bottom: $spacing-unit * 2;
-
-  .statsBar {
-    display: flex;
-    gap: $spacing-unit * 1.5;
-    justify-content: center;
-    margin-bottom: $spacing-unit * 1.5;
-
-    @include responsive(mobile) {
-      flex-direction: column;
-      gap: $spacing-unit;
-    }
-
-    .statItem {
-      display: flex;
-      align-items: center;
-      gap: $spacing-unit / 2;
-      padding: $spacing-unit;
-      background-color: $background;
-      border: 1px solid $border;
-      @include alternating-border-radius($button-border-radius);
-      min-width: 120px;
-      justify-content: center;
-
-      i {
-        color: $primary;
-        font-size: 0.875rem;
-      }
-
-      span {
-        color: $secondary;
-        font-weight: 500;
-        font-size: 0.875rem;
-      }
-    }
-  }
-}
-
 .searchOverlay {
   margin-bottom: $spacing-unit * 1.5;
-  max-width: 400px;
+  max-width: 100%;
+
+  @include responsive(mobile) {
+    margin-bottom: $spacing-unit;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: $background;
+    padding: $spacing-unit 0;
+    margin: 0 0 $spacing-unit 0;
+  }
 
   .searchContainer {
     position: relative;
     display: flex;
     align-items: center;
+    max-width: 400px;
+
+    @include responsive(mobile) {
+      max-width: 100%;
+    }
 
     i {
       position: absolute;
@@ -70,12 +50,19 @@
 
   .searchInput {
     width: 100%;
-    padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+    padding: 0.875rem 0.875rem 0.875rem 2.75rem;
     border: 1.5px solid $border;
     background-color: $background;
-    font-size: 0.9375rem;
+    font-size: 1rem;
     @include transition(all);
     @include alternating-border-radius(0.75rem);
+
+    @include responsive(mobile) {
+      padding: 1rem 1rem 1rem 3rem;
+      font-size: 1.0625rem;
+      @include alternating-border-radius(0.75rem);
+      min-height: 48px;
+    }
 
     &:focus {
       outline: none;
@@ -93,8 +80,6 @@
   display: flex;
   flex-direction: column;
   gap: $spacing-unit * 1.5;
-  background-color: rgba($background, 0.6);
-  @include alternating-border-radius($regular-border-radius);
 }
 
 .error {
@@ -168,16 +153,31 @@
   color: $dark-grey;
   font-size: 0.875rem;
 
+  @include responsive(mobile) {
+    margin-top: $spacing-unit * 1.5;
+    padding: $spacing-unit 0;
+  }
+
   #lastUpdated {
     text-align: center;
     margin-bottom: $spacing-unit * 0.5;
     font-style: italic;
+
+    @include responsive(mobile) {
+      font-size: 0.9375rem;
+    }
   }
 
   .dataSource {
     text-align: center;
     color: lighten($dark-grey, 15%);
     font-size: 0.8125rem;
+    line-height: 1.4;
+
+    @include responsive(mobile) {
+      font-size: 0.875rem;
+      padding: 0 $spacing-unit;
+    }
 
     a {
       color: $primary;
@@ -190,17 +190,3 @@
   }
 }
 
-@media (max-width: 600px) {
-  .busInfoContainer {
-    padding: $spacing-unit;
-  }
-
-  .searchOverlay {
-    margin-bottom: $spacing-unit;
-
-    .searchInput {
-      padding: $spacing-unit * 0.75;
-      font-size: 0.9375rem;
-    }
-  }
-}

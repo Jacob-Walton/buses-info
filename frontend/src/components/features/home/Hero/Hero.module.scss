@@ -8,7 +8,7 @@
   background-position: center;
   background-repeat: no-repeat;
   position: relative;
-  height: 100vh;
+  height: calc(100vh - $navbar-height);
   width: 100%;
   margin: 0;
   padding: 0;
@@ -17,6 +17,10 @@
   justify-content: center;
   color: white;
   text-align: center;
+
+  @media (max-width: 480px) {
+    height: calc(100vh - 56px); // Account for smaller mobile navbar
+  }
 }
 
 .heroContent {

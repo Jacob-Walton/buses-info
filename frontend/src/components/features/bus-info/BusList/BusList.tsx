@@ -82,23 +82,6 @@ export default function BusList({ buses, isLoading = false, error = null, lastUp
   return (
     <div className={styles.busInfoContainer}>
       <div className={styles.contentContainer}>
-        <div className={styles.headerSection}>
-          <div className={styles.statsBar}>
-            <div className={styles.statItem}>
-              <i className="fas fa-bus"></i>
-              <span>{buses.length} Total</span>
-            </div>
-            <div className={styles.statItem}>
-              <i className="fas fa-map-marker-alt"></i>
-              <span>{organizedBuses.atBays.length} At Bays</span>
-            </div>
-            <div className={styles.statItem}>
-              <i className="fas fa-clock"></i>
-              <span>{organizedBuses.notArrived.length} Pending</span>
-            </div>
-          </div>
-        </div>
-
         <div className={styles.searchOverlay}>
           <div className={styles.searchContainer}>
             <i className="fas fa-search"></i>

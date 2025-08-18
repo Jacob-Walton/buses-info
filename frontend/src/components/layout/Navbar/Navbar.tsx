@@ -93,7 +93,7 @@ export function Navbar() {
 
           <div className={`${styles.navbarMenu} ${isMobileMenuOpen ? styles.active : ''}`}>
             <ul className={styles.navbarNav}>
-              <li className={styles.navItem}>
+              <li className={`${styles.navItem} ${isMobileMenuOpen ? styles.animate : ''}`}>
                 <Link 
                   href="/" 
                   className={`${styles.navLink} ${isActive('/') ? styles.active : ''}`}
@@ -102,7 +102,7 @@ export function Navbar() {
                   Home
                 </Link>
               </li>
-              <li className={styles.navItem}>
+              <li className={`${styles.navItem} ${isMobileMenuOpen ? styles.animate : ''}`}>
                 <Link 
                   href="/buses" 
                   className={`${styles.navLink} ${isActive('/buses') ? styles.active : ''}`}
@@ -113,50 +113,89 @@ export function Navbar() {
               </li>
 
               {!isAuthenticated ? (
-                <Link 
-                  href="/login" 
-                  className={`${styles.navLink} ${styles.navLinkBold}`}
-                  onClick={handleNavClick}
-                >
-                  Sign In
-                </Link>
-              ) : (
-                <div className={styles.profileMenu} ref={profileMenuRef}>
-                  <button 
-                    className={styles.profileTrigger}
-                    onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                <li className={`${styles.navItem} ${isMobileMenuOpen ? styles.animate : ''}`}>
+                  <Link 
+                    href="/login" 
+                    className={`${styles.navLink} ${styles.navLinkBold}`}
+                    onClick={handleNavClick}
                   >
-                    <i className="fas fa-user"></i>
-                    <i className="fas fa-chevron-down"></i>
-                  </button>
-                  <div className={`${styles.profileDropdown} ${isProfileDropdownOpen ? styles.active : ''}`}>
-                    {user?.role === 'Admin' && (
+                    Sign In
+                  </Link>
+                </li>
+              ) : (
+                <>
+                  <div className={`${styles.profileMenu} ${styles.desktopOnly}`} ref={profileMenuRef}>
+                    <button 
+                      className={styles.profileTrigger}
+                      onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                    >
+                      <i className="fas fa-user"></i>
+                      <i className="fas fa-chevron-down"></i>
+                    </button>
+                    <div className={`${styles.profileDropdown} ${isProfileDropdownOpen ? styles.active : ''}`}>
+                      {user?.role === 'Admin' && (
+                        <Link 
+                          href="/admin" 
+                          className={styles.dropdownItem}
+                          onClick={handleNavClick}
+                        >
+                          <i className="fas fa-shield-alt"></i>
+                          Admin
+                        </Link>
+                      )}
                       <Link 
-                        href="/admin" 
+                        href="/settings" 
                         className={styles.dropdownItem}
                         onClick={handleNavClick}
                       >
-                        <i className="fas fa-shield-alt"></i>
-                        Admin
+                        <i className="fas fa-cog"></i>
+                        Settings
                       </Link>
-                    )}
-                    <Link 
-                      href="/settings" 
-                      className={styles.dropdownItem}
-                      onClick={handleNavClick}
-                    >
-                      <i className="fas fa-cog"></i>
-                      Settings
-                    </Link>
-                    <button 
-                      onClick={handleLogout} 
-                      className={`${styles.dropdownItem} ${styles.danger}`}
-                    >
-                      <i className="fas fa-sign-out-alt"></i>
-                      Sign Out
-                    </button>
+                      <button 
+                        onClick={handleLogout} 
+                        className={`${styles.dropdownItem} ${styles.danger}`}
+                      >
+                        <i className="fas fa-sign-out-alt"></i>
+                        Sign Out
+                      </button>
+                    </div>
                   </div>
-                </div>
+                  
+                  {/* Mobile profile items */}
+                  <div className={styles.mobileProfileItems}>
+                    {user?.role === 'Admin' && (
+                      <li className={`${styles.navItem} ${isMobileMenuOpen ? styles.animate : ''}`}>
+                        <Link 
+                          href="/admin" 
+                          className={`${styles.navLink} ${isActive('/admin') ? styles.active : ''}`}
+                          onClick={handleNavClick}
+                        >
+                          <i className="fas fa-shield-alt"></i>
+                          Admin
+                        </Link>
+                      </li>
+                    )}
+                    <li className={`${styles.navItem} ${isMobileMenuOpen ? styles.animate : ''}`}>
+                      <Link 
+                        href="/settings" 
+                        className={`${styles.navLink} ${isActive('/settings') ? styles.active : ''}`}
+                        onClick={handleNavClick}
+                      >
+                        <i className="fas fa-cog"></i>
+                        Settings
+                      </Link>
+                    </li>
+                    <li className={`${styles.navItem} ${isMobileMenuOpen ? styles.animate : ''}`}>
+                      <button 
+                        onClick={handleLogout} 
+                        className={`${styles.navLink} ${styles.danger}`}
+                      >
+                        <i className="fas fa-sign-out-alt"></i>
+                        Sign Out
+                      </button>
+                    </li>
+                  </div>
+                </>
               )}
             </ul>
           </div>

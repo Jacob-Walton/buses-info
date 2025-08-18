@@ -1,5 +1,5 @@
 # Build stage
-FROM node:20-alpine as builder
+FROM node:22-alpine as builder
 
 WORKDIR /app
 
@@ -16,13 +16,16 @@ COPY . .
 RUN ESLINT_NO_DEV_ERRORS=true npm run build
 
 # Production stage - Next.js server
-FROM node:20-alpine
+FROM node:22-alpine
 
 WORKDIR /app
 
 # Copy package files and install production dependencies
 COPY package*.json ./
 RUN npm ci --only=production
+
+# Install TypeScript for next.config.ts support
+RUN npm install typescript
 
 # Copy built application from builder stage
 COPY --from=builder /app/.next ./.next
