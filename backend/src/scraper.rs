@@ -52,7 +52,7 @@ async fn scrape_attempt(client: &reqwest::Client) -> anyhow::Result<Vec<BusStatu
     parse_bus_data(&text)
 }
 
-fn parse_bus_data(html: &str) -> anyhow::Result<Vec<BusStatus>> {
+pub fn parse_bus_data(html: &str) -> anyhow::Result<Vec<BusStatus>> {
     let document = Html::parse_document(html);
     let table_selector = Selector::parse("table").unwrap();
     let row_selector = Selector::parse("tr").unwrap();

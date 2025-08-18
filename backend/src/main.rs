@@ -16,6 +16,9 @@ use database::Database;
 use handlers::*;
 use user_data::*;
 
+#[cfg(test)]
+mod tests;
+
 fn default_level() -> tracing::Level {
     if cfg!(debug_assertions) {
         tracing::Level::DEBUG

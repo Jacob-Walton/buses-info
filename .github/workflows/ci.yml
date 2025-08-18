@@ -34,6 +34,26 @@ jobs:
 
   test-backend:
     runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: test_buses
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_pass
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://test_user:test_pass@localhost:5433/test_buses
+      JWT_SECRET_KEY: test_secret_key_for_ci_only
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -44,17 +64,33 @@ jobs:
           toolchain: stable
           components: rustfmt, clippy
 
+      - name: Install sqlx-cli
+        run: cargo install sqlx-cli --no-default-features --features postgres
+
+      - name: Wait for PostgreSQL
+        run: |
+          until pg_isready -h localhost -p 5433 -U test_user; do
+            echo "Waiting for PostgreSQL..."
+            sleep 2
+          done
+
+      - name: Run database migrations
+        working-directory: backend
+        run: sqlx migrate run --database-url $DATABASE_URL
+
       - name: Run backend formatting check
         working-directory: backend
         run: cargo fmt --check
 
       - name: Run backend linting
         working-directory: backend
-        run: cargo clippy -- -D warnings
+        run: cargo clippy --all-targets -- -D warnings
 
       - name: Run backend tests
         working-directory: backend
-        run: cargo test
+        run: cargo test -- --test-threads=1
+        env:
+          RUST_BACKTRACE: 1
 
       - name: Build backend
         working-directory: backend

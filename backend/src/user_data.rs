@@ -152,14 +152,15 @@ fn extract_claims_from_headers(headers: &HeaderMap) -> Result<Claims, StatusCode
 
 // Helper functions to interact with database
 
-async fn get_user_info(
+pub async fn get_user_info(
     database: &Database,
     user_id: &str,
 ) -> Result<UserInfo, Box<dyn std::error::Error>> {
     let query = "SELECT email, created_at, last_login FROM users WHERE id = $1";
 
+    let user_uuid = uuid::Uuid::parse_str(user_id)?;
     let row = sqlx::query(query)
-        .bind(user_id)
+        .bind(user_uuid)
         .fetch_one(&database.pool)
         .await?;
 
@@ -174,7 +175,7 @@ async fn get_user_info(
     })
 }
 
-async fn get_user_preferences(
+pub async fn get_user_preferences(
     database: &Database,
     _user_id: &str,
 ) -> Result<UserPreferences, Box<dyn std::error::Error>> {
@@ -201,7 +202,7 @@ async fn get_user_preferences(
     })
 }
 
-async fn get_usage_data(
+pub async fn get_usage_data(
     database: &Database,
     user_id: &str,
 ) -> Result<UsageData, Box<dyn std::error::Error>> {
@@ -209,8 +210,9 @@ async fn get_usage_data(
 
     // Count total logins (simple approximation)
     let login_count_query = "SELECT COUNT(*) as login_count FROM users WHERE id = $1";
+    let user_uuid = uuid::Uuid::parse_str(user_id)?;
     let login_count: i64 = sqlx::query(login_count_query)
-        .bind(user_id)
+        .bind(user_uuid)
         .fetch_one(&database.pool)
         .await?
         .get("login_count");
@@ -221,27 +223,35 @@ async fn get_usage_data(
     })
 }
 
-async fn delete_user_data(
+pub async fn delete_user_data(
     database: &Database,
     user_id: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    // Start a transaction to ensure all deletes succeed or none do
+    let user_uuid = uuid::Uuid::parse_str(user_id)?;
+
+    // First, try to delete user preferences outside of transaction
+    // We don't care if this fails since the table might not exist
+    let _ = sqlx::query("DELETE FROM user_preferences WHERE user_id = $1")
+        .bind(user_uuid)
+        .execute(&database.pool)
+        .await;
+
+    // Now delete the user account in a separate transaction
     let mut tx = database.pool.begin().await?;
 
-    // Delete user preferences (if table exists)
-    let _ = sqlx::query("DELETE FROM user_preferences WHERE user_id = $1")
-        .bind(user_id)
+    let result = sqlx::query("DELETE FROM users WHERE id = $1")
+        .bind(user_uuid)
         .execute(&mut *tx)
-        .await; // Don't fail if table doesn't exist
+        .await;
 
-    // Delete the user account itself
-    sqlx::query("DELETE FROM users WHERE id = $1")
-        .bind(user_id)
-        .execute(&mut *tx)
-        .await?;
-
-    // Commit the transaction
-    tx.commit().await?;
-
-    Ok(())
+    match result {
+        Ok(_) => {
+            tx.commit().await?;
+            Ok(())
+        }
+        Err(e) => {
+            let _ = tx.rollback().await;
+            Err(Box::new(e))
+        }
+    }
 }

@@ -6,6 +6,7 @@
 ![Rust](https://img.shields.io/badge/Rust-CE412B?style=for-the-badge&logo=rust&logoColor=FFF)
 ![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-336791?style=for-the-badge&logo=postgresql&logoColor=white)
+![Coverage](https://img.shields.io/badge/Coverage-60%25-orange?style=for-the-badge&logo=codecov&logoColor=white)
 
 ## Overview
 
