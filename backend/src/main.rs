@@ -79,18 +79,18 @@ async fn main() -> anyhow::Result<()> {
     let listener = match TcpListener::bind(&addr).await {
         Ok(l) => l,
         Err(e) => {
-            eprintln!("Failed to bind to {}: {:?}", addr, e);
+            eprintln!("Failed to bind to {addr}: {e:?}");
             std::process::exit(1);
         }
     };
 
     let listen_addr = format!("http://{addr}");
-    println!("Listening on {}", listen_addr);
+    println!("Listening on {listen_addr}");
 
     tracing::info!("Listening on address: {}", listen_addr);
 
     if let Err(e) = axum::serve(listener, app).await {
-        eprintln!("Server error: {:?}", e);
+        eprintln!("Server error: {e:?}");
         std::process::exit(1);
     }
 
