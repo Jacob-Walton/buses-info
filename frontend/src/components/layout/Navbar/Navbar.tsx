@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
@@ -11,6 +11,7 @@ export function Navbar() {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAuth();
+  const profileMenuRef = useRef<HTMLDivElement>(null);
 
   const isActive = (path: string) => pathname === path;
 
@@ -28,6 +29,28 @@ export function Navbar() {
     };
   }, [isMobileMenuOpen]);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+        setIsProfileDropdownOpen(false);
+      }
+    };
+
+    if (isProfileDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isProfileDropdownOpen]);
+
+  // Close dropdown when pathname changes (navigation)
+  useEffect(() => {
+    setIsProfileDropdownOpen(false);
+  }, [pathname]);
+
   const handleMobileMenuToggle = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
@@ -40,6 +63,7 @@ export function Navbar() {
 
   const handleNavClick = () => {
     setIsMobileMenuOpen(false);
+    setIsProfileDropdownOpen(false);
   };
 
   return (
@@ -97,7 +121,7 @@ export function Navbar() {
                   Sign In
                 </Link>
               ) : (
-                <div className={styles.profileMenu}>
+                <div className={styles.profileMenu} ref={profileMenuRef}>
                   <button 
                     className={styles.profileTrigger}
                     onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}

@@ -7,6 +7,7 @@ interface User {
   email: string;
   role: 'User' | 'Admin';
   name?: string;
+  created_at: string;
 }
 
 interface AuthContextType {
@@ -43,6 +44,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const checkAuthStatus = async () => {
     try {
+      // Check if we're in development mode
+      const isDev = process.env.NODE_ENV === 'development';
+      
+      if (isDev) {
+        // Use dummy user in development
+        const dummyUser: User = {
+          id: 'dev-user-123',
+          email: 'dev@example.com',
+          role: 'User',
+          name: 'Dev User',
+          created_at: '2024-01-15T10:30:00Z',
+        };
+        setUser(dummyUser);
+        setIsLoading(false);
+        return;
+      }
+
       const token = localStorage.getItem('auth_token');
       if (!token) {
         setIsLoading(false);

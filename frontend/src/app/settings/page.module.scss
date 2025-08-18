@@ -1,0 +1,529 @@
+@import '@/styles/abstracts/variables';
+@import '@/styles/abstracts/mixins';
+
+.settingsPage {
+  min-height: calc(100vh - ($navbar-height * 3));
+  margin-top: $navbar-height;
+  margin-bottom: $navbar-height;
+  background-color: $background;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .settingsContainer {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 $spacing-unit * 2;
+
+    @include responsive(mobile) {
+      padding: 0 $spacing-unit;
+    }
+  }
+
+  .notLoggedIn {
+    text-align: center;
+    padding: $spacing-unit * 3;
+    background-color: $background;
+    border: 1px solid $border;
+    @include alternating-border-radius($regular-border-radius);
+
+    h1 {
+      color: $secondary;
+      margin-bottom: $spacing-unit;
+    }
+
+    p {
+      color: $text;
+      margin-bottom: $spacing-unit * 2;
+    }
+
+    .loginLink {
+      display: inline-block;
+      padding: $spacing-unit $spacing-unit * 2;
+      background-color: $primary;
+      color: $background;
+      text-decoration: none;
+      @include alternating-border-radius($button-border-radius);
+      font-weight: 500;
+      @include transition;
+
+      &:hover {
+        background-color: darken($primary, 10%);
+      }
+    }
+  }
+
+  .settingsHeader {
+    margin-bottom: $spacing-unit * 2;
+    text-align: center;
+
+    .settingsTitle {
+      color: $secondary;
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: $spacing-unit / 2;
+
+      @include responsive(mobile) {
+        font-size: 1.5rem;
+      }
+    }
+
+    .settingsSubtitle {
+      color: $dark-grey;
+      font-size: 1rem;
+    }
+  }
+
+  .settingsContent {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: $spacing-unit * 2;
+    background-color: $background;
+    border: 1px solid $border;
+    @include alternating-border-radius($regular-border-radius);
+    overflow: hidden;
+
+    @include responsive(tablet) {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+  }
+
+  .settingsTabs {
+    background-color: $background;
+    padding: $spacing-unit * 1.5;
+    border-right: 1px solid $border;
+
+    @include responsive(tablet) {
+      padding: $spacing-unit;
+      border-right: none;
+      border-bottom: 1px solid $border;
+      display: flex;
+      overflow-x: auto;
+      gap: $spacing-unit / 2;
+    }
+  }
+
+  .tabButton {
+    @include reset-button;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: $spacing-unit;
+    padding: $spacing-unit;
+    margin-bottom: $spacing-unit / 2;
+    color: $dark-grey;
+    font-weight: 500;
+    @include alternating-border-radius($button-border-radius);
+    @include transition;
+
+    &:hover {
+      background-color: rgba($primary, 0.05);
+      color: $primary;
+    }
+
+    &.active {
+      background-color: $primary;
+      color: $background;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    i {
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    span {
+      white-space: nowrap;
+    }
+
+    @include responsive(tablet) {
+      width: auto;
+      margin-bottom: 0;
+      flex-shrink: 0;
+    }
+  }
+
+  .settingsPanel {
+    padding: $spacing-unit * 2;
+
+    @include responsive(mobile) {
+      padding: $spacing-unit * 1.5;
+    }
+  }
+
+  .panelContent {
+    max-width: 600px;
+
+    .panelTitle {
+      color: $secondary;
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: $spacing-unit / 2;
+    }
+
+    .panelDescription {
+      color: $dark-grey;
+      margin-bottom: $spacing-unit * 2;
+      line-height: 1.6;
+    }
+  }
+
+  .accountInfo {
+    background-color: $surface;
+    border: 1px solid $border;
+    @include alternating-border-radius($regular-border-radius);
+    margin-bottom: $spacing-unit * 2;
+
+    .infoItem {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: $spacing-unit * 1.5;
+      border-bottom: 1px solid $border;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      label {
+        color: $secondary;
+        font-weight: 500;
+      }
+
+      span {
+        color: $text;
+      }
+    }
+  }
+
+  .accountActions {
+    h3 {
+      color: $secondary;
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: $spacing-unit;
+    }
+  }
+
+  .privacySection {
+    margin-bottom: $spacing-unit * 2;
+
+    h3 {
+      color: $secondary;
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: $spacing-unit;
+    }
+
+    p {
+      color: $text;
+      margin-bottom: $spacing-unit;
+      line-height: 1.6;
+    }
+  }
+
+  .cookieControls {
+    background-color: $surface;
+    border: 1px solid $border;
+    @include alternating-border-radius($regular-border-radius);
+    padding: $spacing-unit;
+
+    .cookieItem {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: $spacing-unit;
+      border-bottom: 1px solid $border;
+      gap: $spacing-unit * 2;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      @include responsive(mobile) {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: $spacing-unit;
+      }
+
+      .cookieInfo {
+        flex: 1;
+
+        strong {
+          display: block;
+          color: $secondary;
+          margin-bottom: $spacing-unit / 4;
+        }
+
+        p {
+          color: $dark-grey;
+          font-size: 0.875rem;
+          margin: 0;
+        }
+      }
+    }
+  }
+
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+
+    input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: $border;
+      @include transition;
+      @include alternating-border-radius(6px);
+
+      &::before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: $background;
+        @include transition;
+        @include alternating-border-radius(3px);
+      }
+    }
+
+    input:checked + .slider {
+      background-color: $primary;
+    }
+
+    input:checked + .slider::before {
+      transform: translateX(20px);
+    }
+
+    input:disabled + .slider {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  .privacyLinks {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: $spacing-unit;
+
+    .privacyLink {
+      display: flex;
+      align-items: center;
+      gap: $spacing-unit;
+      padding: $spacing-unit * 1.5;
+      border: 1px solid $border;
+      @include alternating-border-radius($button-border-radius);
+      text-decoration: none;
+      color: $text;
+      @include transition;
+      background-color: $surface;
+
+      &:hover {
+        border-color: $primary;
+        background-color: rgba($primary, 0.05);
+      }
+
+      i {
+        color: $primary;
+        font-size: 1.25rem;
+      }
+    }
+  }
+
+  .dataSection {
+    margin-bottom: $spacing-unit * 2;
+
+    h3 {
+      color: $secondary;
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: $spacing-unit;
+    }
+
+    p {
+      color: $text;
+      margin-bottom: $spacing-unit;
+      line-height: 1.6;
+    }
+  }
+
+  .actionItem {
+    background-color: $surface;
+    border: 1px solid $border;
+    @include alternating-border-radius($regular-border-radius);
+    padding: $spacing-unit * 1.5;
+    margin-bottom: $spacing-unit;
+
+    .actionInfo {
+      margin-bottom: $spacing-unit;
+
+      strong {
+        display: block;
+        color: $secondary;
+        margin-bottom: $spacing-unit / 2;
+        font-size: 1.125rem;
+      }
+
+      p {
+        color: $text;
+        margin-bottom: $spacing-unit / 2;
+        line-height: 1.6;
+      }
+
+      ul {
+        margin: 0;
+        padding-left: $spacing-unit * 1.5;
+
+        li {
+          color: $dark-grey;
+          font-size: 0.875rem;
+          margin-bottom: $spacing-unit / 4;
+        }
+      }
+    }
+  }
+
+  .statusMessage {
+    display: flex;
+    align-items: center;
+    gap: $spacing-unit / 2;
+    padding: $spacing-unit;
+    @include alternating-border-radius($button-border-radius);
+    font-size: 0.875rem;
+    margin-top: $spacing-unit;
+
+    &.info {
+      background-color: rgba($primary, 0.1);
+      border: 1px solid rgba($primary, 0.3);
+      color: $primary;
+    }
+
+    &.error {
+      background-color: rgba($accent, 0.1);
+      border: 1px solid rgba($accent, 0.3);
+      color: $accent;
+    }
+
+    i {
+      flex-shrink: 0;
+    }
+  }
+
+  .dataRights {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: $spacing-unit;
+    margin: $spacing-unit 0;
+
+    .rightItem {
+      display: flex;
+      align-items: flex-start;
+      gap: $spacing-unit;
+      padding: $spacing-unit * 1.5;
+      border: 1px solid $border;
+      @include alternating-border-radius($regular-border-radius);
+      background-color: $surface;
+
+      i {
+        color: $primary;
+        font-size: 1.25rem;
+        margin-top: 0.125rem;
+        flex-shrink: 0;
+      }
+
+      div {
+        flex: 1;
+
+        strong {
+          display: block;
+          color: $secondary;
+          margin-bottom: $spacing-unit / 4;
+        }
+
+        p {
+          color: $dark-grey;
+          font-size: 0.875rem;
+          margin: 0;
+          line-height: 1.5;
+        }
+      }
+    }
+  }
+
+  .dangerZone {
+    margin-top: $spacing-unit * 2;
+    padding: $spacing-unit * 1.5;
+    border: 2px solid rgba($accent, 0.3);
+    @include alternating-border-radius($regular-border-radius);
+    background-color: rgba($accent, 0.05);
+
+    .dangerItem {
+      .dangerInfo {
+        margin-bottom: $spacing-unit;
+
+        h4 {
+          color: $accent;
+          font-size: 1.125rem;
+          font-weight: 600;
+          margin-bottom: $spacing-unit / 2;
+        }
+
+        p {
+          color: $text;
+          margin: 0;
+          line-height: 1.6;
+        }
+      }
+    }
+  }
+
+  .confirmationBox {
+    margin-top: $spacing-unit;
+    padding: $spacing-unit * 1.5;
+    border: 1px solid $border;
+    @include alternating-border-radius($button-border-radius);
+    background-color: $background;
+
+    p {
+      margin-bottom: $spacing-unit / 2;
+      color: $text;
+    }
+
+    ul {
+      margin: $spacing-unit / 2 0;
+      padding-left: $spacing-unit * 1.5;
+
+      li {
+        margin-bottom: $spacing-unit / 4;
+        color: $text;
+      }
+    }
+
+    .confirmationActions {
+      display: flex;
+      gap: $spacing-unit;
+      margin-top: $spacing-unit;
+
+      @include responsive(mobile) {
+        flex-direction: column;
+      }
+    }
+  }
+}

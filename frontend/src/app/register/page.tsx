@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import styles from '../login/page.module.scss';
+import Image from 'next/image';
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -78,7 +79,13 @@ export default function RegisterPage() {
       <div className={styles.authFormContainer}>
         <div className={styles.loginContainer}>
           <div className={styles.loginLogo}>
-            <img src="https://d1tl6qv7xwsvxx.cloudfront.net/assets/logo-full.png" alt="Bus Info Logo" />
+            <Image
+              src="https://d1tl6qv7xwsvxx.cloudfront.net/assets/logo-full.png"
+              alt="Bus Info Logo"
+              width={200}
+              height={60}
+              priority
+            />
           </div>
           
           <h1 className={styles.loginTitle}>Create Account</h1>
@@ -193,11 +200,11 @@ export default function RegisterPage() {
               className={styles.btnGoogle}
               disabled={isLoading}
             >
-              <img 
+              <Image 
                 src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/google/google-original.svg" 
                 alt="Google" 
-                width="18" 
-                height="18" 
+                width={18} 
+                height={18} 
               />
               Google
             </button>
@@ -208,11 +215,11 @@ export default function RegisterPage() {
               className={styles.btnMicrosoft}
               disabled={isLoading}
             >
-              <img 
+              <Image 
                 src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/windows11/windows11-original.svg" 
                 alt="Microsoft" 
-                width="18" 
-                height="18" 
+                width={18} 
+                height={18} 
               />
               Microsoft
             </button>

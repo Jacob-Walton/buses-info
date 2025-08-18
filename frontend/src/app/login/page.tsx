@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
-import { Button } from '@/components/ui';
+import Image from 'next/image';
 import styles from './page.module.scss';
 
 export default function LoginPage() {
@@ -51,7 +51,13 @@ export default function LoginPage() {
       <div className={styles.authFormContainer}>
         <div className={styles.loginContainer}>
           <div className={styles.loginLogo}>
-            <img src="https://d1tl6qv7xwsvxx.cloudfront.net/assets/logo-full.png" alt="Bus Info Logo" />
+            <Image
+              src="https://d1tl6qv7xwsvxx.cloudfront.net/assets/logo-full.png"
+              alt="Bus Info Logo"
+              width={200}
+              height={60}
+              priority
+            />
           </div>
           
           <h1 className={styles.loginTitle}>Welcome Back</h1>
@@ -135,11 +141,11 @@ export default function LoginPage() {
               className={styles.btnGoogle}
               disabled={isLoading}
             >
-              <img 
+              <Image 
                 src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/google/google-original.svg" 
                 alt="Google" 
-                width="18" 
-                height="18" 
+                width={18} 
+                height={18} 
               />
               Google
             </button>
@@ -150,11 +156,11 @@ export default function LoginPage() {
               className={styles.btnMicrosoft}
               disabled={isLoading}
             >
-              <img 
+              <Image 
                 src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/windows11/windows11-original.svg" 
                 alt="Microsoft" 
-                width="18" 
-                height="18" 
+                width={18} 
+                height={18} 
               />
               Microsoft
             </button>

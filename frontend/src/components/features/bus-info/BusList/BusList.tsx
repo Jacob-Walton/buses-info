@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import styles from './BusList.module.scss';
 import { BusStatus } from '@/lib/api';
 import BusSection from '../BusSection';
@@ -21,7 +21,6 @@ export default function BusList({ buses, isLoading = false, error = null, lastUp
     'at-bays': false,
     'not-arrived': true // Default collapsed
   });
-  const [userModifiedSections, setUserModifiedSections] = useLocalStorage<Record<string, boolean>>('bus-section-user-modified', {});
 
   const togglePreferred = (service: string) => {
     setPreferredBuses(prev => 
@@ -32,6 +31,9 @@ export default function BusList({ buses, isLoading = false, error = null, lastUp
   };
 
   const filteredBuses = useMemo(() => {
+    if (!searchTerm.trim()) {
+      return buses; // Return all buses when no search term
+    }
     return buses.filter(bus => 
       bus.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (bus.bay && bus.bay.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -56,49 +58,8 @@ export default function BusList({ buses, isLoading = false, error = null, lastUp
       ...prev,
       [sectionKey]: !prev[sectionKey]
     }));
-    
-    // Mark that user manually modified this section
-    setUserModifiedSections(prev => ({
-      ...prev,
-      [sectionKey]: true
-    }));
   };
 
-  // Collapse/expand based on search
-  useEffect(() => {
-    if (searchTerm.trim()) {
-      // When searching, expand sections that have matching buses
-      const newCollapsedState = { ...collapsedSections };
-      
-      if (organizedBuses.preferred.length > 0) {
-        newCollapsedState['preferred'] = false;
-      }
-      if (organizedBuses.atBays.length > 0) {
-        newCollapsedState['at-bays'] = false;
-      }
-      if (organizedBuses.notArrived.length > 0) {
-        newCollapsedState['not-arrived'] = false;
-      }
-      
-      setCollapsedSections(newCollapsedState);
-    } else {
-      // When search is cleared, restore default collapsed state for sections
-      // that weren't manually modified by the user
-      const newCollapsedState = { ...collapsedSections };
-      
-      if (!userModifiedSections['preferred'] && organizedBuses.preferred.length === 0) {
-        newCollapsedState['preferred'] = false; // Keep preferred expanded if it exists
-      }
-      if (!userModifiedSections['at-bays'] && organizedBuses.atBays.length === 0) {
-        newCollapsedState['at-bays'] = false; // Keep at-bays expanded by default
-      }
-      if (!userModifiedSections['not-arrived'] && organizedBuses.notArrived.length === 0) {
-        newCollapsedState['not-arrived'] = true; // Collapse not-arrived by default
-      }
-      
-      setCollapsedSections(newCollapsedState);
-    }
-  }, [searchTerm, organizedBuses, userModifiedSections]);
 
   if (error) {
     return (
@@ -121,15 +82,35 @@ export default function BusList({ buses, isLoading = false, error = null, lastUp
   return (
     <div className={styles.busInfoContainer}>
       <div className={styles.contentContainer}>
+        <div className={styles.headerSection}>
+          <div className={styles.statsBar}>
+            <div className={styles.statItem}>
+              <i className="fas fa-bus"></i>
+              <span>{buses.length} Total</span>
+            </div>
+            <div className={styles.statItem}>
+              <i className="fas fa-map-marker-alt"></i>
+              <span>{organizedBuses.atBays.length} At Bays</span>
+            </div>
+            <div className={styles.statItem}>
+              <i className="fas fa-clock"></i>
+              <span>{organizedBuses.notArrived.length} Pending</span>
+            </div>
+          </div>
+        </div>
+
         <div className={styles.searchOverlay}>
-          <input
-            type="text"
-            id="searchInput"
-            className={styles.searchInput}
-            placeholder="Search by bus number or bay"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          <div className={styles.searchContainer}>
+            <i className="fas fa-search"></i>
+            <input
+              type="text"
+              id="searchInput"
+              className={styles.searchInput}
+              placeholder="Search by bus number or bay"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
         </div>
 
         <div className={styles.busInfoSections}>

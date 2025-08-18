@@ -4,24 +4,77 @@
 .busInfoContainer {
   padding: $spacing-unit * 2;
   min-height: calc(100vh - $navbar-height + $spacing-unit * 2);
+  background: linear-gradient(135deg, $background 0%, rgba($surface, 0.3) 100%);
 }
 
 .contentContainer {
   // Container for main content
 }
 
+.headerSection {
+  margin-bottom: $spacing-unit * 2;
+
+  .statsBar {
+    display: flex;
+    gap: $spacing-unit * 1.5;
+    justify-content: center;
+    margin-bottom: $spacing-unit * 1.5;
+
+    @include responsive(mobile) {
+      flex-direction: column;
+      gap: $spacing-unit;
+    }
+
+    .statItem {
+      display: flex;
+      align-items: center;
+      gap: $spacing-unit / 2;
+      padding: $spacing-unit;
+      background-color: $background;
+      border: 1px solid $border;
+      @include alternating-border-radius($button-border-radius);
+      min-width: 120px;
+      justify-content: center;
+
+      i {
+        color: $primary;
+        font-size: 0.875rem;
+      }
+
+      span {
+        color: $secondary;
+        font-weight: 500;
+        font-size: 0.875rem;
+      }
+    }
+  }
+}
+
 .searchOverlay {
   margin-bottom: $spacing-unit * 1.5;
   max-width: 400px;
 
+  .searchContainer {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    i {
+      position: absolute;
+      left: $spacing-unit;
+      color: $dark-grey;
+      font-size: 0.875rem;
+      z-index: 1;
+    }
+  }
+
   .searchInput {
     width: 100%;
-    padding: 0.5rem 0.75rem;
+    padding: 0.75rem 0.75rem 0.75rem 2.5rem;
     border: 1.5px solid $border;
     background-color: $background;
     font-size: 0.9375rem;
-    @include transition(border-color);
-    @include box-shadow(none);
+    @include transition(all);
     @include alternating-border-radius(0.75rem);
 
     &:focus {
@@ -40,6 +93,8 @@
   display: flex;
   flex-direction: column;
   gap: $spacing-unit * 1.5;
+  background-color: rgba($background, 0.6);
+  @include alternating-border-radius($regular-border-radius);
 }
 
 .error {
@@ -75,7 +130,7 @@
     height: 40px;
     margin-bottom: $spacing-unit;
     position: relative;
-    
+
     &::before {
       content: '';
       width: 100%;
@@ -101,6 +156,7 @@
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -141,7 +197,7 @@
 
   .searchOverlay {
     margin-bottom: $spacing-unit;
-    
+
     .searchInput {
       padding: $spacing-unit * 0.75;
       font-size: 0.9375rem;

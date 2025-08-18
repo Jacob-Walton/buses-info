@@ -8,11 +8,13 @@ mod database;
 mod handlers;
 mod models;
 mod scraper;
+mod user_data;
 
 use auth_handlers::*;
 use cache::BusCache;
 use database::Database;
 use handlers::*;
+use user_data::*;
 
 fn default_level() -> tracing::Level {
     if cfg!(debug_assertions) {
@@ -63,6 +65,9 @@ async fn main() -> anyhow::Result<()> {
         .route("/api/auth/login", post(login))
         .route("/api/auth/logout", post(logout))
         .route("/api/auth/me", get(me))
+        .route("/api/user/export-data", post(request_data_export))
+        .route("/api/user/data", get(export_user_data))
+        .route("/api/user/delete-account", axum::routing::delete(delete_user_account))
         .with_state(app_state);
 
     let addr = std::env::var("LISTEN_ADDR").unwrap_or("localhost:4001".to_string());
