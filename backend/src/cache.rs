@@ -25,10 +25,10 @@ impl BusCache {
     pub async fn get(&self) -> Option<Vec<BusStatus>> {
         let cache = self.data.read().await;
 
-        if let Some(entry) = cache.as_ref() {
-            if entry.timestamp.elapsed() < self.ttl {
-                return Some(entry.buses.clone());
-            }
+        if let Some(entry) = cache.as_ref()
+            && entry.timestamp.elapsed() < self.ttl
+        {
+            return Some(entry.buses.clone());
         }
 
         None
