@@ -1,6 +1,8 @@
 use crate::{
-    cache::BusCache, database::Database, models::BusStatus, 
-    scraper::{scrape_bus_information, generate_dummy_bus_data},
+    cache::BusCache,
+    database::Database,
+    models::BusStatus,
+    scraper::{generate_dummy_bus_data, scrape_bus_information},
 };
 use axum::{Json, extract::State, response::IntoResponse};
 use serde_json::json;

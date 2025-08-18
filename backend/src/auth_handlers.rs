@@ -90,7 +90,16 @@ pub async fn register(
     };
 
     // Create user
-    let user = match create_user(&db, &email, &first_name, &last_name, &password_hash).await {
+    let user = match create_user(
+        &db,
+        &email,
+        &first_name,
+        &last_name,
+        &password_hash,
+        req.terms_accepted,
+    )
+    .await
+    {
         Ok(user) => user,
         Err(e) => {
             tracing::error!("Failed to create user: {}", e);

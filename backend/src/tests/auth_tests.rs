@@ -53,7 +53,7 @@ async fn test_create_and_get_user() {
     let last_name = "User";
     let password_hash = hash_password("password123").unwrap();
 
-    let created_user = create_user(&db, email, first_name, last_name, &password_hash)
+    let created_user = create_user(&db, email, first_name, last_name, &password_hash, true)
         .await
         .expect("Failed to create user");
 
@@ -101,7 +101,7 @@ async fn test_authenticate_user() {
     // Create a user
     let email = "auth_test@example.com";
     let password_hash = hash_password("password123").unwrap();
-    let user = create_user(&db, email, "Auth", "Test", &password_hash)
+    let user = create_user(&db, email, "Auth", "Test", &password_hash, true)
         .await
         .expect("Failed to create user");
 

@@ -4,39 +4,106 @@ use scraper::{Html, Selector};
 /// Generate dummy bus data for development/debug mode
 pub fn generate_dummy_bus_data() -> Vec<BusStatus> {
     vec![
-        BusStatus { service: "101".to_string(), bay: Some("T1".to_string()) },
-        BusStatus { service: "102".to_string(), bay: Some("T2".to_string()) },
-        
-        BusStatus { service: "103".to_string(), bay: Some("A1".to_string()) },
-        BusStatus { service: "104".to_string(), bay: Some("B1".to_string()) },
-        BusStatus { service: "105".to_string(), bay: Some("C1".to_string()) },
-        
-        BusStatus { service: "106".to_string(), bay: Some("A2".to_string()) },
-        BusStatus { service: "107".to_string(), bay: Some("B2".to_string()) },
-        BusStatus { service: "108".to_string(), bay: None }, // Not arrived
-        
-        BusStatus { service: "109".to_string(), bay: Some("A3".to_string()) },
-        BusStatus { service: "110".to_string(), bay: None }, // Not arrived
-        BusStatus { service: "111".to_string(), bay: Some("C3".to_string()) },
-        
-        BusStatus { service: "112".to_string(), bay: Some("A4".to_string()) },
-        BusStatus { service: "113".to_string(), bay: Some("B4".to_string()) },
-        BusStatus { service: "114".to_string(), bay: Some("C4".to_string()) },
-        
-        BusStatus { service: "115".to_string(), bay: None }, // Not arrived
-        BusStatus { service: "116".to_string(), bay: Some("B5".to_string()) },
-        BusStatus { service: "117".to_string(), bay: Some("C5".to_string()) },
-        
-        BusStatus { service: "118".to_string(), bay: Some("A6".to_string()) },
-        BusStatus { service: "119".to_string(), bay: None }, // Not arrived
-        BusStatus { service: "120".to_string(), bay: Some("C6".to_string()) },
-        
-        BusStatus { service: "121".to_string(), bay: Some("A7".to_string()) },
-        BusStatus { service: "122".to_string(), bay: Some("B7".to_string()) },
-        BusStatus { service: "123".to_string(), bay: None }, // Not arrived
-        
-        BusStatus { service: "124".to_string(), bay: Some("A8".to_string()) },
-        BusStatus { service: "125".to_string(), bay: Some("B8".to_string()) },
+        BusStatus {
+            service: "101".to_string(),
+            bay: Some("T1".to_string()),
+        },
+        BusStatus {
+            service: "102".to_string(),
+            bay: Some("T2".to_string()),
+        },
+        BusStatus {
+            service: "103".to_string(),
+            bay: Some("A1".to_string()),
+        },
+        BusStatus {
+            service: "104".to_string(),
+            bay: Some("B1".to_string()),
+        },
+        BusStatus {
+            service: "105".to_string(),
+            bay: Some("C1".to_string()),
+        },
+        BusStatus {
+            service: "106".to_string(),
+            bay: Some("A2".to_string()),
+        },
+        BusStatus {
+            service: "107".to_string(),
+            bay: Some("B2".to_string()),
+        },
+        BusStatus {
+            service: "108".to_string(),
+            bay: None,
+        }, // Not arrived
+        BusStatus {
+            service: "109".to_string(),
+            bay: Some("A3".to_string()),
+        },
+        BusStatus {
+            service: "110".to_string(),
+            bay: None,
+        }, // Not arrived
+        BusStatus {
+            service: "111".to_string(),
+            bay: Some("C3".to_string()),
+        },
+        BusStatus {
+            service: "112".to_string(),
+            bay: Some("A4".to_string()),
+        },
+        BusStatus {
+            service: "113".to_string(),
+            bay: Some("B4".to_string()),
+        },
+        BusStatus {
+            service: "114".to_string(),
+            bay: Some("C4".to_string()),
+        },
+        BusStatus {
+            service: "115".to_string(),
+            bay: None,
+        }, // Not arrived
+        BusStatus {
+            service: "116".to_string(),
+            bay: Some("B5".to_string()),
+        },
+        BusStatus {
+            service: "117".to_string(),
+            bay: Some("C5".to_string()),
+        },
+        BusStatus {
+            service: "118".to_string(),
+            bay: Some("A6".to_string()),
+        },
+        BusStatus {
+            service: "119".to_string(),
+            bay: None,
+        }, // Not arrived
+        BusStatus {
+            service: "120".to_string(),
+            bay: Some("C6".to_string()),
+        },
+        BusStatus {
+            service: "121".to_string(),
+            bay: Some("A7".to_string()),
+        },
+        BusStatus {
+            service: "122".to_string(),
+            bay: Some("B7".to_string()),
+        },
+        BusStatus {
+            service: "123".to_string(),
+            bay: None,
+        }, // Not arrived
+        BusStatus {
+            service: "124".to_string(),
+            bay: Some("A8".to_string()),
+        },
+        BusStatus {
+            service: "125".to_string(),
+            bay: Some("B8".to_string()),
+        },
     ]
 }
 

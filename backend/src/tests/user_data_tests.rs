@@ -8,9 +8,16 @@ async fn test_get_user_info() {
 
     // Create a test user
     let password_hash = hash_password("password123").unwrap();
-    let user = create_user(&db, "userdata@example.com", "User", "Data", &password_hash)
-        .await
-        .expect("Failed to create user");
+    let user = create_user(
+        &db,
+        "userdata@example.com",
+        "User",
+        "Data",
+        &password_hash,
+        true,
+    )
+    .await
+    .expect("Failed to create user");
 
     // Get user info
     let user_info = get_user_info(&db, &user.id)
@@ -42,9 +49,16 @@ async fn test_get_usage_data() {
 
     // Create a test user
     let password_hash = hash_password("password123").unwrap();
-    let user = create_user(&db, "usage@example.com", "Usage", "Test", &password_hash)
-        .await
-        .expect("Failed to create user");
+    let user = create_user(
+        &db,
+        "usage@example.com",
+        "Usage",
+        "Test",
+        &password_hash,
+        true,
+    )
+    .await
+    .expect("Failed to create user");
 
     let usage_data = get_usage_data(&db, &user.id)
         .await
@@ -60,9 +74,16 @@ async fn test_delete_user_data() {
 
     // Create a test user
     let password_hash = hash_password("password123").unwrap();
-    let user = create_user(&db, "delete@example.com", "Delete", "Test", &password_hash)
-        .await
-        .expect("Failed to create user");
+    let user = create_user(
+        &db,
+        "delete@example.com",
+        "Delete",
+        "Test",
+        &password_hash,
+        true,
+    )
+    .await
+    .expect("Failed to create user");
 
     // Verify user exists
     let user_exists_before = get_user_info(&db, &user.id).await;

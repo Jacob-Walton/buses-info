@@ -56,6 +56,8 @@ pub struct RegisterRequest {
     pub first_name: String,
     #[serde(rename = "lastName")]
     pub last_name: String,
+    #[serde(rename = "termsAccepted")]
+    pub terms_accepted: bool,
 }
 
 #[derive(Debug, Serialize)]
@@ -205,7 +207,12 @@ pub async fn create_user(
     first_name: &str,
     last_name: &str,
     password_hash: &str,
+    terms_accepted: bool,
 ) -> Result<User> {
+    if !terms_accepted {
+        return Err(anyhow!("Terms must be accepted to create a user"));
+    }
+
     let user_id = uuid::Uuid::new_v4();
     let now = chrono::Utc::now();
 
@@ -250,12 +257,14 @@ pub async fn create_test_users(db: &Database) {
             password: "password".to_string(),
             first_name: "Test".to_string(),
             last_name: "User".to_string(),
+            terms_accepted: true,
         },
         RegisterRequest {
             email: "admin@example.com".to_string(),
             password: "admin".to_string(),
             first_name: "Admin".to_string(),
             last_name: "User".to_string(),
+            terms_accepted: true,
         },
     ];
 
@@ -269,6 +278,7 @@ pub async fn create_test_users(db: &Database) {
                     &user.first_name,
                     &user.last_name,
                     &password_hash,
+                    user.terms_accepted,
                 )
                 .await
                 .unwrap();
@@ -277,7 +287,10 @@ pub async fn create_test_users(db: &Database) {
                 warn!("User with email {} already exists", user.email);
             }
         } else {
-            error!("Failed to check for existing user with email {}", user.email);
+            error!(
+                "Failed to check for existing user with email {}",
+                user.email
+            );
         }
     }
 }
