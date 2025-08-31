@@ -18,7 +18,7 @@ async fn test_health_check() {
 async fn test_health_status() {
     let db = setup_test_database().await;
     let cache = setup_test_cache();
-    let state = State((db, cache));
+    let state = State((db, cache, None));
 
     let response = health_status(state).await;
     let response = response.into_response();
@@ -45,7 +45,7 @@ async fn test_health_status() {
 async fn test_current_bus_information_cache_miss() {
     let db = setup_test_database().await;
     let cache = setup_test_cache();
-    let state = State((db, cache));
+    let state = State((db, cache, None));
 
     let response = current_bus_information(state).await;
     let response = response.into_response();
@@ -66,7 +66,6 @@ async fn test_current_bus_information_cache_miss() {
     // Should indicate not cached (fresh data)
     assert_eq!(json["cached"], false);
 
-    // Buses should be an array (could be empty if scraper fails)
     assert!(json["buses"].is_array());
 }
 
@@ -88,7 +87,7 @@ async fn test_current_bus_information_cache_hit() {
     ];
     cache.set(test_data.clone()).await;
 
-    let state = State((db, cache));
+    let state = State((db, cache, None));
     let response = current_bus_information(state).await;
     let response = response.into_response();
 
@@ -123,7 +122,7 @@ async fn test_current_bus_information_empty_cache() {
     // Set empty data in cache
     cache.set(vec![]).await;
 
-    let state = State((db, cache));
+    let state = State((db, cache, None));
     let response = current_bus_information(state).await;
     let response = response.into_response();
 

@@ -15,7 +15,7 @@ async fn create_test_app() -> Router {
     init_test_env();
     let db = setup_test_database().await;
     let cache = setup_test_cache();
-    let state = (db, cache);
+    let state = (db, cache, None);
 
     Router::new()
         .route("/health", axum::routing::get(health_check))
@@ -105,7 +105,6 @@ async fn test_register_missing_fields() {
         .unwrap();
 
     let response = app.oneshot(request).await.unwrap();
-    // The response could be 400 (BAD_REQUEST) or 422 (UNPROCESSABLE_ENTITY) depending on how Axum handles JSON parsing
     assert!(
         response.status() == StatusCode::BAD_REQUEST
             || response.status() == StatusCode::UNPROCESSABLE_ENTITY

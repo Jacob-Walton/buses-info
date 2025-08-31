@@ -17,7 +17,7 @@ async fn test_database_connection() {
             println!("Database connection successful");
         }
         Err(e) => {
-            eprintln!("Warning: Test database not available: {e}");
+            eprintln!("Test database not available: {e}");
         }
     }
 }

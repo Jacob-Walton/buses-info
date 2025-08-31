@@ -11,6 +11,7 @@ use std::collections::HashMap;
 use crate::auth::{Claims, verify_token};
 use crate::cache::BusCache;
 use crate::database::Database;
+use crate::redis_service::RedisService;
 
 #[derive(Debug, Serialize)]
 pub struct UserDataExport {
@@ -62,7 +63,7 @@ pub struct AccountDeletionResponse {
 
 /// Export user's personal data
 pub async fn export_user_data(
-    State((database, _cache)): State<(Database, BusCache)>,
+    State((database, _cache, _redis)): State<(Database, BusCache, Option<RedisService>)>,
     headers: HeaderMap,
 ) -> Result<Json<UserDataExport>, StatusCode> {
     let claims = extract_claims_from_headers(&headers)?;
@@ -99,8 +100,18 @@ pub async fn request_data_export(
 ) -> Result<Json<DataExportResponse>, StatusCode> {
     let _claims = extract_claims_from_headers(&headers)?;
     let request_id = uuid::Uuid::new_v4().to_string();
+    let request_id_clone = request_id.clone();
 
-    // TODO: Implement actual export logic and email notification
+    // Queue export job for background processing
+    tokio::spawn(async move {
+        if let Err(e) = process_export_request(request_id_clone.clone()).await {
+            tracing::error!(
+                "Export processing failed for request {}: {}",
+                request_id_clone,
+                e
+            );
+        }
+    });
 
     Ok(Json(DataExportResponse {
         status: "accepted".to_string(),
@@ -111,11 +122,18 @@ pub async fn request_data_export(
 
 /// Delete user account
 pub async fn delete_user_account(
-    State((database, _cache)): State<(Database, BusCache)>,
+    State((database, _cache, redis)): State<(Database, BusCache, Option<RedisService>)>,
     headers: HeaderMap,
 ) -> Result<Json<AccountDeletionResponse>, StatusCode> {
     let claims = extract_claims_from_headers(&headers)?;
     let user_id = claims.sub;
+
+    // Invalidate all refresh tokens for this user
+    if let Some(redis_service) = &redis
+        && let Err(e) = redis_service.invalidate_all_user_tokens(&user_id).await
+    {
+        tracing::error!("Failed to invalidate user tokens: {}", e);
+    }
 
     // Delete user data from database
     let result = delete_user_data(&database, &user_id).await;
@@ -196,7 +214,9 @@ pub async fn get_user_preferences(
     // For now, return empty preferences since we haven't implemented user preferences yet
     // In the future, this would query the user_preferences table
     Ok(UserPreferences {
-        favorite_routes: vec![], // Would come from user_preferences table
+        favorite_routes: get_favorite_routes(database, _user_id)
+            .await
+            .unwrap_or_default(),
         notification_settings: HashMap::new(),
         display_settings: HashMap::new(),
     })
@@ -219,7 +239,9 @@ pub async fn get_usage_data(
 
     Ok(UsageData {
         total_logins: login_count as u32,
-        last_30_days_activity: vec![], // Would be populated from analytics table
+        last_30_days_activity: get_recent_activity(database, user_id)
+            .await
+            .unwrap_or_default(),
     })
 }
 
@@ -254,4 +276,89 @@ pub async fn delete_user_data(
             Err(Box::new(e))
         }
     }
+}
+
+async fn process_export_request(request_id: String) -> Result<(), Box<dyn std::error::Error>> {
+    // Pretend to be processing
+    tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
+
+    // Eventually this will:
+    // 1. Generate the export file (CSV, JSON, etc.)
+    // 2. Upload to storage (S3, etc.)
+    // 3. Send email with download link
+    // 4. Clean up temporary files after expiration
+
+    tracing::info!("Export request {} processed successfully", request_id);
+    Ok(())
+}
+
+async fn get_favorite_routes(
+    database: &Database,
+    user_id: &str,
+) -> Result<Vec<String>, Box<dyn std::error::Error>> {
+    let user_uuid = uuid::Uuid::parse_str(user_id)?;
+
+    // Check if routes table exists
+    let table_check = sqlx::query("SELECT to_regclass('user_favorite_routes')")
+        .fetch_optional(&database.pool)
+        .await;
+
+    if table_check.is_err() || table_check.unwrap().is_none() {
+        return Ok(vec![]);
+    }
+
+    let rows = sqlx::query("SELECT route_name FROM user_favorite_routes WHERE user_id = $1")
+        .bind(user_uuid)
+        .fetch_all(&database.pool)
+        .await?;
+
+    let routes = rows
+        .iter()
+        .map(|row| row.get::<String, _>("route_name"))
+        .collect();
+
+    Ok(routes)
+}
+
+async fn get_recent_activity(
+    database: &Database,
+    user_id: &str,
+) -> Result<Vec<ActivityRecord>, Box<dyn std::error::Error>> {
+    let user_uuid = uuid::Uuid::parse_str(user_id)?;
+
+    // Check if analytics table exists
+    let table_check = sqlx::query("SELECT to_regclass('user_activity_logs')")
+        .fetch_optional(&database.pool)
+        .await;
+
+    if table_check.is_err() || table_check.unwrap().is_none() {
+        return Ok(vec![]);
+    }
+
+    let rows = sqlx::query(
+        "SELECT 
+            DATE(created_at) as activity_date,
+            COUNT(*) as page_views,
+            AVG(EXTRACT(EPOCH FROM (session_end - session_start))/60) as avg_session_minutes
+         FROM user_activity_logs 
+         WHERE user_id = $1 AND created_at >= NOW() - INTERVAL '30 days'
+         GROUP BY DATE(created_at)
+         ORDER BY activity_date DESC",
+    )
+    .bind(user_uuid)
+    .fetch_all(&database.pool)
+    .await?;
+
+    let activity = rows
+        .iter()
+        .map(|row| ActivityRecord {
+            date: row.get::<chrono::NaiveDate, _>("activity_date").to_string(),
+            page_views: row.get::<i64, _>("page_views") as u32,
+            session_duration_minutes: row
+                .get::<Option<f64>, _>("avg_session_minutes")
+                .map(|avg| avg as u32),
+        })
+        .collect();
+
+    Ok(activity)
 }

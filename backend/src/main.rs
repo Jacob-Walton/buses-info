@@ -7,6 +7,7 @@ mod cache;
 mod database;
 mod handlers;
 mod models;
+mod redis_service;
 mod scraper;
 mod user_data;
 
@@ -14,6 +15,7 @@ use auth_handlers::*;
 use cache::BusCache;
 use database::Database;
 use handlers::*;
+use redis_service::RedisService;
 use user_data::*;
 
 #[cfg(test)]
@@ -49,6 +51,9 @@ async fn main() -> anyhow::Result<()> {
             "LISTEN_ADDR",
             "CACHE_DURATION_MINUTES",
             "RUST_LOG",
+            "GOOGLE_CLIENT_ID",
+            "APPLE_CLIENT_ID",
+            "REDIS_URL",
         ];
 
         println!("Environment variables:");
@@ -98,7 +103,31 @@ async fn main() -> anyhow::Result<()> {
         .unwrap_or(5);
     let bus_cache = BusCache::new(cache_duration);
 
-    let app_state = (database, bus_cache);
+    // Initialize Redis service
+    let redis_url = std::env::var("REDIS_URL").ok();
+    let redis_service = match RedisService::new(redis_url.as_deref()) {
+        Ok(service) => {
+            // Test Redis connection
+            if let Err(e) = service.health_check().await {
+                tracing::warn!(
+                    "Redis health check failed: {}. Refresh tokens will not be available.",
+                    e
+                );
+            } else {
+                tracing::info!("Redis connection established successfully");
+            }
+            Some(service)
+        }
+        Err(e) => {
+            tracing::warn!(
+                "Failed to initialize Redis: {}. Refresh tokens will not be available.",
+                e
+            );
+            None
+        }
+    };
+
+    let app_state = (database, bus_cache, redis_service);
 
     let app = axum::Router::new()
         .route("/api/health", get(health_check))
@@ -108,6 +137,10 @@ async fn main() -> anyhow::Result<()> {
         .route("/api/auth/login", post(login))
         .route("/api/auth/logout", post(logout))
         .route("/api/auth/me", get(me))
+        .route("/api/auth/google", post(google_login))
+        .route("/api/auth/apple", post(apple_login))
+        .route("/api/auth/validate", post(validate_token))
+        .route("/api/auth/refresh", post(refresh_token))
         .route("/api/user/export-data", post(request_data_export))
         .route("/api/user/data", get(export_user_data))
         .route(

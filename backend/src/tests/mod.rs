@@ -5,7 +5,9 @@ pub mod cache_tests;
 pub mod database_tests;
 pub mod handlers_tests;
 pub mod integration_tests;
+pub mod redis_tests;
 pub mod scraper_tests;
+pub mod social_auth_tests;
 pub mod user_data_tests;
 
 use crate::{cache::BusCache, database::Database};
@@ -25,6 +27,20 @@ pub fn init_test_env() {
                     "postgresql://test_user:test_pass@localhost:5433/test_buses",
                 )
             };
+        }
+
+        // Set test client IDs for social auth
+        if std::env::var("GOOGLE_CLIENT_ID").is_err() {
+            unsafe {
+                std::env::set_var(
+                    "GOOGLE_CLIENT_ID",
+                    "test-google-client-id.apps.googleusercontent.com",
+                )
+            };
+        }
+
+        if std::env::var("APPLE_CLIENT_ID").is_err() {
+            unsafe { std::env::set_var("APPLE_CLIENT_ID", "com.test.app") };
         }
     });
 }
