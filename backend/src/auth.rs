@@ -110,7 +110,7 @@ pub struct GoogleTokenClaims {
 pub struct AppleTokenClaims {
     pub sub: String,
     pub email: String,
-    pub email_verified: Option<String>,
+    pub email_verified: Option<bool>,
     pub aud: String,
     pub iss: String,
     pub exp: usize,
