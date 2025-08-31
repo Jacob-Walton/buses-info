@@ -54,9 +54,9 @@ async fn main() -> anyhow::Result<()> {
         println!("Environment variables:");
         for var in env_whitelist {
             if let Ok(value) = std::env::var(var) {
-                println!("{var}: {value}");
+                println!(" - {var}: {value}");
             } else {
-                eprintln!("Warning: {var} is not set");
+                eprintln!(" - Warning: {var} is not set");
             }
         }
     }

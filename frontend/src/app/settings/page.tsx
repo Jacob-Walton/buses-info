@@ -323,7 +323,7 @@ export default function SettingsPage() {
                 
                 <div className={styles.dataSection}>
                   <h3>Data Export</h3>
-                  <p>Under UK GDPR, you have the right to access your personal data. Request a copy of all data we hold about you.</p>
+                  <p>Request a copy of all data we hold about you.</p>
                   
                   <div className={styles.actionItem}>
                     <div className={styles.actionInfo}>
@@ -331,7 +331,7 @@ export default function SettingsPage() {
                       <p>Get a copy of all your personal data including:</p>
                       <ul>
                         <li>Account information (email, registration date)</li>
-                        <li>Bus route preferences and settings</li>
+                        <li>Bus route preferences</li>
                         <li>Usage history and analytics data</li>
                         <li>Cookie preferences</li>
                       </ul>
@@ -341,7 +341,6 @@ export default function SettingsPage() {
                       disabled={dataExport.status === 'requesting' || dataExport.status === 'processing'}
                       variant="primary"
                     >
-                      <i className="fas fa-download"></i>
                       {dataExport.status === 'requesting' ? 'Requesting...' : 'Request Data Export'}
                     </Button>
                   </div>
@@ -354,47 +353,6 @@ export default function SettingsPage() {
                       {dataExport.message}
                     </div>
                   )}
-                </div>
-
-                <div className={styles.dataSection}>
-                  <h3>Data Rights</h3>
-                  <p>Under UK GDPR, you have several rights regarding your personal data:</p>
-                  
-                  <div className={styles.dataRights}>
-                    <div className={styles.rightItem}>
-                      <i className="fas fa-eye"></i>
-                      <div>
-                        <strong>Right to Access</strong>
-                        <p>Request a copy of your data (use the export button above)</p>
-                      </div>
-                    </div>
-                    <div className={styles.rightItem}>
-                      <i className="fas fa-edit"></i>
-                      <div>
-                        <strong>Right to Rectification</strong>
-                        <p>Request corrections to inaccurate data</p>
-                      </div>
-                    </div>
-                    <div className={styles.rightItem}>
-                      <i className="fas fa-trash"></i>
-                      <div>
-                        <strong>Right to Erasure</strong>
-                        <p>Request deletion of your data (use account deletion)</p>
-                      </div>
-                    </div>
-                    <div className={styles.rightItem}>
-                      <i className="fas fa-ban"></i>
-                      <div>
-                        <strong>Right to Object</strong>
-                        <p>Object to certain processing of your data</p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <p>To exercise any of these rights or if you have questions about your data, contact us at: 
-                    <a href="mailto:support@konpeki.co.uk"> support@konpeki.co.uk</a>
-                  </p>
-                  <p>We&apos;ll respond within one month as required by UK GDPR.</p>
                 </div>
               </div>
             )}
