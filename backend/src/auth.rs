@@ -1,13 +1,9 @@
 use anyhow::{Result, anyhow};
 use base64::prelude::*;
-use base64::prelude::*;
 use bcrypt::{DEFAULT_COST, hash, verify};
 use chrono::{Duration, Utc};
-use jsonwebtoken::{Algorithm, DecodingKey, Validation, decode};
-use jsonwebtoken::{Algorithm, DecodingKey, Validation, decode};
-use jsonwebtoken::{DecodingKey, EncodingKey, Header, Validation, decode, encode};
+use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, Validation, decode, encode};
 use once_cell::sync::Lazy;
-use rsa::{RsaPublicKey, pkcs1::EncodeRsaPublicKey};
 use rsa::{RsaPublicKey, pkcs1::EncodeRsaPublicKey};
 use serde::{Deserialize, Serialize};
 use sqlx::Row;

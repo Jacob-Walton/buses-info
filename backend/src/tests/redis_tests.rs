@@ -1,4 +1,4 @@
-use crate::redis_service::{RedisService, RefreshTokenData};
+use crate::redis_service::RedisService;
 use crate::tests::init_test_env;
 
 #[tokio::test]
@@ -40,7 +40,7 @@ async fn test_store_and_retrieve_refresh_token() {
                     assert!(data.created_at.timestamp() > 0);
                 }
                 Ok(None) => println!("Token not found (Redis may not be running)"),
-                Err(e) => println!("Redis error: {}", e),
+                Err(e) => println!("Redis error: {e}"),
             }
         } else {
             println!("Skipping Redis test - service not available");
@@ -70,7 +70,7 @@ async fn test_invalidate_refresh_token() {
             match retrieved {
                 Ok(None) => println!("Token successfully invalidated"),
                 Ok(Some(_)) => println!("Token still exists (unexpected)"),
-                Err(e) => println!("Redis error: {}", e),
+                Err(e) => println!("Redis error: {e}"),
             }
         }
     } else {

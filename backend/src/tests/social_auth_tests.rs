@@ -1,4 +1,4 @@
-use crate::auth::{AppleTokenClaims, GoogleTokenClaims, verify_apple_token, verify_google_token};
+use crate::auth::{verify_apple_token, verify_google_token};
 use crate::tests::init_test_env;
 
 #[tokio::test]
