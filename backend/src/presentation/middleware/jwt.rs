@@ -1,3 +1,4 @@
+use crate::infrastructure::JwtService;
 use axum::{
     Json,
     extract::FromRequestParts,
@@ -5,7 +6,6 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use serde_json::json;
-use crate::infrastructure::JwtService;
 
 pub struct JwtUser {
     pub user_id: String,
@@ -75,13 +75,11 @@ where
             })?;
 
             match jwt_service.verify_access_token(token) {
-                Ok(claims) => {
-                    Ok(JwtUser {
-                        user_id: claims.sub,
-                        email: claims.email,
-                        role: claims.role,
-                    })
-                }
+                Ok(claims) => Ok(JwtUser {
+                    user_id: claims.sub,
+                    email: claims.email,
+                    role: claims.role,
+                }),
                 Err(_) => Err((
                     StatusCode::UNAUTHORIZED,
                     Json(json!({

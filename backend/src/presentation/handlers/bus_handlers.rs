@@ -24,7 +24,7 @@ pub async fn current_bus_information(
     tracing::debug!("Cache miss, scraping fresh bus data");
     #[cfg(debug_assertions)]
     let mut buses = scraper.scrape_buses().await.unwrap_or_default();
-    
+
     #[cfg(not(debug_assertions))]
     let buses = scraper.scrape_buses().await.unwrap_or_default();
 
