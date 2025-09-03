@@ -1,68 +1,28 @@
+use axum::Router;
 use axum::routing::{get, post};
+use buses_api::application::{AuthUseCases, GetBusRankings, GetCurrentBuses};
+use buses_api::domain::services::{BusService, RankingService, UserService};
+use buses_api::infrastructure::{
+    InMemoryCache, JwtService, OAuthService, PasswordService, PostgresBusRepository,
+    PostgresConnection, PostgresRankingRepository, PostgresUserRepository, RedisService,
+    RunshawScraper,
+};
+use buses_api::presentation::{
+    apple_login, current_bus_information, google_login, health_check, health_status, login, logout,
+    me, refresh_token, register, service_rankings,
+};
+use std::sync::Arc;
 use tokio::net::TcpListener;
-
-mod auth;
-mod auth_handlers;
-mod cache;
-mod database;
-mod handlers;
-mod models;
-mod redis_service;
-mod scraper;
-mod user_data;
-
-use auth_handlers::*;
-use cache::BusCache;
-use database::Database;
-use handlers::*;
-use redis_service::RedisService;
-use user_data::*;
-
-#[cfg(test)]
-mod tests;
-
-fn default_level() -> tracing::Level {
-    if cfg!(debug_assertions) {
-        tracing::Level::DEBUG
-    } else {
-        tracing::Level::INFO
-    }
-}
-
-#[cfg(debug_assertions)]
-async fn create_debug_users(db: &Database) {
-    use crate::auth::create_test_users;
-    create_test_users(db).await;
-}
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    // Initialize environment
     #[cfg(debug_assertions)]
     {
         println!("Running in debug mode");
         let root_env = std::path::Path::new(".env.local");
         if root_env.exists() {
             dotenvy::from_path(root_env).ok();
-        }
-
-        let env_whitelist: Vec<&str> = vec![
-            "DATABASE_URL",
-            "JWT_SECRET_KEY",
-            "LISTEN_ADDR",
-            "CACHE_DURATION_MINUTES",
-            "RUST_LOG",
-            "GOOGLE_CLIENT_ID",
-            "APPLE_CLIENT_ID",
-            "REDIS_URL",
-        ];
-
-        println!("Environment variables:");
-        for var in env_whitelist {
-            if let Ok(value) = std::env::var(var) {
-                println!(" - {var}: {value}");
-            } else {
-                eprintln!(" - Warning: {var} is not set");
-            }
         }
     }
 
@@ -77,96 +37,156 @@ async fn main() -> anyhow::Result<()> {
         }
     }
 
-    if std::env::var("JWT_SECRET_KEY").is_err() {
-        eprintln!(
-            "FATAL: JWT_SECRET_KEY environment variable is not set. Please set it in your environment or .env file."
-        );
-        std::process::exit(1);
-    }
-
+    // Initialize tracing
     tracing_subscriber::fmt()
-        .with_max_level(default_level())
+        .with_max_level(tracing::Level::DEBUG)
         .with_env_filter("buses_api=debug,warn")
         .init();
 
-    // Initialize database
+    // Initialize infrastructure
+    tracing::info!("Initializing infrastructure...");
+
+    // Database
     let database_url = std::env::var("DATABASE_URL").ok();
-    let database = Database::new(database_url.as_deref()).await?;
+    tracing::info!("Creating database connection...");
+    let db_conn = Arc::new(PostgresConnection::new(database_url.as_deref()).await?);
+    tracing::info!("Running database migrations...");
+    db_conn.migrate().await?;
+    tracing::info!("Database setup complete");
 
-    #[cfg(debug_assertions)]
-    create_debug_users(&database).await;
+    // Repositories
+    let bus_repository = Arc::new(PostgresBusRepository::new(db_conn.clone()));
+    let ranking_repository = Arc::new(PostgresRankingRepository::new(db_conn.clone()));
+    let user_repository = Arc::new(PostgresUserRepository::new(db_conn.clone()));
 
-    // Initialize bus cache
+    // Domain services
+    let bus_service = Arc::new(BusService::new(bus_repository.clone()));
+    let ranking_service = Arc::new(RankingService::new(ranking_repository));
+    let user_service = Arc::new(UserService::new(user_repository));
+
+    // Infrastructure services
+    let oauth_service = Arc::new(OAuthService::new());
+
+    // Redis service for refresh tokens
+    let redis_url = std::env::var("REDIS_URL").ok();
+    let redis_service = Arc::new(
+        RedisService::new(redis_url.as_deref())
+            .await
+            .map_err(|e| anyhow::anyhow!("Failed to create Redis service: {}", e))?,
+    );
+
+    // JWT service for token management
+    let jwt_service = Arc::new(
+        JwtService::new().map_err(|e| anyhow::anyhow!("Failed to create JWT service: {}", e))?,
+    );
+
+    // Password service for hashing
+    let password_service = Arc::new(PasswordService::new());
+
     let cache_duration = std::env::var("CACHE_DURATION_MINUTES")
         .unwrap_or_else(|_| "5".to_string())
         .parse::<u64>()
         .unwrap_or(5);
-    let bus_cache = BusCache::new(cache_duration);
+    let cache = Arc::new(InMemoryCache::new(cache_duration));
+    let scraper = Arc::new(
+        RunshawScraper::new().map_err(|e| anyhow::anyhow!("Failed to create scraper: {}", e))?,
+    );
 
-    // Initialize Redis service
-    let redis_url = std::env::var("REDIS_URL").ok();
-    let redis_service = match RedisService::new(redis_url.as_deref()) {
-        Ok(service) => {
-            // Test Redis connection
-            if let Err(e) = service.health_check().await {
-                tracing::warn!(
-                    "Redis health check failed: {}. Refresh tokens will not be available.",
-                    e
-                );
-            } else {
-                tracing::info!("Redis connection established successfully");
-            }
-            Some(service)
+    // Application services
+    let get_current_buses = Arc::new(GetCurrentBuses::new(bus_service));
+    let get_rankings = Arc::new(GetBusRankings::new(ranking_service));
+    let auth_use_cases = Arc::new(AuthUseCases::new(
+        user_service.clone(),
+        oauth_service,
+        redis_service,
+        jwt_service,
+        password_service,
+    ));
+
+    // Create test users in debug mode
+    #[cfg(debug_assertions)]
+    {
+        if let Err(e) = user_service.create_test_users().await {
+            tracing::warn!("Failed to create test users: {}", e);
+        } else {
+            tracing::info!("Test users created successfully");
         }
-        Err(e) => {
-            tracing::warn!(
-                "Failed to initialize Redis: {}. Refresh tokens will not be available.",
-                e
-            );
-            None
-        }
-    };
-
-    let app_state = (database, bus_cache, redis_service);
-
-    let app = axum::Router::new()
-        .route("/api/health", get(health_check))
-        .route("/api/health/status", get(health_status))
-        .route("/api/buses/current", get(current_bus_information))
-        .route("/api/auth/register", post(register))
-        .route("/api/auth/login", post(login))
-        .route("/api/auth/logout", post(logout))
-        .route("/api/auth/me", get(me))
-        .route("/api/auth/google", post(google_login))
-        .route("/api/auth/apple", post(apple_login))
-        .route("/api/auth/validate", post(validate_token))
-        .route("/api/auth/refresh", post(refresh_token))
-        .route("/api/user/export-data", post(request_data_export))
-        .route("/api/user/data", get(export_user_data))
-        .route(
-            "/api/user/delete-account",
-            axum::routing::delete(delete_user_account),
-        )
-        .with_state(app_state);
-
-    let addr = std::env::var("LISTEN_ADDR").unwrap_or("localhost:4001".to_string());
-    let listener = match TcpListener::bind(&addr).await {
-        Ok(l) => l,
-        Err(e) => {
-            eprintln!("Failed to bind to {addr}: {e:?}");
-            std::process::exit(1);
-        }
-    };
-
-    let listen_addr = format!("http://{addr}");
-    println!("Listening on {listen_addr}");
-
-    tracing::info!("Listening on address: {}", listen_addr);
-
-    if let Err(e) = axum::serve(listener, app).await {
-        eprintln!("Server error: {e:?}");
-        std::process::exit(1);
     }
+
+    tracing::info!("All services initialized successfully");
+
+    // Build router with dependency injection
+    let app = Router::new()
+        .route("/api/health", get(health_check))
+        .route(
+            "/api/health/status",
+            get({
+                let db = db_conn.clone();
+                move || health_status(db)
+            }),
+        )
+        .route(
+            "/api/buses/current",
+            get({
+                let cache = cache.clone();
+                let scraper = scraper.clone();
+                let get_current_buses = get_current_buses.clone();
+                move || current_bus_information(cache, scraper, get_current_buses)
+            }),
+        )
+        .route(
+            "/api/buses/rankings",
+            get({
+                let get_rankings = get_rankings.clone();
+                move |query| service_rankings(query, get_rankings)
+            }),
+        )
+        .route(
+            "/api/auth/register",
+            post({
+                let auth_use_cases = auth_use_cases.clone();
+                move |request| register(request, auth_use_cases)
+            }),
+        )
+        .route(
+            "/api/auth/login",
+            post({
+                let auth_use_cases = auth_use_cases.clone();
+                move |request| login(request, auth_use_cases)
+            }),
+        )
+        .route(
+            "/api/auth/google",
+            post({
+                let auth_use_cases = auth_use_cases.clone();
+                move |request| google_login(request, auth_use_cases)
+            }),
+        )
+        .route(
+            "/api/auth/apple",
+            post({
+                let auth_use_cases = auth_use_cases.clone();
+                move |request| apple_login(request, auth_use_cases)
+            }),
+        )
+        .route(
+            "/api/auth/refresh",
+            post({
+                let auth_use_cases = auth_use_cases.clone();
+                move |request| refresh_token(request, auth_use_cases)
+            }),
+        )
+        .route("/api/auth/logout", post(logout))
+        .route("/api/auth/me", get(me));
+
+    // Start server
+    let addr = std::env::var("LISTEN_ADDR").unwrap_or("localhost:4001".to_string());
+    let listener = TcpListener::bind(&addr).await?;
+    let listen_addr = format!("http://{addr}");
+
+    tracing::info!("Server starting on {}", listen_addr);
+
+    axum::serve(listener, app).await?;
 
     Ok(())
 }

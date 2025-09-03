@@ -17,8 +17,3 @@ CREATE INDEX IF NOT EXISTS idx_user_activity_logs_user_id ON user_activity_logs(
 CREATE INDEX IF NOT EXISTS idx_user_activity_logs_created_at ON user_activity_logs(created_at);
 CREATE INDEX IF NOT EXISTS idx_user_activity_logs_session_id ON user_activity_logs(session_id);
 CREATE INDEX IF NOT EXISTS idx_user_activity_logs_action ON user_activity_logs(action);
-
--- Create partial index for recent activity (last 90 days)
-CREATE INDEX IF NOT EXISTS idx_user_activity_logs_recent 
-ON user_activity_logs(user_id, created_at) 
-WHERE created_at >= NOW() - INTERVAL '90 days';
