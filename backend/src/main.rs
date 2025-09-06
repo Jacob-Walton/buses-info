@@ -1,6 +1,6 @@
-use axum::Router;
 use axum::http::{HeaderValue, Method};
 use axum::routing::{get, post, put};
+use axum::{Router, middleware};
 use buses_api::application::{AuthUseCases, GetBusRankings, GetCurrentBuses};
 use buses_api::domain::services::{
     BusService, RankingService, UserPreferencesService, UserService,
@@ -17,12 +17,14 @@ use buses_api::presentation::handlers::user_preferences_handlers::{
     get_favorite_routes, set_favorite_routes,
 };
 use buses_api::presentation::{
-    current_bus_information, health_check, health_status, service_rankings,
+    auth_middleware, current_bus_information, health_check, health_status, service_rankings,
 };
 use std::sync::Arc;
 use tokio::net::TcpListener;
 use tower_cookies::CookieManagerLayer;
 use tower_http::cors::CorsLayer;
+
+#[cfg(debug_assertions)]
 use tower_http::trace::TraceLayer;
 
 #[tokio::main]
@@ -141,22 +143,6 @@ async fn main() -> anyhow::Result<()> {
             }),
         )
         .route(
-            "/api/buses/current",
-            get({
-                let cache = cache.clone();
-                let scraper = scraper.clone();
-                let get_current_buses = get_current_buses.clone();
-                move || current_bus_information(cache, scraper, get_current_buses)
-            }),
-        )
-        .route(
-            "/api/buses/rankings",
-            get({
-                let get_rankings = get_rankings.clone();
-                move |query| service_rankings(query, get_rankings)
-            }),
-        )
-        .route(
             "/api/auth/register",
             post({
                 let auth_use_cases = auth_use_cases.clone();
@@ -191,7 +177,10 @@ async fn main() -> anyhow::Result<()> {
                 move |cookies, json| refresh_token(cookies, json, auth_use_cases)
             }),
         )
-        .route("/api/auth/logout", post(logout))
+        .route("/api/auth/logout", post(logout));
+
+    // Protected routes (require authentication)
+    let protected_routes = Router::new()
         .route(
             "/api/auth/me",
             get({
@@ -200,19 +189,41 @@ async fn main() -> anyhow::Result<()> {
             }),
         )
         .route(
-            "/api/users/{user_id}/favorites",
+            "/api/buses/current",
             get({
-                let preferences_service = user_preferences_service.clone();
-                move |path| get_favorite_routes(path, preferences_service)
+                let cache = cache.clone();
+                let scraper = scraper.clone();
+                let get_current_buses = get_current_buses.clone();
+                move || current_bus_information(cache, scraper, get_current_buses)
             }),
         )
         .route(
-            "/api/users/{user_id}/favorites",
+            "/api/buses/rankings",
+            get({
+                let get_rankings = get_rankings.clone();
+                move |query| service_rankings(query, get_rankings)
+            }),
+        )
+        .route(
+            "/api/favorites",
+            get({
+                let preferences_service = user_preferences_service.clone();
+                move |extension| get_favorite_routes(extension, preferences_service)
+            }),
+        )
+        .route(
+            "/api/favorites",
             put({
                 let preferences_service = user_preferences_service.clone();
-                move |path, json| set_favorite_routes(path, json, preferences_service)
+                move |extension, json| set_favorite_routes(extension, json, preferences_service)
             }),
-        );
+        )
+        .layer(middleware::from_fn_with_state(
+            auth_use_cases.clone(),
+            auth_middleware,
+        ));
+
+    let app = app.merge(protected_routes);
 
     #[cfg(debug_assertions)]
     let app = app.layer(TraceLayer::new_for_http());
@@ -220,12 +231,9 @@ async fn main() -> anyhow::Result<()> {
     let app = app
         .layer(
             CorsLayer::new()
-                .allow_origin([
-                    "http://localhost:3000".parse::<HeaderValue>().unwrap(),
-                    "https://accounts.google.com"
-                        .parse::<HeaderValue>()
-                        .unwrap(),
-                ])
+                .allow_origin(["https://accounts.google.com"
+                    .parse::<HeaderValue>()
+                    .unwrap()])
                 .allow_headers([
                     axum::http::header::CONTENT_TYPE,
                     axum::http::header::AUTHORIZATION,

@@ -1,7 +1,9 @@
-use crate::domain::services::UserPreferencesService;
+use crate::{
+    domain::services::UserPreferencesService, presentation::middleware::AuthenticatedUser,
+};
 use axum::{
     Json,
-    extract::{Path, Query},
+    extract::{Extension, Path, Query},
     http::StatusCode,
     response::IntoResponse,
 };
@@ -32,9 +34,10 @@ pub struct PreferenceQuery {
 }
 
 pub async fn get_favorite_routes(
-    Path(user_id): Path<Uuid>,
+    Extension(user): Extension<AuthenticatedUser>,
     preferences_service: Arc<UserPreferencesService>,
 ) -> impl IntoResponse {
+    let user_id = user.user_id;
     match preferences_service.get_favorite_routes(user_id).await {
         Ok(response) => (StatusCode::OK, Json(json!(response))).into_response(),
         Err(e) => {
@@ -112,10 +115,11 @@ pub async fn remove_favorite_route(
 }
 
 pub async fn set_favorite_routes(
-    Path(user_id): Path<Uuid>,
+    Extension(user): Extension<AuthenticatedUser>,
     Json(request): Json<SetFavoritesRequest>,
     preferences_service: Arc<UserPreferencesService>,
 ) -> impl IntoResponse {
+    let user_id = user.user_id;
     match preferences_service
         .set_favorite_routes(user_id, request.routes)
         .await

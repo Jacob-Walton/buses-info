@@ -90,7 +90,7 @@ export function useFavoriteRoutes(options: UseFavoriteRoutesOptions = {}): UseFa
     setError(null);
 
     try {
-      const response = await fetch(`/api/users/${user.id}/favorites`, {
+      const response = await fetch('/api/favorites', {
         credentials: 'include',
       });
 
@@ -150,7 +150,7 @@ export function useFavoriteRoutes(options: UseFavoriteRoutesOptions = {}): UseFa
         return;
       }
 
-      const response = await fetch(`/api/users/${user.id}/favorites`, {
+      const response = await fetch('/api/favorites', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
