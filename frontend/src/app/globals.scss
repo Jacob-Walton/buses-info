@@ -1,6 +1,6 @@
 // External resources
-@import url("https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap");
-@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css");
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css');
 
 // Abstracts
 @import '../styles/abstracts/variables';
@@ -21,32 +21,32 @@
   --color-secondary-dark: #{$secondary-dark};
   --color-accent: #{$accent};
   --color-accent-light: #{$accent-light};
-  
+
   --color-background: #{$background};
   --color-background-light: #{$surface-alt};
   --color-surface: #{$surface};
   --color-border: #{$border};
   --color-border-light: #{$light-grey};
-  
+
   --color-text-primary: #{$text};
   --color-text-secondary: #{$dark-grey};
-  
+
   --color-white: #ffffff;
   --color-black: #000000;
-  
+
   // Status colors
   --color-success: #{$status-arrived};
   --color-success-light: #{lighten($status-arrived, 40%)};
   --color-success-dark: #{darken($status-arrived, 10%)};
-  
+
   --color-error: #{$status-not-arrived};
   --color-error-light: #{lighten($status-not-arrived, 40%)};
   --color-error-dark: #{darken($status-not-arrived, 10%)};
-  
+
   --color-warning: #ffc107;
   --color-warning-light: #{lighten(#ffc107, 30%)};
   --color-warning-dark: #{darken(#ffc107, 10%)};
-  
+
   --color-info: #17a2b8;
   --color-info-light: #{lighten(#17a2b8, 30%)};
   --color-info-dark: #{darken(#17a2b8, 10%)};
@@ -101,7 +101,7 @@ body.menu-open {
 
   @media (max-width: 768px) {
     &::after {
-      content: "";
+      content: '';
       position: fixed;
       top: 0;
       left: 0;

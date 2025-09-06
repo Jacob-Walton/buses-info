@@ -8,7 +8,8 @@ pub mod scraping;
 
 pub use cache::InMemoryCache;
 pub use database::{
-    PostgresBusRepository, PostgresConnection, PostgresRankingRepository, PostgresUserRepository,
+    PostgresBusRepository, PostgresConnection, PostgresRankingRepository,
+    PostgresUserPreferencesRepository, PostgresUserRepository,
 };
 pub use jwt_service::JwtService;
 pub use oauth::OAuthService;

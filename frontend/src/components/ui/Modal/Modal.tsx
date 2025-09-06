@@ -12,12 +12,12 @@ interface ModalProps {
   showCloseButton?: boolean;
 }
 
-export function Modal({ 
-  isOpen, 
-  onClose, 
-  children, 
+export function Modal({
+  isOpen,
+  onClose,
+  children,
   className = '',
-  showCloseButton = true 
+  showCloseButton = true,
 }: ModalProps) {
   useEffect(() => {
     if (isOpen) {
@@ -51,18 +51,14 @@ export function Modal({
 
   const modalContent = (
     <div className={styles.modalOverlay} onClick={onClose}>
-      <div 
+      <div
         className={`${styles.modalContent} ${className}`}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
       >
         {showCloseButton && (
-          <button 
-            className={styles.closeButton}
-            onClick={onClose}
-            aria-label="Close modal"
-          >
+          <button className={styles.closeButton} onClick={onClose} aria-label="Close modal">
             <i className="fas fa-times"></i>
           </button>
         )}

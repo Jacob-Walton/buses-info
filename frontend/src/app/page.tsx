@@ -7,14 +7,9 @@ import { withAuth } from '@/components/features/auth';
 import styles from './page.module.scss';
 
 function BusesPage() {
-  const { 
-    buses, 
-    isLoading, 
-    error, 
-    lastUpdated
-  } = useBuses({
+  const { buses, isLoading, error, lastUpdated } = useBuses({
     refreshInterval: 30000, // 30 seconds
-    autoRefresh: true
+    autoRefresh: true,
   });
 
   useEffect(() => {
@@ -24,12 +19,7 @@ function BusesPage() {
   return (
     <div className={styles.busesPage}>
       <div className={styles.container}>
-        <BusList 
-          buses={buses}
-          isLoading={isLoading}
-          error={error}
-          lastUpdated={lastUpdated}
-        />
+        <BusList buses={buses} isLoading={isLoading} error={error} lastUpdated={lastUpdated} />
       </div>
     </div>
   );
@@ -37,5 +27,5 @@ function BusesPage() {
 
 export default withAuth(BusesPage, {
   requiredRoles: ['admin', 'user'],
-  redirectTo: '/login'
+  redirectTo: '/login',
 });

@@ -14,17 +14,20 @@ export interface ButtonProps {
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ 
-    children, 
-    variant = 'primary', 
-    size = 'medium', 
-    href, 
-    onClick, 
-    disabled, 
-    type = 'button',
-    className = '',
-    ...props 
-  }, ref) => {
+  (
+    {
+      children,
+      variant = 'primary',
+      size = 'medium',
+      href,
+      onClick,
+      disabled,
+      type = 'button',
+      className = '',
+      ...props
+    },
+    ref,
+  ) => {
     const baseClasses = `${styles.button} ${styles[variant]} ${styles[size]} ${className}`;
 
     if (href) {
@@ -47,7 +50,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {children}
       </button>
     );
-  }
+  },
 );
 
 Button.displayName = 'Button';

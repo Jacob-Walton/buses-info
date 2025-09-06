@@ -5,27 +5,29 @@ WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
+COPY yarn.lock ./
 
 # Install dependencies (including dev dependencies for build)
-RUN npm ci
+RUN yarn install --frozen-lockfile
 
 # Copy source code
 COPY . .
 
 # Build the application (skip linting during build)
-RUN ESLINT_NO_DEV_ERRORS=true npm run build
+RUN ESLINT_NO_DEV_ERRORS=true yarn build
 
-# Production stage - Next.js server
-FROM node:22-alpine
+# Runtime stage
+FROM node:22-alpine AS runtime
 
 WORKDIR /app
 
 # Copy package files and install production dependencies
 COPY package*.json ./
-RUN npm ci --only=production
+COPY yarn.lock ./
+RUN yarn install --frozen-lockfile --production
 
 # Install TypeScript for next.config.ts support
-RUN npm install typescript
+RUN yarn add typescript
 
 # Copy built application from builder stage
 COPY --from=builder /app/.next ./.next
@@ -46,4 +48,4 @@ EXPOSE 3000
 ENV HOST=0.0.0.0
 
 # Start Next.js server
-CMD ["npm", "start"]
+CMD ["yarn", "start"]

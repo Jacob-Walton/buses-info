@@ -16,7 +16,8 @@ export default function UnauthorizedPage() {
         <h1 className={styles.title}>Access Denied</h1>
         <h2 className={styles.subtitle}>403</h2>
         <p className={styles.description}>
-          You don&apos;t have permission to access this page. Please log in with an authorized account or contact an administrator if you believe this is an error.
+          You don&apos;t have permission to access this page. Please log in with an authorized
+          account or contact an administrator if you believe this is an error.
         </p>
         <div className={styles.actions}>
           <Button onClick={() => router.push('/login')} variant="primary">

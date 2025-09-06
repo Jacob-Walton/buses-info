@@ -5,7 +5,29 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import Image from 'next/image';
+import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
 import styles from './page.module.scss';
+
+// Declare Apple Sign In global
+declare global {
+  interface Window {
+    AppleID: {
+      auth: {
+        init: (options: {
+          clientId: string;
+          scope: string;
+          redirectURI: string;
+          usePopup: boolean;
+        }) => Promise<void>;
+        signIn: () => Promise<{
+          authorization: {
+            id_token: string;
+          };
+        }>;
+      };
+    };
+  }
+}
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -13,7 +35,7 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const { login } = useAuth();
+  const { login, refreshUser } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,12 +53,114 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleLogin = () => {
-    window.location.href = '/api/auth/google';
+  const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
+    if (!credentialResponse.credential) {
+      setError('Google login failed: No credential received');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const res = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // Include cookies
+        body: JSON.stringify({
+          idToken: credentialResponse.credential,
+        }),
+      });
+
+      if (res.ok) {
+        await refreshUser();
+        router.push('/');
+      } else {
+        const errorData = await res.json();
+        setError(errorData.error || 'Google login failed');
+      }
+    } catch (error) {
+      console.error('Google login error:', error);
+      setError('Google login failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleMicrosoftLogin = () => {
-    window.location.href = '/api/auth/microsoft';
+  const handleGoogleError = () => {
+    setError('Google login failed. Please try again.');
+  };
+
+  const handleAppleLogin = async () => {
+    setIsLoading(true);
+    setError('');
+
+    try {
+      // Load Apple script if not already loaded
+      if (!window.AppleID) {
+        await loadAppleScript();
+      }
+
+      // Initialize Apple Sign In
+      await window.AppleID.auth.init({
+        clientId: process.env.NEXT_PUBLIC_APPLE_CLIENT_ID!,
+        scope: 'name email',
+        redirectURI: window.location.origin,
+        usePopup: true,
+      });
+
+      const response = await window.AppleID.auth.signIn();
+
+      const res = await fetch('/api/auth/apple', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          id_token: response.authorization.id_token,
+        }),
+      });
+
+      if (res.ok) {
+        await refreshUser();
+        router.push('/');
+      } else {
+        const errorData = await res.json();
+        setError(errorData.error || 'Apple login failed');
+      }
+    } catch (error: unknown) {
+      console.error('Apple login error:', error);
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'error' in error &&
+        (error as { error: string }).error === 'popup_closed_by_user'
+      )
+        return;
+      setError('Apple login failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadAppleScript = (): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      if (document.getElementById('apple-signin-script')) {
+        resolve();
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.id = 'apple-signin-script';
+      script.src =
+        'https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js';
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error('Failed to load Apple Sign In script'));
+      document.head.appendChild(script);
+    });
   };
 
   return (
@@ -47,7 +171,7 @@ export default function LoginPage() {
           <p>Access bus information, predictions and more.</p>
         </div>
       </div>
-      
+
       <div className={styles.authFormContainer}>
         <div className={styles.loginContainer}>
           <div className={styles.loginLogo}>
@@ -59,7 +183,7 @@ export default function LoginPage() {
               priority
             />
           </div>
-          
+
           <h1 className={styles.loginTitle}>Welcome Back</h1>
 
           {process.env.NODE_ENV === 'development' && (
@@ -67,8 +191,12 @@ export default function LoginPage() {
               <h3>Development Mode</h3>
               <p>Use these test credentials:</p>
               <ul>
-                <li><strong>User:</strong> test@example.com / password</li>
-                <li><strong>Admin:</strong> admin@example.com / admin</li>
+                <li>
+                  <strong>User:</strong> test@example.com / password
+                </li>
+                <li>
+                  <strong>Admin:</strong> admin@example.com / admin
+                </li>
               </ul>
             </div>
           )}
@@ -129,11 +257,7 @@ export default function LoginPage() {
               </Link>
             </div>
 
-            <button
-              type="submit"
-              className={styles.btnPrimary}
-              disabled={isLoading}
-            >
+            <button type="submit" className={styles.btnPrimary} disabled={isLoading}>
               <i className="fas fa-sign-in-alt"></i>
               {isLoading ? 'Signing In...' : 'Sign In'}
             </button>
@@ -144,36 +268,40 @@ export default function LoginPage() {
             <span>or continue with</span>
             <div className={styles.dividerLine}></div>
           </div>
-          
+
           <div className={styles.socialLogin}>
-            <button
-              type="button"
-              onClick={handleGoogleLogin}
-              className={styles.btnGoogle}
-              disabled={isLoading}
-            >
-              <Image 
-                src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/google/google-original.svg" 
-                alt="Google" 
-                width={18} 
-                height={18} 
-              />
-              Google
-            </button>
+            <div className={styles.googleButtonContainer}>
+              <button className={styles.btnGoogle}>
+                <Image
+                  src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/google/google-original.svg"
+                  alt="Google"
+                  width={18}
+                  height={18}
+                />
+                Google
+              </button>
+              <div className={styles.googleOverlay}>
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={handleGoogleError}
+                  useOneTap={false}
+                />
+              </div>
+            </div>
 
             <button
               type="button"
-              onClick={handleMicrosoftLogin}
-              className={styles.btnMicrosoft}
+              onClick={handleAppleLogin}
+              className={styles.btnApple}
               disabled={isLoading}
             >
-              <Image 
-                src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/windows11/windows11-original.svg" 
-                alt="Microsoft" 
-                width={18} 
-                height={18} 
+              <Image
+                src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/apple/apple-original.svg"
+                alt="Apple"
+                width={18}
+                height={18}
               />
-              Microsoft
+              Apple
             </button>
           </div>
 

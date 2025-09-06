@@ -16,16 +16,16 @@ interface BusSectionProps {
   onToggleCollapse?: () => void;
 }
 
-export default function BusSection({ 
-  title, 
-  buses, 
-  preferredBuses, 
+export default function BusSection({
+  title,
+  buses,
+  preferredBuses,
   onTogglePreferred,
   isPreferredSection = false,
   showStarIcon = false,
   busCount,
   isCollapsed = false,
-  onToggleCollapse
+  onToggleCollapse,
 }: BusSectionProps) {
   const handleToggleCollapse = () => {
     if (onToggleCollapse) {
@@ -33,20 +33,17 @@ export default function BusSection({
     }
   };
 
-  const sectionClasses = [
-    styles.busSection,
-    isPreferredSection ? styles.preferredSection : '',
-  ].filter(Boolean).join(' ');
+  const sectionClasses = [styles.busSection, isPreferredSection ? styles.preferredSection : '']
+    .filter(Boolean)
+    .join(' ');
 
-  const headerClasses = [
-    styles.busSectionHeader,
-    isCollapsed ? styles.collapsed : '',
-  ].filter(Boolean).join(' ');
+  const headerClasses = [styles.busSectionHeader, isCollapsed ? styles.collapsed : '']
+    .filter(Boolean)
+    .join(' ');
 
-  const contentClasses = [
-    styles.busSectionContent,
-    isCollapsed ? styles.collapsed : '',
-  ].filter(Boolean).join(' ');
+  const contentClasses = [styles.busSectionContent, isCollapsed ? styles.collapsed : '']
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <div className={sectionClasses}>
@@ -66,7 +63,7 @@ export default function BusSection({
           <i className="fas fa-chevron-up" />
         </button>
       </div>
-      
+
       <div className={contentClasses}>
         {buses.map((bus) => (
           <BusItem
@@ -77,9 +74,7 @@ export default function BusSection({
           />
         ))}
         {buses.length === 0 && !isCollapsed && (
-          <div className={styles.emptyMessage}>
-            No buses in this section
-          </div>
+          <div className={styles.emptyMessage}>No buses in this section</div>
         )}
       </div>
     </div>

@@ -9,15 +9,17 @@ export default function GlobalError({
   return (
     <html>
       <body>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '100vh',
-          padding: '2rem',
-          textAlign: 'center',
-          fontFamily: 'system-ui, sans-serif'
-        }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '100vh',
+            padding: '2rem',
+            textAlign: 'center',
+            fontFamily: 'system-ui, sans-serif',
+          }}
+        >
           <div>
             <h1>Something went wrong!</h1>
             <p>A critical error occurred. Please refresh the page or try again later.</p>
@@ -31,7 +33,7 @@ export default function GlobalError({
                 borderRadius: '0.5rem',
                 cursor: 'pointer',
                 fontSize: '1rem',
-                fontWeight: '600'
+                fontWeight: '600',
               }}
             >
               Try again

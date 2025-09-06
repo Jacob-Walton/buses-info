@@ -44,9 +44,9 @@
   position: relative;
   height: 40px;
   width: 100px;
-  
+
   &.simple {
-    background-image: url("https://d1tl6qv7xwsvxx.cloudfront.net/assets/landscape-filled.png");
+    background-image: url('https://d1tl6qv7xwsvxx.cloudfront.net/assets/landscape-filled.png');
     background-repeat: no-repeat;
     background-position: left center;
     background-size: contain;
@@ -240,7 +240,7 @@
   border-radius: 50%;
   transition: background-color 0.3s ease;
   flex-shrink: 0;
-  
+
   &:hover {
     background-color: rgba($primary, 0.1);
   }
@@ -254,16 +254,16 @@
     transform: translateX(-50%);
     background-color: $text;
     transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
-    
+
     &:nth-child(1) {
       top: 13px;
     }
-    
+
     &:nth-child(2) {
       top: 18px;
       opacity: 1;
     }
-    
+
     &:nth-child(3) {
       top: 23px;
     }
@@ -272,16 +272,16 @@
   &.active {
     span {
       background-color: $primary;
-      
+
       &:nth-child(1) {
         top: 18px;
         transform: translateX(-50%) rotate(45deg);
       }
-      
+
       &:nth-child(2) {
         opacity: 0;
       }
-      
+
       &:nth-child(3) {
         top: 18px;
         transform: translateX(-50%) rotate(-45deg);
@@ -327,22 +327,22 @@
 
 .mobileProfileItems {
   display: none;
-  
+
   @include responsive(mobile) {
     display: contents;
   }
-  
+
   .navLink.danger {
     color: $accent;
     background: rgba($accent, 0.05);
     border-color: rgba($accent, 0.2);
-    
+
     &:hover {
       background: rgba($accent, 0.1);
       color: $accent;
       transform: translateX(2px);
     }
-    
+
     i {
       color: $accent;
     }
@@ -362,7 +362,7 @@
   .navbarBrand {
     height: 32px;
     width: 80px;
-    
+
     &.simple {
       background-size: contain;
     }
@@ -387,12 +387,11 @@
     backdrop-filter: blur(10px);
   }
 
-
   .navbarMenu {
     &:not(.active) {
       pointer-events: none;
     }
-    
+
     &.active {
       transform: translateX(0);
       pointer-events: auto;
@@ -413,18 +412,30 @@
       opacity: 0;
       transform: translateY(30px) scale(0.95);
       transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      
+
       &.animate {
         opacity: 1;
         transform: translateY(0) scale(1);
       }
 
-      &:nth-child(1) { transition-delay: 0.1s; }
-      &:nth-child(2) { transition-delay: 0.15s; }
-      &:nth-child(3) { transition-delay: 0.2s; }
-      &:nth-child(4) { transition-delay: 0.25s; }
-      &:nth-child(5) { transition-delay: 0.3s; }
-      &:nth-child(6) { transition-delay: 0.35s; }
+      &:nth-child(1) {
+        transition-delay: 0.1s;
+      }
+      &:nth-child(2) {
+        transition-delay: 0.15s;
+      }
+      &:nth-child(3) {
+        transition-delay: 0.2s;
+      }
+      &:nth-child(4) {
+        transition-delay: 0.25s;
+      }
+      &:nth-child(5) {
+        transition-delay: 0.3s;
+      }
+      &:nth-child(6) {
+        transition-delay: 0.35s;
+      }
     }
 
     .navLink {
@@ -442,7 +453,7 @@
       background: rgba($background, 0.7);
       border: 1px solid rgba($border, 0.3);
       @include transition(all, 0.25s);
-      
+
       i {
         width: 24px;
         height: 24px;
@@ -453,13 +464,13 @@
         color: $dark-grey;
         @include transition(all, 0.25s);
       }
-      
+
       &.active {
         color: $primary;
         background: rgba($primary, 0.08);
         border-color: rgba($primary, 0.2);
         transform: translateX(4px);
-        
+
         i {
           color: $primary;
           transform: scale(1.1);
@@ -471,7 +482,7 @@
         background: rgba($primary, 0.05);
         border-color: rgba($primary, 0.15);
         transform: translateX(2px);
-        
+
         i {
           color: $primary;
           transform: scale(1.05);
@@ -495,7 +506,7 @@
       border: 1px solid rgba($accent, 0.2);
       @include transition(all, 0.25s);
       margin-top: 0;
-      
+
       &:hover {
         background: rgba($accent, 0.1);
         color: $accent;

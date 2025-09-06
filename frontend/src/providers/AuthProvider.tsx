@@ -1,15 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { config } from '@/constants/config';
-
-interface User {
-  id: string;
-  email: string;
-  role: 'User' | 'Admin';
-  name?: string;
-  created_at: string;
-}
+import { User } from '@/types/auth';
 
 interface AuthContextType {
   user: User | null;
@@ -17,7 +9,13 @@ interface AuthContextType {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  register: (data: { email: string; password: string; firstName: string; lastName: string, termsAccepted: boolean }) => Promise<void>;
+  register: (data: {
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+    termsAccepted: boolean;
+  }) => Promise<void>;
   refreshUser: () => Promise<void>;
 }
 
@@ -39,34 +37,42 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Check auth status on app load
   useEffect(() => {
     checkAuthStatus();
   }, []);
 
   const checkAuthStatus = async () => {
     try {
-      const token = localStorage.getItem('auth_token');
-      if (!token) {
-        setIsLoading(false);
-        return;
-      }
-
+      // Call /me endpoint
       const response = await fetch('/api/auth/me', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        method: 'GET',
+        credentials: 'include', // Include httpOnly cookies
       });
 
       if (response.ok) {
-        const userData = await response.json();
-        setUser(userData);
+        const data = await response.json();
+        setUser(data.user);
+      } else if (response.status === 401) {
+        // Access token might be expired, try refresh
+        const refreshResponse = await fetch('/api/auth/refresh', {
+          method: 'POST',
+          credentials: 'include', // Include httpOnly cookies
+        });
+
+        if (refreshResponse.ok) {
+          const refreshData = await refreshResponse.json();
+          setUser(refreshData.user);
+        } else {
+          // Both tokens invalid
+          setUser(null);
+        }
       } else {
-        // Token invalid, remove it
-        localStorage.removeItem('auth_token');
+        setUser(null);
       }
     } catch (error) {
       console.error('Auth check failed:', error);
-      localStorage.removeItem('auth_token');
+      setUser(null);
     } finally {
       setIsLoading(false);
     }
@@ -79,6 +85,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // Include cookies
         body: JSON.stringify({ email, password }),
       });
 
@@ -87,22 +94,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
         throw new Error(error.message || 'Login failed');
       }
 
-      const { user: userData, token } = await response.json();
-      localStorage.setItem('auth_token', token);
-      setUser(userData);
+      const data = await response.json();
+      setUser(data.user);
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
     }
   };
 
-  const register = async (data: { email: string; password: string; firstName: string; lastName: string, termsAccepted: boolean }) => {
+  const register = async (data: {
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+    termsAccepted: boolean;
+  }) => {
     try {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // Include cookies
         body: JSON.stringify(data),
       });
 
@@ -111,9 +124,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         throw new Error(error.message || 'Registration failed');
       }
 
-      const { user: userData, token } = await response.json();
-      localStorage.setItem('auth_token', token);
-      setUser(userData);
+      const responseData = await response.json();
+      setUser(responseData.user);
     } catch (error) {
       console.error('Registration failed:', error);
       throw error;
@@ -122,19 +134,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const logout = async () => {
     try {
-      const token = localStorage.getItem('auth_token');
-      if (token) {
-        await fetch('/api/auth/logout', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-      }
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include', // Include cookies
+      });
     } catch (error) {
       console.error('Logout request failed:', error);
     } finally {
-      localStorage.removeItem('auth_token');
       setUser(null);
     }
   };
@@ -153,9 +159,5 @@ export function AuthProvider({ children }: AuthProviderProps) {
     refreshUser,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

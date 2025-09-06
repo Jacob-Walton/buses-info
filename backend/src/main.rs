@@ -1,18 +1,29 @@
 use axum::Router;
-use axum::routing::{get, post};
+use axum::http::{HeaderValue, Method};
+use axum::routing::{get, post, put};
 use buses_api::application::{AuthUseCases, GetBusRankings, GetCurrentBuses};
-use buses_api::domain::services::{BusService, RankingService, UserService};
+use buses_api::domain::services::{
+    BusService, RankingService, UserPreferencesService, UserService,
+};
 use buses_api::infrastructure::{
     InMemoryCache, JwtService, OAuthService, PasswordService, PostgresBusRepository,
-    PostgresConnection, PostgresRankingRepository, PostgresUserRepository, RedisService,
-    RunshawScraper,
+    PostgresConnection, PostgresRankingRepository, PostgresUserPreferencesRepository,
+    PostgresUserRepository, RedisService, RunshawScraper,
+};
+use buses_api::presentation::handlers::auth_handlers::{
+    apple_login, google_login, login, logout, me, refresh_token, register,
+};
+use buses_api::presentation::handlers::user_preferences_handlers::{
+    get_favorite_routes, set_favorite_routes,
 };
 use buses_api::presentation::{
-    apple_login, current_bus_information, google_login, health_check, health_status, login, logout,
-    me, refresh_token, register, service_rankings,
+    current_bus_information, health_check, health_status, service_rankings,
 };
 use std::sync::Arc;
 use tokio::net::TcpListener;
+use tower_cookies::CookieManagerLayer;
+use tower_http::cors::CorsLayer;
+use tower_http::trace::TraceLayer;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -40,7 +51,7 @@ async fn main() -> anyhow::Result<()> {
     // Initialize tracing
     tracing_subscriber::fmt()
         .with_max_level(tracing::Level::DEBUG)
-        .with_env_filter("buses_api=debug,warn")
+        .with_env_filter(std::env::var("RUST_LOG").unwrap_or("buses_api=debug,warn".to_string()))
         .init();
 
     // Initialize infrastructure
@@ -58,11 +69,15 @@ async fn main() -> anyhow::Result<()> {
     let bus_repository = Arc::new(PostgresBusRepository::new(db_conn.clone()));
     let ranking_repository = Arc::new(PostgresRankingRepository::new(db_conn.clone()));
     let user_repository = Arc::new(PostgresUserRepository::new(db_conn.clone()));
+    let user_preferences_repository =
+        Arc::new(PostgresUserPreferencesRepository::new(db_conn.clone()));
 
     // Domain services
     let bus_service = Arc::new(BusService::new(bus_repository.clone()));
     let ranking_service = Arc::new(RankingService::new(ranking_repository));
     let user_service = Arc::new(UserService::new(user_repository));
+    let user_preferences_service =
+        Arc::new(UserPreferencesService::new(user_preferences_repository));
 
     // Infrastructure services
     let oauth_service = Arc::new(OAuthService::new());
@@ -145,39 +160,89 @@ async fn main() -> anyhow::Result<()> {
             "/api/auth/register",
             post({
                 let auth_use_cases = auth_use_cases.clone();
-                move |request| register(request, auth_use_cases)
+                move |cookies, json| register(cookies, json, auth_use_cases)
             }),
         )
         .route(
             "/api/auth/login",
             post({
                 let auth_use_cases = auth_use_cases.clone();
-                move |request| login(request, auth_use_cases)
+                move |cookies, json| login(cookies, json, auth_use_cases)
             }),
         )
         .route(
             "/api/auth/google",
             post({
                 let auth_use_cases = auth_use_cases.clone();
-                move |request| google_login(request, auth_use_cases)
+                move |cookies, json| google_login(cookies, json, auth_use_cases)
             }),
         )
         .route(
             "/api/auth/apple",
             post({
                 let auth_use_cases = auth_use_cases.clone();
-                move |request| apple_login(request, auth_use_cases)
+                move |cookies, json| apple_login(cookies, json, auth_use_cases)
             }),
         )
         .route(
             "/api/auth/refresh",
             post({
                 let auth_use_cases = auth_use_cases.clone();
-                move |request| refresh_token(request, auth_use_cases)
+                move |cookies, json| refresh_token(cookies, json, auth_use_cases)
             }),
         )
         .route("/api/auth/logout", post(logout))
-        .route("/api/auth/me", get(me));
+        .route(
+            "/api/auth/me",
+            get({
+                let auth_use_cases = auth_use_cases.clone();
+                move |cookies| me(cookies, auth_use_cases)
+            }),
+        )
+        .route(
+            "/api/users/{user_id}/favorites",
+            get({
+                let preferences_service = user_preferences_service.clone();
+                move |path| get_favorite_routes(path, preferences_service)
+            }),
+        )
+        .route(
+            "/api/users/{user_id}/favorites",
+            put({
+                let preferences_service = user_preferences_service.clone();
+                move |path, json| set_favorite_routes(path, json, preferences_service)
+            }),
+        );
+
+    #[cfg(debug_assertions)]
+    let app = app.layer(TraceLayer::new_for_http());
+
+    let app = app
+        .layer(
+            CorsLayer::new()
+                .allow_origin([
+                    "http://localhost:3000".parse::<HeaderValue>().unwrap(),
+                    "https://accounts.google.com"
+                        .parse::<HeaderValue>()
+                        .unwrap(),
+                ])
+                .allow_headers([
+                    axum::http::header::CONTENT_TYPE,
+                    axum::http::header::AUTHORIZATION,
+                    axum::http::header::ACCEPT,
+                    axum::http::header::COOKIE,
+                    axum::http::header::SET_COOKIE,
+                ])
+                .allow_methods([
+                    Method::GET,
+                    Method::POST,
+                    Method::PUT,
+                    Method::DELETE,
+                    Method::OPTIONS,
+                ])
+                .allow_credentials(true),
+        )
+        .layer(CookieManagerLayer::new());
 
     // Start server
     let addr = std::env::var("LISTEN_ADDR").unwrap_or("localhost:4001".to_string());

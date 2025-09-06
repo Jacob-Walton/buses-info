@@ -23,8 +23,12 @@ interface CookiePreferences {
 export default function SettingsPage() {
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<'account' | 'privacy' | 'data'>('account');
-  const [dataExport, setDataExport] = useState<DataExportRequest>({ status: 'idle' });
-  const [accountDeletion, setAccountDeletion] = useState<AccountDeletion>({ status: 'idle' });
+  const [dataExport, setDataExport] = useState<DataExportRequest>({
+    status: 'idle',
+  });
+  const [accountDeletion, setAccountDeletion] = useState<AccountDeletion>({
+    status: 'idle',
+  });
   const [cookiePreferences, setCookiePreferences] = useState<CookiePreferences>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('bus-info-cookie-preferences');
@@ -60,16 +64,17 @@ export default function SettingsPage() {
 
   const handleDataExport = async () => {
     setDataExport({ status: 'requesting' });
-    
+
     try {
       // In development, simulate the API call
       if (process.env.NODE_ENV === 'development') {
         // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
         setDataExport({
           status: 'processing',
-          message: 'Your data export has been requested. You will receive an email with a download link within 24 hours.',
+          message:
+            'Your data export has been requested. You will receive an email with a download link within 24 hours.',
         });
         return;
       }
@@ -85,7 +90,8 @@ export default function SettingsPage() {
       if (response.ok) {
         setDataExport({
           status: 'processing',
-          message: 'Your data export has been requested. You will receive an email with a download link within 24 hours.',
+          message:
+            'Your data export has been requested. You will receive an email with a download link within 24 hours.',
         });
       } else {
         throw new Error('Failed to request data export');
@@ -110,8 +116,8 @@ export default function SettingsPage() {
       // In development, simulate the API call
       if (process.env.NODE_ENV === 'development') {
         // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
         // Simulate successful deletion
         alert('Account deleted successfully (dev mode)');
         logout();
@@ -159,24 +165,25 @@ export default function SettingsPage() {
     }
 
     // Dispatch event for other components
-    window.dispatchEvent(new CustomEvent('cookiePreferencesChanged', { 
-      detail: prefsToSave 
-    }));
+    window.dispatchEvent(
+      new CustomEvent('cookiePreferencesChanged', {
+        detail: prefsToSave,
+      }),
+    );
   };
 
   const tabs = [
     { key: 'account', label: 'Account', icon: 'fas fa-user' },
     { key: 'privacy', label: 'Privacy', icon: 'fas fa-shield-alt' },
-    { key: 'data', label: 'Your Data', icon: 'fas fa-download' }
+    { key: 'data', label: 'Your Data', icon: 'fas fa-download' },
   ] as const;
 
   return (
     <div className={styles.settingsPage}>
       <div className={styles.settingsContainer}>
-
         <div className={styles.settingsContent}>
           <nav className={styles.settingsTabs}>
-            {tabs.map(tab => (
+            {tabs.map((tab) => (
               <button
                 key={tab.key}
                 className={`${styles.tabButton} ${activeTab === tab.key ? styles.active : ''}`}
@@ -192,8 +199,10 @@ export default function SettingsPage() {
             {activeTab === 'account' && (
               <div className={styles.panelContent}>
                 <h2 className={styles.panelTitle}>Account Information</h2>
-                <p className={styles.panelDescription}>Your account details and basic information.</p>
-                
+                <p className={styles.panelDescription}>
+                  Your account details and basic information.
+                </p>
+
                 <div className={styles.accountInfo}>
                   <div className={styles.infoItem}>
                     <label>Email</label>
@@ -201,7 +210,7 @@ export default function SettingsPage() {
                   </div>
                   <div className={styles.infoItem}>
                     <label>Member since</label>
-                    <span>{new Date(user.created_at).toLocaleDateString()}</span>
+                    <span>{new Date(user.createdAt).toLocaleDateString()}</span>
                   </div>
                 </div>
 
@@ -211,12 +220,18 @@ export default function SettingsPage() {
                     <div className={styles.dangerItem}>
                       <div className={styles.dangerInfo}>
                         <h4>Delete Account</h4>
-                        <p>Permanently delete your account and all associated data. This action cannot be undone.</p>
+                        <p>
+                          Permanently delete your account and all associated data. This action
+                          cannot be undone.
+                        </p>
                       </div>
-                      
-                      {(accountDeletion.status === 'confirming' || accountDeletion.status === 'processing') ? (
+
+                      {accountDeletion.status === 'confirming' ||
+                      accountDeletion.status === 'processing' ? (
                         <div className={styles.confirmationBox}>
-                          <p><strong>Are you absolutely sure?</strong></p>
+                          <p>
+                            <strong>Are you absolutely sure?</strong>
+                          </p>
                           <p>This will permanently delete:</p>
                           <ul>
                             <li>Your account and login credentials</li>
@@ -224,16 +239,18 @@ export default function SettingsPage() {
                             <li>Any usage history</li>
                           </ul>
                           <p>This action cannot be undone.</p>
-                          
+
                           <div className={styles.confirmationActions}>
-                            <Button 
+                            <Button
                               onClick={handleAccountDeletion}
                               variant="danger"
                               disabled={accountDeletion.status === 'processing'}
                             >
-                              {accountDeletion.status === 'processing' ? 'Deleting...' : 'Yes, Delete My Account'}
+                              {accountDeletion.status === 'processing'
+                                ? 'Deleting...'
+                                : 'Yes, Delete My Account'}
                             </Button>
-                            <Button 
+                            <Button
                               onClick={() => setAccountDeletion({ status: 'idle' })}
                               variant="secondary"
                             >
@@ -242,10 +259,7 @@ export default function SettingsPage() {
                           </div>
                         </div>
                       ) : (
-                        <Button 
-                          onClick={handleAccountDeletion}
-                          variant="danger"
-                        >
+                        <Button onClick={handleAccountDeletion} variant="danger">
                           Delete Account
                         </Button>
                       )}
@@ -264,12 +278,14 @@ export default function SettingsPage() {
             {activeTab === 'privacy' && (
               <div className={styles.panelContent}>
                 <h2 className={styles.panelTitle}>Privacy Settings</h2>
-                <p className={styles.panelDescription}>Control your privacy and cookie preferences.</p>
-                
+                <p className={styles.panelDescription}>
+                  Control your privacy and cookie preferences.
+                </p>
+
                 <div className={styles.privacySection}>
                   <h3>Cookie Preferences</h3>
                   <p>Control which cookies we can use on your device.</p>
-                  
+
                   <div className={styles.cookieControls}>
                     <div className={styles.cookieItem}>
                       <div className={styles.cookieInfo}>
@@ -288,15 +304,16 @@ export default function SettingsPage() {
                         <p>Help us understand how you use the site</p>
                       </div>
                       <label className={styles.switch}>
-                        <input 
-                          type="checkbox" 
+                        <input
+                          type="checkbox"
                           checked={cookiePreferences.analytics}
-                          onChange={(e) => handleCookiePreferenceChange('analytics', e.target.checked)}
+                          onChange={(e) =>
+                            handleCookiePreferenceChange('analytics', e.target.checked)
+                          }
                         />
                         <span className={styles.slider}></span>
                       </label>
                     </div>
-
                   </div>
                 </div>
 
@@ -319,12 +336,14 @@ export default function SettingsPage() {
             {activeTab === 'data' && (
               <div className={styles.panelContent}>
                 <h2 className={styles.panelTitle}>Your Data</h2>
-                <p className={styles.panelDescription}>Request a copy of your data or manage data-related requests.</p>
-                
+                <p className={styles.panelDescription}>
+                  Request a copy of your data or manage data-related requests.
+                </p>
+
                 <div className={styles.dataSection}>
                   <h3>Data Export</h3>
                   <p>Request a copy of all data we hold about you.</p>
-                  
+
                   <div className={styles.actionItem}>
                     <div className={styles.actionInfo}>
                       <strong>Download Your Data</strong>
@@ -336,9 +355,11 @@ export default function SettingsPage() {
                         <li>Cookie preferences</li>
                       </ul>
                     </div>
-                    <Button 
+                    <Button
                       onClick={handleDataExport}
-                      disabled={dataExport.status === 'requesting' || dataExport.status === 'processing'}
+                      disabled={
+                        dataExport.status === 'requesting' || dataExport.status === 'processing'
+                      }
                       variant="primary"
                     >
                       {dataExport.status === 'requesting' ? 'Requesting...' : 'Request Data Export'}
@@ -346,10 +367,18 @@ export default function SettingsPage() {
                   </div>
 
                   {dataExport.message && (
-                    <div className={`${styles.statusMessage} ${
-                      dataExport.status === 'error' ? styles.error : styles.info
-                    }`}>
-                      <i className={dataExport.status === 'error' ? 'fas fa-exclamation-triangle' : 'fas fa-info-circle'}></i>
+                    <div
+                      className={`${styles.statusMessage} ${
+                        dataExport.status === 'error' ? styles.error : styles.info
+                      }`}
+                    >
+                      <i
+                        className={
+                          dataExport.status === 'error'
+                            ? 'fas fa-exclamation-triangle'
+                            : 'fas fa-info-circle'
+                        }
+                      ></i>
                       {dataExport.message}
                     </div>
                   )}

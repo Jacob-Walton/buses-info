@@ -18,13 +18,23 @@ export default function TermsPage() {
 
           <div className={styles.contentSection} id="acceptance">
             <h2>1. Agreement</h2>
-            <p>By using Bus Info, you agree to these terms. If you don&apos;t agree, please don&apos;t use the service.</p>
+            <p>
+              By using Bus Info, you agree to these terms. If you don&apos;t agree, please
+              don&apos;t use the service.
+            </p>
           </div>
 
           <div className={styles.contentSection} id="service">
             <h2>2. What This Service Does</h2>
-            <p>Bus Info provides bus arrival information for informational purposes only. The information comes from third-party sources and may not always be accurate or up-to-date.</p>
-            <p><strong>Important:</strong> Don&apos;t rely solely on this service for important decisions. Always check official sources.</p>
+            <p>
+              Bus Info provides bus arrival information for informational purposes only. The
+              information comes from third-party sources and may not always be accurate or
+              up-to-date.
+            </p>
+            <p>
+              <strong>Important:</strong> Don&apos;t rely solely on this service for important
+              decisions. Always check official sources.
+            </p>
           </div>
 
           <div className={styles.contentSection} id="accounts">
@@ -76,17 +86,26 @@ export default function TermsPage() {
 
           <div className={styles.contentSection} id="intellectual-property">
             <h2>7. Ownership</h2>
-            <p>The website design and code belong to us. You can use the service for personal use but can&apos;t copy, modify, or distribute our content without permission.</p>
+            <p>
+              The website design and code belong to us. You can use the service for personal use but
+              can&apos;t copy, modify, or distribute our content without permission.
+            </p>
           </div>
 
           <div className={styles.contentSection} id="privacy">
             <h2>8. Privacy</h2>
-            <p>How we handle your personal information is explained in our <a href="/privacy">Privacy Notice</a>.</p>
+            <p>
+              How we handle your personal information is explained in our{' '}
+              <a href="/privacy">Privacy Notice</a>.
+            </p>
           </div>
 
           <div className={styles.contentSection} id="disclaimers">
             <h2>9. Disclaimers</h2>
-            <p>This service is provided &quot;as is&quot; without warranties. We can&apos;t promise that:</p>
+            <p>
+              This service is provided &quot;as is&quot; without warranties. We can&apos;t promise
+              that:
+            </p>
             <ul>
               <li>The service will always work perfectly</li>
               <li>The information will always be accurate</li>
@@ -97,7 +116,10 @@ export default function TermsPage() {
 
           <div className={styles.contentSection} id="liability">
             <h2>10. Liability</h2>
-            <p>We&apos;re not responsible for any problems that arise from using this service, including:</p>
+            <p>
+              We&apos;re not responsible for any problems that arise from using this service,
+              including:
+            </p>
             <ul>
               <li>Missed buses or connections</li>
               <li>Inaccurate information</li>
@@ -109,17 +131,26 @@ export default function TermsPage() {
 
           <div className={styles.contentSection} id="termination">
             <h2>11. Account Termination</h2>
-            <p>You can delete your account anytime. We can also suspend or terminate accounts that violate these terms.</p>
+            <p>
+              You can delete your account anytime. We can also suspend or terminate accounts that
+              violate these terms.
+            </p>
           </div>
 
           <div className={styles.contentSection} id="changes">
             <h2>12. Changes to These Terms</h2>
-            <p>We may update these terms occasionally. If we make significant changes, we&apos;ll let you know through the website or by email (if you have an account).</p>
+            <p>
+              We may update these terms occasionally. If we make significant changes, we&apos;ll let
+              you know through the website or by email (if you have an account).
+            </p>
           </div>
 
           <div className={styles.contentSection} id="governing-law">
             <h2>13. Legal Stuff</h2>
-            <p>These terms are governed by the laws of England and Wales. Any disputes will be handled in English courts.</p>
+            <p>
+              These terms are governed by the laws of England and Wales. Any disputes will be
+              handled in English courts.
+            </p>
           </div>
 
           <div className={styles.contentSection} id="contact">

@@ -12,12 +12,13 @@
 
 .authBackground {
   display: none;
-  
+
   @media (min-width: 768px) {
     display: block;
     flex: 1;
-    background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
-      url("https://dhfrjz15mb441.cloudfront.net/bus-info/runshaw.jpg");
+    background-image:
+      linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+      url('https://dhfrjz15mb441.cloudfront.net/bus-info/runshaw.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -27,26 +28,26 @@
     justify-content: center;
     align-items: center;
     color: white;
-    
+
     &::before {
-      content: "";
+      content: '';
       position: absolute;
       inset: 0;
       background: rgba(0, 0, 0, 0.2);
     }
-    
+
     .brandContent {
       z-index: 1;
       text-align: center;
       padding: $spacing-unit * 2;
       max-width: 500px;
-      
+
       h2 {
         font-size: 2.5rem;
         font-weight: 700;
         margin-bottom: $spacing-unit;
       }
-      
+
       p {
         font-size: 1.125rem;
         line-height: 1.6;
@@ -64,7 +65,7 @@
   padding: $spacing-unit;
   background-color: white;
   overflow-y: auto;
-  
+
   @media (min-width: 768px) {
     max-width: 500px;
     box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
@@ -81,7 +82,7 @@
   display: flex;
   justify-content: center;
   margin-bottom: $spacing-unit * 0.75;
-  
+
   img {
     width: 100px;
     height: 100px;
@@ -123,11 +124,11 @@
     list-style: none;
     padding: 0;
     margin: 0;
-    
+
     li {
       margin: 0.25rem 0;
       color: #424242;
-      
+
       strong {
         color: $primary;
       }
@@ -161,8 +162,8 @@
       }
 
       &::before {
-        content: "\f06a";
-        font-family: "Font Awesome 5 Free";
+        content: '\f06a';
+        font-family: 'Font Awesome 5 Free';
         font-weight: 900;
         position: absolute;
         left: 0;
@@ -187,10 +188,10 @@
       color: $dark-grey;
     }
 
-    input[type="email"],
-    input[type="password"],
-    input[type="tel"],
-    input[type="text"] {
+    input[type='email'],
+    input[type='password'],
+    input[type='tel'],
+    input[type='text'] {
       width: 100%;
       padding: 0.5rem 0.75rem;
       border: 1.5px solid $border;
@@ -224,7 +225,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: $spacing-unit * 0.5;
-  
+
   .option {
     margin-bottom: 0;
     padding: 0;
@@ -239,7 +240,7 @@
       margin-right: 0.5rem;
       flex-shrink: 0;
 
-      input[type="checkbox"] {
+      input[type='checkbox'] {
         position: absolute;
         opacity: 0;
         width: 0;
@@ -258,7 +259,7 @@
           cursor: pointer;
 
           &::after {
-            content: "";
+            content: '';
             position: absolute;
             top: 50%;
             left: 50%;
@@ -289,12 +290,12 @@
       color: $text;
     }
   }
-  
+
   .forgotLink {
     font-size: 0.8125rem;
     color: $primary;
     text-decoration: none;
-    
+
     &:hover {
       text-decoration: underline;
     }
@@ -336,13 +337,13 @@
   align-items: center;
   gap: 0.75rem;
   margin: $spacing-unit 0;
-  
+
   span {
     font-size: 0.75rem;
     color: $dark-grey;
     white-space: nowrap;
   }
-  
+
   .dividerLine {
     height: 1px;
     flex-grow: 1;
@@ -360,7 +361,8 @@
   display: flex;
   gap: 0.75rem;
   margin-bottom: $spacing-unit * 0.75;
-  
+  width: 100%;
+
   button {
     @include reset-button;
     flex: 1;
@@ -375,7 +377,7 @@
     color: #333333;
     @include alternating-border-radius($button-border-radius);
     @include transition;
-    
+
     &:hover:not(:disabled) {
       background-color: rgba(0, 0, 0, 0.03);
     }
@@ -384,7 +386,7 @@
       opacity: 0.6;
       cursor: not-allowed;
     }
-    
+
     img {
       width: 18px;
       height: 18px;
@@ -394,12 +396,71 @@
   }
 }
 
-.btnGoogle {
-  // Styles are applied through the .socialLogin button above
+.googleButtonContainer {
+  position: relative;
+  flex: 1;
+  height: 44px;
+  overflow: hidden; // Prevent any overflow
 }
 
-.btnMicrosoft {
-  // Styles are applied through the .socialLogin button above
+.btnGoogle,
+.btnApple {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: white;
+  color: #333;
+  font-weight: 500;
+  height: 44px;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+.btnApple {
+  background: #000;
+  color: white;
+  border-color: #000;
+  position: relative; // Keep relative for Apple button
+}
+
+.googleOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 44px;
+  z-index: 2;
+
+  > div {
+    width: 100% !important;
+    height: 44px !important;
+    position: relative !important;
+
+    > div {
+      width: 100% !important;
+      height: 44px !important;
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+
+      > div,
+      button,
+      iframe {
+        width: 100% !important;
+        height: 44px !important;
+        opacity: 0 !important;
+        border-radius: 8px !important;
+      }
+    }
+  }
 }
 
 .loginLinks {

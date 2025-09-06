@@ -87,7 +87,7 @@
   color: darken($primary, 20%);
   padding: $spacing-unit;
   @include alternating-border-radius($regular-border-radius);
-  margin-bottom: $spacing-unit;
+  margin: $spacing-unit;
   text-align: center;
 
   h3 {
@@ -189,4 +189,3 @@
     }
   }
 }
-

@@ -16,7 +16,7 @@
   aspect-ratio: 1/1;
 
   &::before {
-    content: "";
+    content: '';
     display: block;
     padding-top: 100%;
   }
@@ -108,7 +108,6 @@
     }
   }
 
-
   .starBadge {
     position: absolute;
     top: 0.75rem;
@@ -135,7 +134,7 @@
     &:hover {
       transform: scale(1.2);
       color: $primary;
-      
+
       @include responsive(mobile) {
         transform: scale(1.1);
       }
@@ -163,4 +162,3 @@
     }
   }
 }
-

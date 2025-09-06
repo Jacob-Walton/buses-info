@@ -1,0 +1,16 @@
+#!/bin/sh
+cd backend || exit 1
+
+# Run formatting check
+if ! cargo fmt -- --check; then
+    echo "Code is not formatted. Running cargo fmt..."
+    cargo fmt || exit 1
+    echo "Files were formatted. Please add and commit again."
+    exit 1
+fi
+
+# Run clippy linting
+if ! cargo clippy --all-targets -- -D warnings; then
+    echo "Clippy found issues. Please fix them."
+    exit 1
+fi

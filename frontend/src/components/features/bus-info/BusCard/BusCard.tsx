@@ -38,7 +38,7 @@ export default function BusCard({ bus, isPreferred = false, onTogglePreferred }:
           </button>
         )}
       </div>
-      
+
       <div className={styles.details}>
         <div className={styles.status}>
           <span className={styles.label}>Status:</span>

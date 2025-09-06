@@ -21,8 +21,8 @@
     'overlay': 9998,
     'dropdown': 1000,
     'navbar': 1000,
-    'content': 1
+    'content': 1,
   );
-  
+
   @return map-get($z-indexes, $layer);
 }

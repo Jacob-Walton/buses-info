@@ -11,7 +11,7 @@ interface WithAuthOptions {
 
 export function withAuth<P extends object>(
   Component: ComponentType<P>,
-  options: WithAuthOptions = {}
+  options: WithAuthOptions = {},
 ) {
   const { requiredRoles = [], redirectTo = '/login' } = options;
 
@@ -28,9 +28,7 @@ export function withAuth<P extends object>(
 
         if (requiredRoles.length > 0 && user) {
           const userRole = user.role.toLowerCase();
-          const hasRequiredRole = requiredRoles.some(role => 
-            role.toLowerCase() === userRole
-          );
+          const hasRequiredRole = requiredRoles.some((role) => role.toLowerCase() === userRole);
 
           if (!hasRequiredRole) {
             router.push('/unauthorized');
@@ -42,13 +40,15 @@ export function withAuth<P extends object>(
 
     if (isLoading) {
       return (
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          height: '100vh',
-          fontSize: '18px'
-        }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100vh',
+            fontSize: '18px',
+          }}
+        >
           Loading...
         </div>
       );
@@ -60,9 +60,7 @@ export function withAuth<P extends object>(
 
     if (requiredRoles.length > 0 && user) {
       const userRole = user.role.toLowerCase();
-      const hasRequiredRole = requiredRoles.some(role => 
-        role.toLowerCase() === userRole
-      );
+      const hasRequiredRole = requiredRoles.some((role) => role.toLowerCase() === userRole);
 
       if (!hasRequiredRole) {
         return null;

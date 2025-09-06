@@ -19,14 +19,14 @@ interface UseBusesReturn {
 
 export function useBuses(options: UseBusesOptions = {}): UseBusesReturn {
   const { refreshInterval = 30000, autoRefresh = true } = options; // Default 30 seconds
-  
+
   const [buses, setBuses] = useState<BusResponse['buses']>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [isCached, setIsCached] = useState(false);
-  
+
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -35,9 +35,9 @@ export function useBuses(options: UseBusesOptions = {}): UseBusesReturn {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
-    
+
     abortControllerRef.current = new AbortController();
-    
+
     try {
       if (isRefresh) {
         setIsRefreshing(true);
@@ -51,25 +51,28 @@ export function useBuses(options: UseBusesOptions = {}): UseBusesReturn {
       });
 
       if (!apiResponse.ok) {
-        throw new ApiError(apiResponse.status, `HTTP ${apiResponse.status}: ${apiResponse.statusText}`);
+        throw new ApiError(
+          apiResponse.status,
+          `HTTP ${apiResponse.status}: ${apiResponse.statusText}`,
+        );
       }
 
       const response: BusResponse = await apiResponse.json();
-      
+
       setBuses(response.buses);
       setIsCached(response.cached);
       setLastUpdated(new Date());
-      
     } catch (err) {
       if (err instanceof Error && err.name === 'AbortError') {
         // Request was cancelled, don't update state
         return;
       }
-      
-      const errorMessage = err instanceof ApiError 
-        ? `Failed to fetch bus data: ${err.message}`
-        : 'An unexpected error occurred while fetching bus data';
-      
+
+      const errorMessage =
+        err instanceof ApiError
+          ? `Failed to fetch bus data: ${err.message}`
+          : 'An unexpected error occurred while fetching bus data';
+
       setError(errorMessage);
       console.error('Error fetching buses:', err);
     } finally {

@@ -1,5 +1,6 @@
 use crate::domain::entities::{User, UserCredentials, UserRole};
 use crate::domain::repositories::UserRepository;
+use bcrypt::verify;
 use std::error::Error;
 use std::sync::Arc;
 use uuid::Uuid;
@@ -62,9 +63,9 @@ impl UserService {
         self.repository.find_by_email(email).await
     }
 
-    pub async fn authenticate(&self, email: &str, password_hash: &str) -> Result<Option<User>> {
+    pub async fn authenticate(&self, email: &str, password: &str) -> Result<Option<User>> {
         if let Some(credentials) = self.repository.get_credentials(email).await?
-            && credentials.password_hash == password_hash
+            && verify(password, &credentials.password_hash).unwrap_or(false)
         {
             return self.repository.find_by_email(email).await;
         }

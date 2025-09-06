@@ -71,8 +71,8 @@ export function Navbar() {
       <nav className={styles.navbar}>
         <div className={styles.container}>
           <div className={styles.navbarBrandContainer}>
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               className={`${styles.navbarBrand} ${styles.simple}`}
               aria-label="Bus Info Home"
               title="Bus Info Home"
@@ -94,8 +94,8 @@ export function Navbar() {
           <div className={`${styles.navbarMenu} ${isMobileMenuOpen ? styles.active : ''}`}>
             <ul className={styles.navbarNav}>
               <li className={`${styles.navItem} ${isMobileMenuOpen ? styles.animate : ''}`}>
-                <Link 
-                  href="/" 
+                <Link
+                  href="/"
                   className={`${styles.navLink} ${isActive('/') ? styles.active : ''}`}
                   onClick={handleNavClick}
                 >
@@ -105,8 +105,8 @@ export function Navbar() {
 
               {!isAuthenticated ? (
                 <li className={`${styles.navItem} ${isMobileMenuOpen ? styles.animate : ''}`}>
-                  <Link 
-                    href="/login" 
+                  <Link
+                    href="/login"
                     className={`${styles.navLink} ${styles.navLinkBold}`}
                     onClick={handleNavClick}
                   >
@@ -115,18 +115,23 @@ export function Navbar() {
                 </li>
               ) : (
                 <>
-                  <div className={`${styles.profileMenu} ${styles.desktopOnly}`} ref={profileMenuRef}>
-                    <button 
+                  <div
+                    className={`${styles.profileMenu} ${styles.desktopOnly}`}
+                    ref={profileMenuRef}
+                  >
+                    <button
                       className={styles.profileTrigger}
                       onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
                     >
                       <i className="fas fa-user"></i>
                       <i className="fas fa-chevron-down"></i>
                     </button>
-                    <div className={`${styles.profileDropdown} ${isProfileDropdownOpen ? styles.active : ''}`}>
+                    <div
+                      className={`${styles.profileDropdown} ${isProfileDropdownOpen ? styles.active : ''}`}
+                    >
                       {user?.role === 'Admin' && (
-                        <Link 
-                          href="/admin" 
+                        <Link
+                          href="/admin"
                           className={styles.dropdownItem}
                           onClick={handleNavClick}
                         >
@@ -134,16 +139,16 @@ export function Navbar() {
                           Admin
                         </Link>
                       )}
-                      <Link 
-                        href="/settings" 
+                      <Link
+                        href="/settings"
                         className={styles.dropdownItem}
                         onClick={handleNavClick}
                       >
                         <i className="fas fa-cog"></i>
                         Settings
                       </Link>
-                      <button 
-                        onClick={handleLogout} 
+                      <button
+                        onClick={handleLogout}
                         className={`${styles.dropdownItem} ${styles.danger}`}
                       >
                         <i className="fas fa-sign-out-alt"></i>
@@ -151,13 +156,13 @@ export function Navbar() {
                       </button>
                     </div>
                   </div>
-                  
+
                   {/* Mobile profile items */}
                   <div className={styles.mobileProfileItems}>
                     {user?.role === 'Admin' && (
                       <li className={`${styles.navItem} ${isMobileMenuOpen ? styles.animate : ''}`}>
-                        <Link 
-                          href="/admin" 
+                        <Link
+                          href="/admin"
                           className={`${styles.navLink} ${isActive('/admin') ? styles.active : ''}`}
                           onClick={handleNavClick}
                         >
@@ -167,8 +172,8 @@ export function Navbar() {
                       </li>
                     )}
                     <li className={`${styles.navItem} ${isMobileMenuOpen ? styles.animate : ''}`}>
-                      <Link 
-                        href="/settings" 
+                      <Link
+                        href="/settings"
                         className={`${styles.navLink} ${isActive('/settings') ? styles.active : ''}`}
                         onClick={handleNavClick}
                       >
@@ -177,8 +182,8 @@ export function Navbar() {
                       </Link>
                     </li>
                     <li className={`${styles.navItem} ${isMobileMenuOpen ? styles.animate : ''}`}>
-                      <button 
-                        onClick={handleLogout} 
+                      <button
+                        onClick={handleLogout}
                         className={`${styles.navLink} ${styles.danger}`}
                       >
                         <i className="fas fa-sign-out-alt"></i>
@@ -195,7 +200,7 @@ export function Navbar() {
 
       {/* Mobile overlay */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           className={`${styles.mobileOverlay} ${styles.active}`}
           onClick={handleMobileMenuToggle}
         />

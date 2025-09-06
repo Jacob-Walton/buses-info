@@ -35,7 +35,7 @@
       i {
         font-size: 1rem;
         color: $primary;
-        
+
         @include responsive(mobile) {
           font-size: 1.125rem;
         }
@@ -71,7 +71,7 @@
 
       i {
         font-size: 1rem;
-        
+
         @include responsive(mobile) {
           font-size: 1.125rem;
         }

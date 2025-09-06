@@ -22,26 +22,54 @@ export function Footer() {
             <div className={styles.footerSection}>
               <h4>Navigation</h4>
               <ul>
-                <li><Link href="/"><i className="fas fa-home"></i> Home</Link></li>
-                <li><Link href="/buses"><i className="fas fa-bus"></i> Bus Information</Link></li>
+                <li>
+                  <Link href="/">
+                    <i className="fas fa-home"></i> Home
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/buses">
+                    <i className="fas fa-bus"></i> Bus Information
+                  </Link>
+                </li>
                 {isAuthenticated ? (
-                  <li><Link href="/settings"><i className="fas fa-cog"></i> Account Settings</Link></li>
+                  <li>
+                    <Link href="/settings">
+                      <i className="fas fa-cog"></i> Account Settings
+                    </Link>
+                  </li>
                 ) : (
-                  <li><Link href="/login"><i className="fas fa-sign-in-alt"></i> Sign In</Link></li>
+                  <li>
+                    <Link href="/login">
+                      <i className="fas fa-sign-in-alt"></i> Sign In
+                    </Link>
+                  </li>
                 )}
               </ul>
             </div>
             <div className={styles.footerSection}>
               <h4>Legal Information</h4>
               <ul>
-                <li><Link href="/privacy"><i className="fas fa-shield-alt"></i> Privacy Policy</Link></li>
-                <li><Link href="/terms"><i className="fas fa-gavel"></i> Terms of Use</Link></li>
+                <li>
+                  <Link href="/privacy">
+                    <i className="fas fa-shield-alt"></i> Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/terms">
+                    <i className="fas fa-gavel"></i> Terms of Use
+                  </Link>
+                </li>
                 <li>
                   <button onClick={() => setShowLegalModal(true)} className={styles.linkButton}>
                     <i className="fas fa-balance-scale"></i> Legal Notice
                   </button>
                 </li>
-                <li><Link href="/disclaimer"><i className="fas fa-exclamation-circle"></i> Independence Disclaimer</Link></li>
+                <li>
+                  <Link href="/disclaimer">
+                    <i className="fas fa-exclamation-circle"></i> Independence Disclaimer
+                  </Link>
+                </li>
               </ul>
             </div>
             <div className={styles.footerSection}>
@@ -53,7 +81,11 @@ export function Footer() {
                   </Link>
                 </li>
                 <li>
-                  <a href="https://github.com/Jacob-Walton/buses-info" target="_blank" rel="noopener noreferrer">
+                  <a
+                    href="https://github.com/Jacob-Walton/buses-info"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <i className="fab fa-github"></i> View Source Code
                   </a>
                 </li>
@@ -72,7 +104,8 @@ export function Footer() {
               </button>
             </div>
             <div className={styles.copyright}>
-              &copy; {new Date().getFullYear()} - Bus Info Project - An Independent Open Source Project
+              &copy; {new Date().getFullYear()} - Bus Info Project - An Independent Open Source
+              Project
               <div className={styles.disclaimerText}>
                 Not affiliated with or endorsed by any educational institution
               </div>
@@ -81,7 +114,7 @@ export function Footer() {
         </div>
       </footer>
 
-      <LegalModal 
+      <LegalModal
         isOpen={showLegalModal}
         onAccept={() => setShowLegalModal(false)}
         onClose={() => setShowLegalModal(false)}

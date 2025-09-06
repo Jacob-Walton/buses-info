@@ -7,30 +7,48 @@ pub struct RegisterRequest {
     pub first_name: String,
     pub last_name: String,
     pub password: String,
+    #[serde(default)]
+    pub format: TokenResponseFormat,
 }
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct LoginRequest {
     pub email: String,
     pub password: String,
+    #[serde(default)]
+    pub format: TokenResponseFormat,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum TokenResponseFormat {
+    #[default]
+    Cookie,
+    Json,
 }
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct GoogleTokenRequest {
     #[serde(rename = "idToken")]
     pub id_token: String,
+    #[serde(default)]
+    pub format: TokenResponseFormat,
 }
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct AppleTokenRequest {
     #[serde(rename = "idToken")]
     pub id_token: String,
+    #[serde(default)]
+    pub format: TokenResponseFormat,
 }
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct RefreshTokenRequest {
     #[serde(rename = "refreshToken")]
     pub refresh_token: String,
+    #[serde(default)]
+    pub format: TokenResponseFormat,
 }
 
 #[derive(Debug, Clone, Serialize)]

@@ -19,7 +19,7 @@
   .pageContent {
     background-color: $background;
     line-height: 1.6;
-    
+
     @media (max-width: 768px) {
       margin: 0;
     }
@@ -79,7 +79,7 @@
     ul {
       margin: $spacing-unit 0;
       padding-left: $spacing-unit * 1.5;
-      
+
       li {
         color: $text;
         margin-bottom: $spacing-unit / 2;

@@ -47,7 +47,7 @@ export default function CookieConsent() {
       analytics: true,
       marketing: true,
     };
-    
+
     savePreferences(allAccepted);
     setShowBanner(false);
   };
@@ -63,7 +63,7 @@ export default function CookieConsent() {
       analytics: false,
       marketing: false,
     };
-    
+
     savePreferences(minimal);
     setShowBanner(false);
   };
@@ -71,10 +71,10 @@ export default function CookieConsent() {
   const savePreferences = (prefs: CookiePreferences) => {
     localStorage.setItem(COOKIE_CONSENT_KEY, 'true');
     localStorage.setItem(COOKIE_PREFERENCES_KEY, JSON.stringify(prefs));
-    
+
     // Set essential cookies (always allowed)
     document.cookie = `bus-info-session=1; path=/; max-age=${60 * 60 * 24 * 30}; samesite=strict`;
-    
+
     // Only set analytics cookies if user consented
     if (prefs.analytics) {
       // Analytics cookies will go here
@@ -83,17 +83,19 @@ export default function CookieConsent() {
       // Remove analytics cookies if they exist
       document.cookie = 'bus-info-analytics=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     }
-    
+
     // Dispatch custom event for other components to listen to
-    window.dispatchEvent(new CustomEvent('cookiePreferencesChanged', { 
-      detail: prefs 
-    }));
+    window.dispatchEvent(
+      new CustomEvent('cookiePreferencesChanged', {
+        detail: prefs,
+      }),
+    );
   };
 
   const handlePreferenceChange = (type: keyof CookiePreferences, value: boolean) => {
     if (type === 'essential') return; // Cannot disable essential cookies
-    
-    setPreferences(prev => ({
+
+    setPreferences((prev) => ({
       ...prev,
       [type]: value,
     }));
@@ -109,8 +111,8 @@ export default function CookieConsent() {
           <div className={styles.header}>
             <h3>Cookie Notice</h3>
             <p>
-              We use cookies and similar technologies to provide essential website functionality, 
-              improve your browsing experience, and analyze website usage in accordance with our 
+              We use cookies and similar technologies to provide essential website functionality,
+              improve your browsing experience, and analyze website usage in accordance with our
               Privacy Notice and UK GDPR requirements.
             </p>
           </div>
@@ -118,27 +120,18 @@ export default function CookieConsent() {
           {!showDetails ? (
             <div className={styles.basicView}>
               <p>
-                Essential cookies are required for the website to function. 
-                You can accept all cookies or customize your preferences.
+                Essential cookies are required for the website to function. You can accept all
+                cookies or customize your preferences.
               </p>
-              
+
               <div className={styles.actions}>
-                <button 
-                  onClick={handleAcceptAll}
-                  className={styles.acceptAll}
-                >
+                <button onClick={handleAcceptAll} className={styles.acceptAll}>
                   Accept All
                 </button>
-                <button 
-                  onClick={() => setShowDetails(true)}
-                  className={styles.customize}
-                >
+                <button onClick={() => setShowDetails(true)} className={styles.customize}>
                   Customize
                 </button>
-                <button 
-                  onClick={handleRejectAll}
-                  className={styles.rejectAll}
-                >
+                <button onClick={handleRejectAll} className={styles.rejectAll}>
                   Reject All
                 </button>
               </div>
@@ -159,8 +152,8 @@ export default function CookieConsent() {
                     </label>
                   </div>
                   <p>
-                    Required for basic website functionality including authentication, 
-                    security, and accessibility features. These cannot be disabled.
+                    Required for basic website functionality including authentication, security, and
+                    accessibility features. These cannot be disabled.
                   </p>
                 </div>
 
@@ -177,23 +170,17 @@ export default function CookieConsent() {
                     </label>
                   </div>
                   <p>
-                    Help us understand how visitors interact with our website by collecting 
+                    Help us understand how visitors interact with our website by collecting
                     anonymous information about usage patterns and performance.
                   </p>
                 </div>
               </div>
 
               <div className={styles.actions}>
-                <button 
-                  onClick={handleAcceptSelected}
-                  className={styles.acceptSelected}
-                >
+                <button onClick={handleAcceptSelected} className={styles.acceptSelected}>
                   Save Preferences
                 </button>
-                <button 
-                  onClick={() => setShowDetails(false)}
-                  className={styles.back}
-                >
+                <button onClick={() => setShowDetails(false)} className={styles.back}>
                   Back
                 </button>
               </div>
@@ -240,9 +227,12 @@ export function useCookiePreferences() {
     };
 
     window.addEventListener('cookiePreferencesChanged', handlePreferencesChange as EventListener);
-    
+
     return () => {
-      window.removeEventListener('cookiePreferencesChanged', handlePreferencesChange as EventListener);
+      window.removeEventListener(
+        'cookiePreferencesChanged',
+        handlePreferencesChange as EventListener,
+      );
     };
   }, []);
 

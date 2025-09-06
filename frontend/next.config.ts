@@ -1,8 +1,8 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || ''
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || '',
   },
   images: {
     remotePatterns: [
@@ -10,15 +10,15 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'cdn.jsdelivr.net',
         port: '',
-        pathname: '/gh/devicons/devicon@latest/icons/**'
+        pathname: '/gh/devicons/devicon@latest/icons/**',
       },
       {
         protocol: 'https',
         hostname: 'd1tl6qv7xwsvxx.cloudfront.net',
         port: '',
-        pathname: '/assets/**'
-      }
-    ]
+        pathname: '/assets/**',
+      },
+    ],
   },
   async rewrites() {
     // Only add proxy rewrites in development mode
